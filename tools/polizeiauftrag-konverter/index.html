@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polizeiauftrag/AM → Excel-Konverter</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --text: #1c1c1a;
+    --muted: #5c5c56;
+    --line: #dcdcd6;
+    --accent: #2f6f4e;
+    --accent-dark: #1f4d36;
+    --extracted: #eaf5ee;
+    --inferred: #fff6e0;
+    --inferred-border: #e0b34d;
+    --missing: #fbeceb;
+    --missing-border: #d98a84;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171a;
+      --card: #1f2126;
+      --text: #ececea;
+      --muted: #a3a39c;
+      --line: #33353b;
+      --accent: #7fc4a0;
+      --accent-dark: #a9dcc1;
+      --extracted: #1c2c22;
+      --inferred: #332c15;
+      --inferred-border: #7a6323;
+      --missing: #341f1e;
+      --missing-border: #7a3a35;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 1.5rem 1rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 78rem; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
+  h2 { font-size: 1.05rem; margin: 0 0 .75rem; }
+  p.sub { color: var(--muted); margin: 0 0 1.5rem; }
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.25rem 1.4rem;
+    margin-bottom: 1.25rem;
+  }
+  .notice {
+    display: flex; gap: .6rem; align-items: flex-start;
+    background: var(--extracted); border: 1px solid var(--accent);
+    border-radius: 10px; padding: .8rem 1rem; margin-bottom: 1.25rem; font-size: .9rem;
+  }
+  .notice b { color: var(--accent-dark); }
+
+  #dropzone {
+    border: 2px dashed var(--line);
+    border-radius: 10px;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  #dropzone.dragover { border-color: var(--accent); background: var(--extracted); }
+  #dropzone strong { color: var(--text); }
+  #fileInput { display: none; }
+
+  #fileList { list-style: none; padding: 0; margin: 1rem 0 0; display: flex; flex-direction: column; gap: .5rem; }
+  #fileList li {
+    display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+    border: 1px solid var(--line); border-radius: 8px; padding: .5rem .75rem; font-size: .875rem;
+  }
+  .badge { padding: .15rem .55rem; border-radius: 999px; font-size: .75rem; font-weight: 600; white-space: nowrap; }
+  .badge.ok { background: var(--extracted); color: var(--accent-dark); border: 1px solid var(--accent); }
+  .badge.unknown { background: var(--missing); color: #a33; border: 1px solid var(--missing-border); }
+  .filename { flex: 1; min-width: 12rem; word-break: break-all; }
+  .fileActions { display: flex; gap: .4rem; }
+  .fileActions button, .toolbar button, .rowActions button {
+    font-size: .8rem; padding: .3rem .6rem; border-radius: 6px; border: 1px solid var(--line);
+    background: transparent; color: var(--text); cursor: pointer;
+  }
+  .fileActions button:hover, .toolbar button:hover, .rowActions button:hover { border-color: var(--accent); color: var(--accent-dark); }
+
+  #previewArea { margin-top: .75rem; }
+  #previewArea iframe { width: 100%; height: 70vh; border: 1px solid var(--line); border-radius: 8px; }
+
+  .toolbar { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .toolbar button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  .toolbar button.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+  .toolbar .status { font-size: .85rem; color: var(--muted); }
+
+  .legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin-bottom: .75rem; }
+  .legend span { display: inline-flex; align-items: center; gap: .35rem; }
+  .swatch { width: .8rem; height: .8rem; border-radius: 3px; display: inline-block; }
+  .swatch.extracted { background: var(--extracted); border: 1px solid var(--accent); }
+  .swatch.inferred { background: var(--inferred); border: 1px solid var(--inferred-border); }
+  .swatch.missing { background: var(--missing); border: 1px solid var(--missing-border); }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: .82rem; }
+  thead th {
+    position: sticky; top: 0; background: var(--card); z-index: 1;
+    border-bottom: 2px solid var(--line); padding: .5rem .6rem; text-align: left;
+    white-space: nowrap; font-weight: 600;
+  }
+  tbody td {
+    border-bottom: 1px solid var(--line); border-right: 1px solid var(--line);
+    padding: 0; min-width: 7rem;
+  }
+  tbody td[contenteditable="true"] {
+    padding: .4rem .5rem; outline: none; white-space: nowrap;
+  }
+  tbody td[contenteditable="true"]:focus { background: var(--extracted); white-space: normal; }
+  td.extracted { background: var(--extracted); }
+  td.inferred { background: var(--inferred); }
+  td.missing { background: var(--missing); }
+  td.rowlabel { position: sticky; left: 0; background: var(--card); font-weight: 600; border-right: 2px solid var(--line); white-space: nowrap; padding: .4rem .6rem; }
+
+  select.cellselect { width: 100%; border: none; background: transparent; color: var(--text); font-size: .82rem; padding: .4rem .5rem; }
+
+  footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 2rem; }
+  .hint { font-size: .8rem; color: var(--muted); margin-top: .5rem; }
+  code { background: var(--extracted); padding: .1rem .35rem; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Polizeiauftrag / AM → Excel-Konverter</h1>
+<p class="sub">Polizeiauftrag (Landesdirektion Sachsen) und AM/Asyl.Abschlussmitteilung (BAMF) als PDF hochladen, automatisch erkennen und die Felder passend zur Spaltenstruktur der Statistik-Excel zum Kopieren aufbereiten.</p>
+
+<div class="notice">
+  <span>🔒</span>
+  <span><b>Alles bleibt lokal im Browser.</b> Die PDFs werden ausschließlich auf diesem Rechner mit JavaScript ausgelesen (pdf.js, lokal eingebunden). Es findet kein Upload an einen Server statt — auch nicht an Anthropic/Claude. Die Seite funktioniert ohne Internetverbindung.</span>
+</div>
+
+<section>
+  <h2>1. PDFs hochladen</h2>
+  <div id="dropzone">
+    <div><strong>PDFs hierher ziehen</strong> oder klicken zum Auswählen</div>
+    <div class="hint">Polizeiauftrag und AM-Mitteilung können zusammen oder einzeln hochgeladen werden — der Typ wird automatisch erkannt. Mehrere Fälle nacheinander möglich.</div>
+    <input type="file" id="fileInput" accept="application/pdf" multiple>
+  </div>
+  <ul id="fileList"></ul>
+  <div id="previewArea"></div>
+</section>
+
+<section id="resultSection" style="display:none;">
+  <h2>2. Erkannte Daten — prüfen &amp; kopieren</h2>
+  <div class="legend">
+    <span><span class="swatch extracted"></span> aus PDF erkannt</span>
+    <span><span class="swatch inferred"></span> abgeleitet/geraten — bitte prüfen</span>
+    <span><span class="swatch missing"></span> nicht im PDF enthalten — bitte manuell ergänzen</span>
+  </div>
+  <div class="toolbar">
+    <button class="primary" id="copyAllBtn">Alle Zeilen kopieren (für Excel einfügen)</button>
+    <button id="copyHeaderBtn">Nur Kopfzeile kopieren</button>
+    <button id="resetBtn">Zurücksetzen</button>
+    <span class="status" id="copyStatus"></span>
+  </div>
+  <p class="hint">Zellen sind editierbar — direkt in der Tabelle korrigieren, dann kopieren. Beim Einfügen in Excel: Zielzelle in Spalte <code>B</code> der nächsten freien Zeile wählen (Spalte <code>A</code> = ID, bitte manuell fortlaufend vergeben) und mit <code>Strg/Cmd+V</code> einfügen — die Werte landen automatisch in den richtigen Spalten.</p>
+  <div class="tablewrap">
+    <table id="resultTable">
+      <thead><tr id="headRow"></tr></thead>
+      <tbody id="bodyRows"></tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <p>Lokales Hilfswerkzeug · keine Datenübertragung · Quelltext einsehbar in dieser Datei</p>
+</footer>
+
+</main>
+
+<script src="vendor/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
+
+/* ---------------------------------------------------------------------- */
+/* Excel-Spaltendefinition (Blatt "Ausländerstatistik")                    */
+/* ---------------------------------------------------------------------- */
+const COLUMNS = [
+  { key: 'id', label: 'ID' },
+  { key: 'familienname', label: 'Familienname' },
+  { key: 'vorname', label: 'Vorname' },
+  { key: 'geschlecht', label: 'Geschlecht' },
+  { key: 'geburtsdatum', label: 'Geburtsdatum' },
+  { key: 'familie', label: 'Familie (Sohn/Tochter/Mann/Frau)', type: 'select', options: ['entfällt', 'Mann', 'Frau', 'Sohn', 'Tochter'] },
+  { key: 'staatsangehoerigkeit', label: 'Staatsangehörigkeit' },
+  { key: 'zabNummer', label: 'ZAB-Nummer' },
+  { key: 'azrNummer', label: 'AZR-Nummer' },
+  { key: 'pNummer', label: 'P-Nummer bei Charter' },
+  { key: 'wohnortPlzOrt', label: 'Wohnort (PLZ/Ort)' },
+  { key: 'wohnortStrasse', label: 'Wohnort (Straße, Hausnummer)' },
+  { key: 'wohnortHaus', label: 'Wohnort (Haus/Zimmer/aufhältig bei)' },
+  { key: 'zustaendigkeit', label: 'Zuständigkeitsbereich / PRev.' },
+  { key: 'abschiebedatum', label: 'Abschiebedatum' },
+  { key: 'abschiebeart', label: 'Abschiebeart (Luft/Land/FesthalteAO)', type: 'select', options: ['Luftabschiebung', 'Landabschiebung', 'FesthalteAO'] },
+  { key: 'zielort', label: 'Zielort (Land)' },
+  { key: 'flughafen', label: 'Flughafen/Grenzübergang' },
+  { key: 'abflugszeit', label: 'Abflugszeit' },
+  { key: 'asNummer', label: 'Abschiebenummer (AS-Nummer BPP)' },
+  { key: 'uebergabeort', label: 'Übergabeort' },
+  { key: 'uebergabezeit', label: 'Übergabezeit' },
+  { key: 'uebergabean', label: 'Übergabe an (BPP/BPol)', type: 'select', options: ['', 'BPol', 'BPP'] },
+  { key: 'anordnendeDienststelle', label: 'Anordnende Dienststelle' },
+  { key: 'aktenzeichenDienststelle', label: 'Aktenzeichen der Dienststelle' },
+  { key: 'sachbearbeiter', label: 'Sachbearbeiter im Referat 2' },
+  { key: 'telefon', label: 'Erreichbarkeit (Telefon)' },
+  { key: 'visSax', label: 'VIS.SAX Zeichen' },
+  { key: 'sicherheitsbegleitung', label: 'Sicherheitsbegleitung (ja/nein)', type: 'select', options: ['', 'ja', 'nein'] },
+  { key: 'arztbegleitung', label: 'Arztbegleitung (ja/nein)', type: 'select', options: ['', 'ja', 'nein'] },
+  { key: 'familientrennung', label: 'Familientrennung (keine/ja/entfällt)', type: 'select', options: ['', 'keine', 'ja', 'entfällt'] },
+  { key: 'besonderheiten', label: 'Besonderheiten' },
+  { key: 'angetroffen', label: 'angetroffen (ja/nein)', type: 'select', options: ['', 'ja', 'nein'] },
+  { key: 'nichtAngetroffen', label: 'nicht angetroffen (ja/nein)', type: 'select', options: ['', 'ja', 'nein'] },
+  { key: 'storniert', label: 'storniert (ja/nein)', type: 'select', options: ['', 'ja', 'nein'] },
+  { key: 'kostenlegung', label: 'Kostenlegung (erledigt/noch offen)', type: 'select', options: ['noch offen', 'erledigt'] },
+];
+
+/* ---------------------------------------------------------------------- */
+/* Hilfsfunktionen für Text-Matching                                       */
+/* ---------------------------------------------------------------------- */
+function cleanVal(s) {
+  if (!s) return '';
+  return s.replace(/\s*-\s*/g, '-').replace(/\s+/g, ' ').trim();
+}
+function titleCaseName(s) {
+  if (!s) return '';
+  return s.split(/(\s|-)/).map(part => {
+    if (part === ' ' || part === '-') return part;
+    if (part.length === 0) return part;
+    return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+  }).join('');
+}
+
+/* ---------------------------------------------------------------------- */
+/* PDF-Text extrahieren (pdf.js)                                           */
+/* ---------------------------------------------------------------------- */
+async function extractFlatText(arrayBuffer) {
+  const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let full = '';
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    full += content.items.map(it => it.str).join(' ') + '\n';
+  }
+  return full.replace(/\s+/g, ' ').trim();
+}
+
+/* ---------------------------------------------------------------------- */
+/* Dokumenttyp-Erkennung                                                   */
+/* ---------------------------------------------------------------------- */
+function detectDocType(text) {
+  const isPolizeiauftrag = /Landesdirektion\s+Sachsen/i.test(text) &&
+    (/Personalien\s+der\s+abzuschiebenden/i.test(text) || /Durchf[üu]hrung\s+einer/i.test(text));
+  if (isPolizeiauftrag) return 'polizeiauftrag';
+
+  const isAM = /Asyl\.?\s*Abschlussmitteilung/i.test(text) &&
+    (/betroffene\s+Personen/i.test(text) || /Bundesamt\s+f[üu]r\s+Migration/i.test(text));
+  if (isAM) return 'am';
+
+  return 'unknown';
+}
+
+/* ---------------------------------------------------------------------- */
+/* Parser: AM / Asyl.Abschlussmitteilung (BAMF)                            */
+/* ---------------------------------------------------------------------- */
+function parseAM(text) {
+  const result = { aktenzeichen: '', behoerde: '', bescheiddatum: '', rechtskraftdatum: '', persons: [] };
+
+  let m = text.match(/Aktenzeichen:\s*(\d+)\s*Beh[öo]rde\s+([^\n]+?)\s+betroffene\s*Personen/i);
+  if (m) { result.aktenzeichen = m[1]; result.behoerde = cleanVal(m[2]); }
+
+  const rowRe = /(\d{6,15})\s+(m[äa]nnlich|weiblich|divers)\s+(ledig|verheiratet|geschieden|verwitwet|getrennt lebend|Lebenspartnerschaft)\s+([A-ZÄÖÜ][\wÀ-ÿ'’\-]*)\s+([A-ZÄÖÜ][\wÀ-ÿ'’\- ]*?)\s+(\d{2}\.\d{2}\.\d{4})\s+([A-ZÄÖÜ][\wÀ-ÿ'’\-\/. ]*?)(?=\s+\d{6,15}\s+(?:m[äa]nnlich|weiblich)|\s+Verweis\s+auf|\s+Details\s+zur|$)/g;
+  let rm;
+  while ((rm = rowRe.exec(text)) !== null) {
+    result.persons.push({
+      azr: rm[1],
+      geschlecht: rm[2].toLowerCase().replace('ä', 'ä'),
+      familienstand: rm[3],
+      familienname: cleanVal(rm[4]),
+      vorname: cleanVal(rm[5]),
+      geburtsdatum: rm[6],
+      geburtsort: cleanVal(rm[7]),
+    });
+  }
+
+  m = text.match(/Details\s+zur\s+Asyl\.?\s*Abschlussmitteilung\s+(\d{2}\.\d{2}\.\d{4})/i);
+  if (m) result.bescheiddatum = m[1];
+  m = text.match(/Abschiebungsandrohung\s+Vollziehbarkeitsdatum:\s*(\d{2}\.\d{2}\.\d{4})/i);
+  if (m) result.rechtskraftdatum = m[1];
+
+  return result;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Parser: Polizeiauftrag (Landesdirektion Sachsen)                        */
+/* ---------------------------------------------------------------------- */
+function parsePolizeiauftrag(text) {
+  const result = { kinder: [] };
+  let m;
+
+  m = text.match(/ZAB\s*-\s*(\d+)/);
+  if (m) result.zabNummer = m[1];
+
+  m = text.match(/Famil\w*name\s+([A-ZÄÖÜ][A-ZÄÖÜ\s\-]*?)\s+Vorname/i);
+  if (m) result.hauptFamilienname = cleanVal(m[1]);
+
+  m = text.match(/Vorname\(n\)\s+([A-ZÄÖÜa-zäöüß\-]+(?:\s[A-ZÄÖÜa-zäöüß\-]+)*?)\s+G\s*e\s*s\s*c\s*h\s*l\s*e\s*c\s*h\s*t/i);
+  if (m) result.hauptVorname = cleanVal(m[1]);
+
+  m = text.match(/Geburtsdatum\s+(\d{2}\.\d{2}\.\d{4})\s+Geburtsort\s+([A-ZÄÖÜ][\wÀ-ÿ\-]*)/i);
+  if (m) { result.hauptGeburtsdatum = m[1]; result.hauptGeburtsort = m[2]; }
+
+  // Ehepartner-Block
+  const ehIdx = text.search(/Ehepartner\s+[A-ZÄÖÜ]/i);
+  if (ehIdx >= 0) {
+    const sub = text.slice(ehIdx, ehIdx + 300);
+    m = sub.match(/Ehepartner\s+([A-ZÄÖÜ][A-ZÄÖÜ\s\-]*?)\s+Vorname/i);
+    if (m) result.eheFamilienname = cleanVal(m[1]);
+    m = sub.match(/Vorname\(n\)\s+([A-ZÄÖÜa-zäöüß\-]+(?:\s[A-ZÄÖÜa-zäöüß\-]+)*?)\s+G\s*e\s*s\s*c\s*h\s*l\s*e\s*c\s*h\s*t/i);
+    if (m) result.eheVorname = cleanVal(m[1]);
+    m = sub.match(/Geburtstag\s+(\d{2}\.\d{2}\.\d{4})\s+Geburtsort\s+([A-ZÄÖÜ][\wÀ-ÿ\-]*)/i);
+    if (m) { result.eheGeburtsdatum = m[1]; result.eheGeburtsort = m[2]; }
+  }
+
+  // Kinder-Block
+  const kIdx = text.search(/\bKinder\b/i);
+  const apIdx = text.search(/Ansprechpartner/i);
+  if (kIdx >= 0 && apIdx > kIdx) {
+    const sub = text.slice(kIdx, apIdx);
+    const childRe = /([A-ZÄÖÜß]{2,})\s*,\s*([A-ZÄÖÜa-zäöüß\-]+(?:\s[A-ZÄÖÜa-zäöüß\-]+)*?)\s*\*\s*(\d{2}\.\d{2}\.\d{4})\s*([mw])\b/g;
+    let cm;
+    while ((cm = childRe.exec(sub)) !== null) {
+      result.kinder.push({ familienname: cm[1], vorname: cleanVal(cm[2]), geburtsdatum: cm[3], geschlecht: cm[4] === 'm' ? 'männlich' : 'weiblich' });
+    }
+  }
+
+  m = text.match(/Ansprechpartner[\/\-\s\w]*\s+([A-ZÄÖÜ][\wäöüß\-]+\s[A-ZÄÖÜ][\wäöüß\-]+)\s+Durchwahl/i);
+  if (m) result.sachbearbeiter = cleanVal(m[1]);
+
+  m = text.match(/Telefon\s+([\d\s+\-]+?)\s+Telefax/i);
+  if (m) result.telefon = cleanVal(m[1]);
+
+  m = text.match(/Staatsangeh[öo]rigkeit\s*\/\s*Volkszugeh[öo]rigkeit\s+Staatsangeh[öo]rigkeit\s+([A-ZÄÖÜ][\wÀ-ÿ\-]*)/i);
+  if (m) result.staatsangehoerigkeit = m[1];
+
+  m = text.match(/Abschiebetag\s+(\d{2}\.\d{2}\.\d{4})/i);
+  if (m) result.abschiebedatum = m[1];
+
+  m = text.match(/Zielort\/?\s*Zielland\s+([A-ZÄÖÜ][^\n]*?)\s+Flughafen/i);
+  if (m) result.zielort = cleanVal(m[1]);
+
+  m = text.match(/Flughafen\/?\s*BPol\s*-?\s*Dienststelle\s+([A-ZÄÖÜ0-9][^\n]*?)\s+[ÜU]bergabezeit/i);
+  if (m) result.flughafen = cleanVal(m[1]);
+  // Landabschiebung: Grenzübergang statt Flughafen
+  if (!result.flughafen) {
+    m = text.match(/Grenz[üu]bergang\s+([A-ZÄÖÜ0-9][^\n]*?)\s+[ÜU]bergabezeit/i);
+    if (m) result.grenzuebergang = cleanVal(m[1]);
+  }
+
+  m = text.match(/[ÜU]bergabezeit\s+([^\n]*?)\s+Abflugzeit/i);
+  if (m) result.uebergabezeit = cleanVal(m[1]);
+
+  m = text.match(/Abflugzeit\s+([\d:]+\s*Uhr)/i);
+  if (m) result.abflugzeit = m[1];
+
+  m = text.match(/Fluggesellschaft\s+([A-ZÄÖÜ][^\n]*?)\s+Flug\s*-?\s*Nr/i);
+  if (m) result.fluggesellschaft = cleanVal(m[1]);
+
+  m = text.match(/Flug\s*-?\s*Nr\.?\s+([A-Z]{1,3}\s?\d{2,5})/i);
+  if (m) result.flugnummer = cleanVal(m[1]).replace(/\s+/g, '');
+
+  // Adresse (derzeitiger Aufenthalt)
+  const adrIdx = text.search(/auf\s+freiem\s+Fu[ßss]/i);
+  if (adrIdx >= 0) {
+    let sub = text.slice(adrIdx, adrIdx + 250);
+    const anIdx = sub.search(/Anschrift/i);
+    if (anIdx >= 0) sub = sub.slice(anIdx + 'Anschrift'.length);
+    m = sub.match(/\s*([A-ZÄÖÜ][\wäöüß\-]*(?:\s[A-ZÄÖÜa-zäöüß\-]+)*\s\d+[a-zA-Z]?)\s+(\d{5})\s+([A-ZÄÖÜ][\wäöüß\-]*)/);
+    if (m) { result.strasse = cleanVal(m[1]); result.plz = m[2]; result.ort = m[3]; }
+  }
+
+  return result;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Zusammenführen zu Zeilen im Excel-Format                                */
+/* ---------------------------------------------------------------------- */
+function makeRow(overrides) {
+  const row = {};
+  for (const col of COLUMNS) row[col.key] = { value: '', state: 'missing' };
+  Object.assign(row, overrides);
+  return row;
+}
+function set(row, key, value, state) {
+  if (value === undefined || value === null || value === '') return;
+  row[key] = { value: String(value), state: state || 'extracted' };
+}
+
+function findAmMatch(amPersons, vorname) {
+  if (!amPersons || !vorname) return null;
+  const norm = s => (s || '').trim().toUpperCase();
+  return amPersons.find(p => norm(p.vorname) === norm(vorname)) || null;
+}
+
+function buildRows(polizei, am) {
+  const rows = [];
+  const amPersons = am ? am.persons : [];
+
+  const anordnendeDienststelle = 'Landesdirektion Sachsen (ZAB)';
+  const aktenzeichenDienststelle = polizei && polizei.zabNummer ? `ZAB-${polizei.zabNummer}` : '';
+
+  function commonFields(row) {
+    if (polizei) {
+      set(row, 'zabNummer', polizei.zabNummer);
+      set(row, 'wohnortPlzOrt', polizei.plz && polizei.ort ? `${polizei.plz} ${polizei.ort}` : '');
+      set(row, 'wohnortStrasse', polizei.strasse);
+      set(row, 'abschiebedatum', polizei.abschiebedatum);
+      set(row, 'zielort', polizei.zielort);
+      if (polizei.flughafen) {
+        set(row, 'flughafen', polizei.flughafen);
+        set(row, 'abschiebeart', 'Luftabschiebung', 'inferred');
+        set(row, 'uebergabean', 'BPol', 'inferred');
+      } else if (polizei.grenzuebergang) {
+        set(row, 'flughafen', polizei.grenzuebergang);
+        set(row, 'abschiebeart', 'Landabschiebung', 'inferred');
+      }
+      set(row, 'abflugszeit', polizei.abflugzeit);
+      set(row, 'uebergabezeit', polizei.uebergabezeit);
+      set(row, 'anordnendeDienststelle', anordnendeDienststelle);
+      set(row, 'aktenzeichenDienststelle', aktenzeichenDienststelle);
+      set(row, 'sachbearbeiter', polizei.sachbearbeiter);
+      set(row, 'telefon', polizei.telefon);
+    }
+    row.kostenlegung = { value: 'noch offen', state: 'inferred' };
+  }
+
+  function enrichFromAM(row, vorname) {
+    const match = findAmMatch(amPersons, vorname);
+    if (match) {
+      set(row, 'azrNummer', match.azr);
+      if (!row.geschlecht.value) set(row, 'geschlecht', titleCaseName(match.geschlecht));
+      if (!row.geburtsdatum.value) set(row, 'geburtsdatum', match.geburtsdatum);
+    }
+    return match;
+  }
+
+  // --- Hauptperson ---
+  if (polizei && polizei.hauptFamilienname) {
+    const row = makeRow();
+    set(row, 'familienname', titleCaseName(polizei.hauptFamilienname));
+    set(row, 'vorname', polizei.hauptVorname);
+    set(row, 'geburtsdatum', polizei.hauptGeburtsdatum);
+    set(row, 'staatsangehoerigkeit', polizei.staatsangehoerigkeit);
+    row.familie = { value: 'entfällt', state: 'extracted' };
+    const match = enrichFromAM(row, polizei.hauptVorname);
+    if (match) set(row, 'staatsangehoerigkeit', row.staatsangehoerigkeit.value || polizei.staatsangehoerigkeit);
+    commonFields(row);
+    rows.push(row);
+  } else if (amPersons.length) {
+    // Nur AM vorhanden, keine Zuordnung "Hauptperson" möglich -> erste Person übernehmen
+    const p = amPersons[0];
+    const row = makeRow();
+    set(row, 'familienname', titleCaseName(p.familienname));
+    set(row, 'vorname', p.vorname);
+    set(row, 'geschlecht', titleCaseName(p.geschlecht));
+    set(row, 'geburtsdatum', p.geburtsdatum);
+    set(row, 'azrNummer', p.azr);
+    row.familie = { value: 'entfällt', state: 'inferred' };
+    commonFields(row);
+    rows.push(row);
+  }
+
+  // --- Ehepartner ---
+  if (polizei && polizei.eheVorname) {
+    const row = makeRow();
+    set(row, 'familienname', titleCaseName(polizei.eheFamilienname || polizei.hauptFamilienname));
+    set(row, 'vorname', polizei.eheVorname);
+    set(row, 'geburtsdatum', polizei.eheGeburtsdatum);
+    set(row, 'staatsangehoerigkeit', polizei.staatsangehoerigkeit);
+    const match = enrichFromAM(row, polizei.eheVorname);
+    const geschl = match ? match.geschlecht : '';
+    row.familie = { value: geschl === 'männlich' ? 'Mann' : geschl === 'weiblich' ? 'Frau' : '', state: match ? 'extracted' : 'missing' };
+    commonFields(row);
+    rows.push(row);
+  }
+
+  // --- Kinder ---
+  if (polizei && polizei.kinder && polizei.kinder.length) {
+    for (const kind of polizei.kinder) {
+      const row = makeRow();
+      set(row, 'familienname', titleCaseName(kind.familienname || polizei.hauptFamilienname));
+      set(row, 'vorname', kind.vorname);
+      set(row, 'geburtsdatum', kind.geburtsdatum);
+      set(row, 'geschlecht', titleCaseName(kind.geschlecht));
+      set(row, 'staatsangehoerigkeit', polizei.staatsangehoerigkeit);
+      enrichFromAM(row, kind.vorname);
+      row.familie = { value: kind.geschlecht === 'männlich' ? 'Sohn' : 'Tochter', state: 'extracted' };
+      commonFields(row);
+      rows.push(row);
+    }
+  }
+
+  // --- Zusätzliche AM-Personen ohne Zuordnung im Polizeiauftrag ---
+  if (amPersons.length) {
+    const usedVornamen = new Set(rows.map(r => (r.vorname.value || '').trim().toUpperCase()));
+    for (const p of amPersons) {
+      if (usedVornamen.has((p.vorname || '').trim().toUpperCase())) continue;
+      const row = makeRow();
+      set(row, 'familienname', titleCaseName(p.familienname));
+      set(row, 'vorname', p.vorname);
+      set(row, 'geschlecht', titleCaseName(p.geschlecht));
+      set(row, 'geburtsdatum', p.geburtsdatum);
+      set(row, 'azrNummer', p.azr);
+      row.familie = { value: '', state: 'missing' };
+      commonFields(row);
+      rows.push(row);
+    }
+  }
+
+  return rows;
+}
+
+/* ---------------------------------------------------------------------- */
+/* UI                                                                       */
+/* ---------------------------------------------------------------------- */
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const fileListEl = document.getElementById('fileList');
+const previewArea = document.getElementById('previewArea');
+const resultSection = document.getElementById('resultSection');
+const headRow = document.getElementById('headRow');
+const bodyRows = document.getElementById('bodyRows');
+const copyStatus = document.getElementById('copyStatus');
+
+let uploadedFiles = []; // { name, type, polizei, am, url }
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+
+async function handleFiles(fileList) {
+  for (const file of fileList) {
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) continue;
+    await processFile(file);
+  }
+  fileInput.value = '';
+  render();
+}
+
+async function processFile(file) {
+  const entry = { name: file.name, type: 'unknown', polizei: null, am: null, url: URL.createObjectURL(file), error: null };
+  uploadedFiles.push(entry);
+  try {
+    const buf = await file.arrayBuffer();
+    const text = await extractFlatText(buf.slice(0));
+    const docType = detectDocType(text);
+    entry.type = docType;
+    if (docType === 'polizeiauftrag') entry.polizei = parsePolizeiauftrag(text);
+    else if (docType === 'am') entry.am = parseAM(text);
+    else entry.rawText = text;
+  } catch (err) {
+    entry.error = err.message || String(err);
+  }
+}
+
+function docTypeLabel(type) {
+  if (type === 'polizeiauftrag') return 'Polizeiauftrag erkannt';
+  if (type === 'am') return 'AM / BAMF-Mitteilung erkannt';
+  return 'Typ nicht erkannt';
+}
+
+function renderFileList() {
+  fileListEl.innerHTML = '';
+  uploadedFiles.forEach((f, idx) => {
+    const li = document.createElement('li');
+    const badge = document.createElement('span');
+    badge.className = 'badge ' + (f.type === 'unknown' ? 'unknown' : 'ok');
+    badge.textContent = f.error ? 'Fehler beim Lesen' : docTypeLabel(f.type);
+    const name = document.createElement('span');
+    name.className = 'filename';
+    name.textContent = f.name;
+    const actions = document.createElement('span');
+    actions.className = 'fileActions';
+    const viewBtn = document.createElement('button');
+    viewBtn.textContent = 'PDF anzeigen';
+    viewBtn.onclick = () => togglePreview(f, idx);
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Entfernen';
+    removeBtn.onclick = () => { uploadedFiles.splice(idx, 1); render(); };
+    actions.appendChild(viewBtn);
+    actions.appendChild(removeBtn);
+    li.appendChild(badge);
+    li.appendChild(name);
+    li.appendChild(actions);
+    fileListEl.appendChild(li);
+    if (f.error) {
+      const err = document.createElement('div');
+      err.style.color = '#c0392b';
+      err.style.fontSize = '.8rem';
+      err.style.flexBasis = '100%';
+      err.textContent = 'Konnte nicht gelesen werden: ' + f.error;
+      li.appendChild(err);
+    }
+  });
+}
+
+let previewOpenIdx = null;
+function togglePreview(f, idx) {
+  if (previewOpenIdx === idx) { previewArea.innerHTML = ''; previewOpenIdx = null; return; }
+  previewOpenIdx = idx;
+  previewArea.innerHTML = '';
+  const iframe = document.createElement('iframe');
+  iframe.src = f.url;
+  previewArea.appendChild(iframe);
+}
+
+function render() {
+  renderFileList();
+
+  const polizeiEntry = uploadedFiles.find(f => f.type === 'polizeiauftrag' && !f.error);
+  const amEntry = uploadedFiles.find(f => f.type === 'am' && !f.error);
+
+  if (!polizeiEntry && !amEntry) {
+    resultSection.style.display = 'none';
+    return;
+  }
+
+  const rows = buildRows(polizeiEntry ? polizeiEntry.polizei : null, amEntry ? amEntry.am : null);
+  renderTable(rows);
+  resultSection.style.display = '';
+}
+
+function renderTable(rows) {
+  headRow.innerHTML = '';
+  const thLabel = document.createElement('th');
+  thLabel.textContent = '';
+  headRow.appendChild(thLabel);
+  for (const col of COLUMNS) {
+    const th = document.createElement('th');
+    th.textContent = col.label;
+    headRow.appendChild(th);
+  }
+
+  bodyRows.innerHTML = '';
+  rows.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    const tdLabel = document.createElement('td');
+    tdLabel.className = 'rowlabel';
+    tdLabel.textContent = row.vorname && row.vorname.value ? `${row.familie.value || 'Person'} ${i + 1}` : `Zeile ${i + 1}`;
+    tr.appendChild(tdLabel);
+
+    for (const col of COLUMNS) {
+      const cellData = row[col.key] || { value: '', state: 'missing' };
+      const td = document.createElement('td');
+      td.className = cellData.state;
+      td.dataset.key = col.key;
+
+      if (col.type === 'select') {
+        const select = document.createElement('select');
+        select.className = 'cellselect';
+        for (const opt of col.options) {
+          const o = document.createElement('option');
+          o.value = opt;
+          o.textContent = opt || '(leer)';
+          if (opt === cellData.value) o.selected = true;
+          select.appendChild(o);
+        }
+        if (!col.options.includes(cellData.value) && cellData.value) {
+          const o = document.createElement('option');
+          o.value = cellData.value;
+          o.textContent = cellData.value;
+          o.selected = true;
+          select.appendChild(o);
+        }
+        select.addEventListener('change', () => { row[col.key].value = select.value; });
+        td.appendChild(select);
+      } else {
+        td.contentEditable = 'true';
+        td.textContent = cellData.value;
+        td.addEventListener('input', () => { row[col.key].value = td.textContent; });
+        td.addEventListener('focus', () => { td.style.whiteSpace = 'normal'; });
+      }
+      tr.appendChild(td);
+    }
+    bodyRows.appendChild(tr);
+  });
+
+  window._currentRows = rows;
+}
+
+function rowsToTSV(rows, includeHeader) {
+  const lines = [];
+  if (includeHeader) lines.push(COLUMNS.map(c => c.label).join('\t'));
+  for (const row of rows) {
+    lines.push(COLUMNS.map(c => (row[c.key] && row[c.key].value ? row[c.key].value : '')).join('\t'));
+  }
+  return lines.join('\n');
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+}
+
+document.getElementById('copyAllBtn').addEventListener('click', async () => {
+  const rows = window._currentRows || [];
+  const ok = await copyText(rowsToTSV(rows, false));
+  copyStatus.textContent = ok ? `${rows.length} Zeile(n) kopiert — in Excel einfügen (Strg/Cmd+V)` : 'Kopieren fehlgeschlagen — bitte manuell markieren und kopieren';
+});
+document.getElementById('copyHeaderBtn').addEventListener('click', async () => {
+  const ok = await copyText(COLUMNS.map(c => c.label).join('\t'));
+  copyStatus.textContent = ok ? 'Kopfzeile kopiert' : 'Kopieren fehlgeschlagen';
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  uploadedFiles.forEach(f => URL.revokeObjectURL(f.url));
+  uploadedFiles = [];
+  previewArea.innerHTML = '';
+  copyStatus.textContent = '';
+  render();
+});
+</script>
+</body>
+</html>
