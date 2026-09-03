@@ -18,6 +18,8 @@
     --inferred-border: #e0b34d;
     --missing: #fbeceb;
     --missing-border: #d98a84;
+    --own: #e8f0fb;
+    --own-border: #6c93c7;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -33,6 +35,8 @@
       --inferred-border: #7a6323;
       --missing: #341f1e;
       --missing-border: #7a3a35;
+      --own: #16232f;
+      --own-border: #4a72a6;
     }
   }
   * { box-sizing: border-box; }
@@ -104,6 +108,15 @@
   .swatch.extracted { background: var(--extracted); border: 1px solid var(--accent); }
   .swatch.inferred { background: var(--inferred); border: 1px solid var(--inferred-border); }
   .swatch.missing { background: var(--missing); border: 1px solid var(--missing-border); }
+  .swatch.own { background: var(--own); border: 1px solid var(--own-border); }
+
+  .settingsRow { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .settingsRow label { flex: 1; min-width: 14rem; font-size: .85rem; color: var(--muted); }
+  .settingsRow input {
+    display: block; width: 100%; margin-top: .3rem; padding: .5rem .6rem;
+    border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--text);
+    font-size: .9rem;
+  }
 
   .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
   table { border-collapse: collapse; width: 100%; font-size: .82rem; }
@@ -114,18 +127,35 @@
   }
   tbody td {
     border-bottom: 1px solid var(--line); border-right: 1px solid var(--line);
-    padding: 0; min-width: 7rem;
+    padding: 0; min-width: 7rem; position: relative;
   }
-  tbody td[contenteditable="true"] {
-    padding: .4rem .5rem; outline: none; white-space: nowrap;
+  .cellval {
+    padding: .4rem 1.6rem .4rem .5rem; outline: none; white-space: nowrap; min-height: 1.6em;
   }
-  tbody td[contenteditable="true"]:focus { background: var(--extracted); white-space: normal; }
+  .cellval:focus { background: var(--extracted); white-space: normal; }
   td.extracted { background: var(--extracted); }
   td.inferred { background: var(--inferred); }
   td.missing { background: var(--missing); }
+  td.own { background: var(--own); }
   td.rowlabel { position: sticky; left: 0; background: var(--card); font-weight: 600; border-right: 2px solid var(--line); white-space: nowrap; padding: .4rem .6rem; }
 
-  select.cellselect { width: 100%; border: none; background: transparent; color: var(--text); font-size: .82rem; padding: .4rem .5rem; }
+  select.cellselect {
+    width: 100%; border: none; background: var(--card); color: var(--text);
+    font-size: .82rem; padding: .4rem 1.6rem .4rem .5rem;
+  }
+  /* Fixe helle Popup-Farben, unabhängig vom Theme: verhindert helle Schrift auf hellem
+     Grund (oder umgekehrt) in der vom Betriebssystem gezeichneten Optionsliste. */
+  select.cellselect option { background: #ffffff; color: #1c1c1a; }
+
+  .cellcopy {
+    position: absolute; top: 2px; right: 2px;
+    font-size: .75rem; line-height: 1; padding: .15rem .3rem;
+    border: 1px solid var(--line); border-radius: 4px;
+    background: var(--card); color: var(--muted); cursor: pointer;
+    opacity: 0; transition: opacity .1s;
+  }
+  tbody td:hover .cellcopy, tbody td:focus-within .cellcopy { opacity: 1; }
+  .cellcopy:hover { color: var(--accent-dark); border-color: var(--accent); }
 
   footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 2rem; }
   .hint { font-size: .8rem; color: var(--muted); margin-top: .5rem; }
@@ -154,10 +184,24 @@
   <div id="previewArea"></div>
 </section>
 
+<section>
+  <h2>Eigene Angaben</h2>
+  <p class="hint">Werden in jede erzeugte Zeile als „Sachbearbeiter im Referat 2“ und „Erreichbarkeit (Telefon)“ übernommen — diese Angaben stehen nicht im PDF (dort steht nur der Ansprechpartner der Landesdirektion Sachsen). Wird lokal in diesem Browser gespeichert, nicht übertragen.</p>
+  <div class="settingsRow">
+    <label>Sachbearbeiter im Referat 2
+      <input type="text" id="ownSachbearbeiter">
+    </label>
+    <label>Erreichbarkeit (Telefon)
+      <input type="text" id="ownTelefon">
+    </label>
+  </div>
+</section>
+
 <section id="resultSection" style="display:none;">
   <h2>2. Erkannte Daten — prüfen &amp; kopieren</h2>
   <div class="legend">
     <span><span class="swatch extracted"></span> aus PDF erkannt</span>
+    <span><span class="swatch own"></span> eigene Angabe (aus den Einstellungen)</span>
     <span><span class="swatch inferred"></span> abgeleitet/geraten — bitte prüfen</span>
     <span><span class="swatch missing"></span> nicht im PDF enthalten — bitte manuell ergänzen</span>
   </div>
@@ -167,7 +211,8 @@
     <button id="resetBtn">Zurücksetzen</button>
     <span class="status" id="copyStatus"></span>
   </div>
-  <p class="hint">Zellen sind editierbar — direkt in der Tabelle korrigieren, dann kopieren. Beim Einfügen in Excel: Zielzelle in Spalte <code>B</code> der nächsten freien Zeile wählen (Spalte <code>A</code> = ID, bitte manuell fortlaufend vergeben) und mit <code>Strg/Cmd+V</code> einfügen — die Werte landen automatisch in den richtigen Spalten.</p>
+  <p class="hint">Zellen sind editierbar — direkt in der Tabelle korrigieren, dann kopieren. Beim Einfügen in Excel: Zielzelle in Spalte <code>B</code> der nächsten freien Zeile wählen (Spalte <code>A</code> = ID, bitte manuell fortlaufend vergeben) und mit <code>Strg/Cmd+V</code> einfügen — die Werte landen automatisch in den richtigen Spalten. Über das <code>⧉</code>-Symbol, das beim Überfahren einer Zelle erscheint, lässt sich auch nur ein einzelner Wert kopieren.</p>
+  <p class="hint"><strong>Gegen Formatverlust:</strong> Excel wandelt beim Einfügen reine Ziffernfolgen mit führenden Nullen (z.&nbsp;B. PLZ <code>04315</code>, Telefonnummern, AZR-/ZAB-Nummer) gerne automatisch in Zahlen um und entfernt dabei die führende Null. Am sichersten: Zielspalten vorher in Excel als <em>Text</em> formatieren (Zellen markieren → Rechtsklick → Zellen formatieren → Text), bevor eingefügt wird.</p>
   <div class="tablewrap">
     <table id="resultTable">
       <thead><tr id="headRow"></tr></thead>
@@ -415,11 +460,10 @@ function findAmMatch(amPersons, vorname) {
   return amPersons.find(p => norm(p.vorname) === norm(vorname)) || null;
 }
 
-function buildRows(polizei, am) {
+function buildRows(polizei, am, own) {
   const rows = [];
   const amPersons = am ? am.persons : [];
 
-  const anordnendeDienststelle = 'Landesdirektion Sachsen (ZAB)';
   const aktenzeichenDienststelle = polizei && polizei.zabNummer ? `ZAB-${polizei.zabNummer}` : '';
 
   function commonFields(row) {
@@ -430,7 +474,11 @@ function buildRows(polizei, am) {
       set(row, 'abschiebedatum', polizei.abschiebedatum);
       set(row, 'zielort', polizei.zielort);
       if (polizei.flughafen) {
-        set(row, 'flughafen', polizei.flughafen);
+        // Nur die Flughafen-Abkürzung (Klammerinhalt) + Flugnummer übernehmen, z.B. "HAJ / TK1554"
+        const abbrMatch = polizei.flughafen.match(/\(([A-Z]{2,4})\)/);
+        const abbr = abbrMatch ? abbrMatch[1] : polizei.flughafen;
+        const flugInfo = polizei.flugnummer ? `${abbr} / ${polizei.flugnummer}` : abbr;
+        set(row, 'flughafen', flugInfo);
         set(row, 'abschiebeart', 'Luftabschiebung', 'inferred');
         set(row, 'uebergabean', 'BPol', 'inferred');
       } else if (polizei.grenzuebergang) {
@@ -438,12 +486,14 @@ function buildRows(polizei, am) {
         set(row, 'abschiebeart', 'Landabschiebung', 'inferred');
       }
       set(row, 'abflugszeit', polizei.abflugzeit);
-      set(row, 'uebergabezeit', polizei.uebergabezeit);
-      set(row, 'anordnendeDienststelle', anordnendeDienststelle);
+      // Übergabezeit bewusst nicht automatisch befüllen — manuell eintragen.
+      set(row, 'anordnendeDienststelle', 'LDS');
       set(row, 'aktenzeichenDienststelle', aktenzeichenDienststelle);
-      set(row, 'sachbearbeiter', polizei.sachbearbeiter);
-      set(row, 'telefon', polizei.telefon);
     }
+    // Sachbearbeiter/Telefon kommen nicht aus dem PDF (dort steht der LDS-Ansprechpartner),
+    // sondern aus den "Eigenen Angaben" — gelten für jede Zeile gleich.
+    set(row, 'sachbearbeiter', own && own.sachbearbeiter, 'own');
+    set(row, 'telefon', own && own.telefon, 'own');
     row.kostenlegung = { value: 'noch offen', state: 'inferred' };
   }
 
@@ -460,7 +510,7 @@ function buildRows(polizei, am) {
   // --- Hauptperson ---
   if (polizei && polizei.hauptFamilienname) {
     const row = makeRow();
-    set(row, 'familienname', titleCaseName(polizei.hauptFamilienname));
+    set(row, 'familienname', polizei.hauptFamilienname.toUpperCase());
     set(row, 'vorname', polizei.hauptVorname);
     set(row, 'geburtsdatum', polizei.hauptGeburtsdatum);
     set(row, 'staatsangehoerigkeit', polizei.staatsangehoerigkeit);
@@ -473,7 +523,7 @@ function buildRows(polizei, am) {
     // Nur AM vorhanden, keine Zuordnung "Hauptperson" möglich -> erste Person übernehmen
     const p = amPersons[0];
     const row = makeRow();
-    set(row, 'familienname', titleCaseName(p.familienname));
+    set(row, 'familienname', (p.familienname || '').toUpperCase());
     set(row, 'vorname', p.vorname);
     set(row, 'geschlecht', titleCaseName(p.geschlecht));
     set(row, 'geburtsdatum', p.geburtsdatum);
@@ -486,7 +536,7 @@ function buildRows(polizei, am) {
   // --- Ehepartner ---
   if (polizei && polizei.eheVorname) {
     const row = makeRow();
-    set(row, 'familienname', titleCaseName(polizei.eheFamilienname || polizei.hauptFamilienname));
+    set(row, 'familienname', (polizei.eheFamilienname || polizei.hauptFamilienname || '').toUpperCase());
     set(row, 'vorname', polizei.eheVorname);
     set(row, 'geburtsdatum', polizei.eheGeburtsdatum);
     set(row, 'staatsangehoerigkeit', polizei.staatsangehoerigkeit);
@@ -501,7 +551,7 @@ function buildRows(polizei, am) {
   if (polizei && polizei.kinder && polizei.kinder.length) {
     for (const kind of polizei.kinder) {
       const row = makeRow();
-      set(row, 'familienname', titleCaseName(kind.familienname || polizei.hauptFamilienname));
+      set(row, 'familienname', (kind.familienname || polizei.hauptFamilienname || '').toUpperCase());
       set(row, 'vorname', kind.vorname);
       set(row, 'geburtsdatum', kind.geburtsdatum);
       set(row, 'geschlecht', titleCaseName(kind.geschlecht));
@@ -519,7 +569,7 @@ function buildRows(polizei, am) {
     for (const p of amPersons) {
       if (usedVornamen.has((p.vorname || '').trim().toUpperCase())) continue;
       const row = makeRow();
-      set(row, 'familienname', titleCaseName(p.familienname));
+      set(row, 'familienname', (p.familienname || '').toUpperCase());
       set(row, 'vorname', p.vorname);
       set(row, 'geschlecht', titleCaseName(p.geschlecht));
       set(row, 'geburtsdatum', p.geburtsdatum);
@@ -544,8 +594,35 @@ const resultSection = document.getElementById('resultSection');
 const headRow = document.getElementById('headRow');
 const bodyRows = document.getElementById('bodyRows');
 const copyStatus = document.getElementById('copyStatus');
+const ownSachbearbeiterInput = document.getElementById('ownSachbearbeiter');
+const ownTelefonInput = document.getElementById('ownTelefon');
 
 let uploadedFiles = []; // { name, type, polizei, am, url }
+
+/* ---------------------------------------------------------------------- */
+/* Eigene Angaben (Sachbearbeiter/Telefon) — lokal gespeichert             */
+/* ---------------------------------------------------------------------- */
+const OWN_SETTINGS_KEY = 'polizeiauftrag_konverter_own_settings_v1';
+function loadOwnSettings() {
+  try {
+    const raw = localStorage.getItem(OWN_SETTINGS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { /* localStorage evtl. gesperrt — Default verwenden */ }
+  return { sachbearbeiter: 'PHK Denis Claßen', telefon: '0341 966-42219' };
+}
+function saveOwnSettings(s) {
+  try { localStorage.setItem(OWN_SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* ignorieren */ }
+}
+let ownSettings = loadOwnSettings();
+ownSachbearbeiterInput.value = ownSettings.sachbearbeiter;
+ownTelefonInput.value = ownSettings.telefon;
+function onOwnSettingsChange() {
+  ownSettings = { sachbearbeiter: ownSachbearbeiterInput.value, telefon: ownTelefonInput.value };
+  saveOwnSettings(ownSettings);
+  render();
+}
+ownSachbearbeiterInput.addEventListener('input', onOwnSettingsChange);
+ownTelefonInput.addEventListener('input', onOwnSettingsChange);
 
 dropzone.addEventListener('click', () => fileInput.click());
 dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
@@ -644,7 +721,7 @@ function render() {
     return;
   }
 
-  const rows = buildRows(polizeiEntry ? polizeiEntry.polizei : null, amEntry ? amEntry.am : null);
+  const rows = buildRows(polizeiEntry ? polizeiEntry.polizei : null, amEntry ? amEntry.am : null, ownSettings);
   renderTable(rows);
   resultSection.style.display = '';
 }
@@ -674,6 +751,13 @@ function renderTable(rows) {
       td.className = cellData.state;
       td.dataset.key = col.key;
 
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'cellcopy';
+      copyBtn.textContent = '⧉';
+      copyBtn.title = 'Nur diesen Wert kopieren';
+      copyBtn.addEventListener('mousedown', e => e.preventDefault()); // Fokus/Caret nicht stehlen
+
       if (col.type === 'select') {
         const select = document.createElement('select');
         select.className = 'cellselect';
@@ -693,12 +777,25 @@ function renderTable(rows) {
         }
         select.addEventListener('change', () => { row[col.key].value = select.value; });
         td.appendChild(select);
+        copyBtn.addEventListener('click', async e => {
+          e.stopPropagation();
+          const ok = await copyText(select.value);
+          copyStatus.textContent = ok ? `„${select.value || '(leer)'}“ kopiert` : 'Kopieren fehlgeschlagen';
+        });
       } else {
-        td.contentEditable = 'true';
-        td.textContent = cellData.value;
-        td.addEventListener('input', () => { row[col.key].value = td.textContent; });
-        td.addEventListener('focus', () => { td.style.whiteSpace = 'normal'; });
+        const val = document.createElement('div');
+        val.className = 'cellval';
+        val.contentEditable = 'true';
+        val.textContent = cellData.value;
+        val.addEventListener('input', () => { row[col.key].value = val.textContent; });
+        td.appendChild(val);
+        copyBtn.addEventListener('click', async e => {
+          e.stopPropagation();
+          const ok = await copyText(val.textContent);
+          copyStatus.textContent = ok ? `„${val.textContent || '(leer)'}“ kopiert` : 'Kopieren fehlgeschlagen';
+        });
       }
+      td.appendChild(copyBtn);
       tr.appendChild(td);
     }
     bodyRows.appendChild(tr);
