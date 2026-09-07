@@ -137,7 +137,9 @@
   td.inferred { background: var(--inferred); }
   td.missing { background: var(--missing); }
   td.own { background: var(--own); }
-  td.rowlabel { position: sticky; left: 0; background: var(--card); font-weight: 600; border-right: 2px solid var(--line); white-space: nowrap; padding: .4rem .6rem; }
+  td.rowlabel { position: sticky; left: 2.4rem; background: var(--card); font-weight: 600; border-right: 2px solid var(--line); white-space: nowrap; padding: .4rem .6rem; }
+  td.rowcheck, th.rowcheck { position: sticky; left: 0; background: var(--card); z-index: 2; text-align: center; width: 2.4rem; min-width: 2.4rem; padding: .4rem; border-right: 1px solid var(--line); }
+  td.rowcheck input, th.rowcheck input { width: 1rem; height: 1rem; cursor: pointer; }
 
   select.cellselect {
     width: 100%; border: none; background: var(--card); color: var(--text);
@@ -207,10 +209,13 @@
   </div>
   <div class="toolbar">
     <button class="primary" id="copyAllBtn">Alle Zeilen kopieren (für Excel einfügen)</button>
+    <button id="copySelectedBtn">Ausgewählte kopieren</button>
+    <button id="deleteSelectedBtn">Ausgewählte löschen</button>
     <button id="copyHeaderBtn">Nur Kopfzeile kopieren</button>
     <button id="resetBtn">Zurücksetzen</button>
     <span class="status" id="copyStatus"></span>
   </div>
+  <p class="hint">Mit der Checkbox links in jeder Zeile lassen sich einzelne Zeilen auswählen — darüber gezielt nur diese kopieren oder löschen (z.&nbsp;B. wenn eine Person doppelt oder fälschlich erkannt wurde).</p>
   <p class="hint">Zellen sind editierbar — direkt in der Tabelle korrigieren, dann kopieren. Beim Einfügen in Excel: Zielzelle in Spalte <code>B</code> der nächsten freien Zeile wählen (Spalte <code>A</code> = ID, bitte manuell fortlaufend vergeben) und mit <code>Strg/Cmd+V</code> einfügen — die Werte landen automatisch in den richtigen Spalten. Über das <code>⧉</code>-Symbol, das beim Überfahren einer Zelle erscheint, lässt sich auch nur ein einzelner Wert kopieren.</p>
   <p class="hint"><strong>Gegen Formatverlust:</strong> Excel wandelt beim Einfügen reine Ziffernfolgen mit führenden Nullen (z.&nbsp;B. PLZ <code>04315</code>, Telefonnummern, AZR-/ZAB-Nummer) gerne automatisch in Zahlen um und entfernt dabei die führende Null. Am sichersten: Zielspalten vorher in Excel als <em>Text</em> formatieren (Zellen markieren → Rechtsklick → Zellen formatieren → Text), bevor eingefügt wird.</p>
   <div class="tablewrap">
@@ -288,6 +293,19 @@ function titleCaseName(s) {
     return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
   }).join('');
 }
+/* pdf.js reiht Textfragmente manchmal mit zusätzlichen Leerzeichen mitten in
+   einem Wort aneinander (Kerning-Artefakte, z.B. "G e schlecht" statt
+   "Geschlecht" — von PDF zu PDF unterschiedlich). fuzzy() baut aus einem
+   Wort/einer Phrase ein Regex-Fragment, das beliebige zusätzliche
+   Leerzeichen zwischen jedem Zeichen toleriert, damit Anker-Labels trotzdem
+   zuverlässig gefunden werden. */
+function fuzzy(phrase) {
+  return phrase.split('').map(ch => {
+    if (ch === ' ') return '\\s+';
+    const esc = ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return esc + '\\s*';
+  }).join('');
+}
 
 /* ---------------------------------------------------------------------- */
 /* PDF-Text extrahieren (pdf.js)                                           */
@@ -307,12 +325,15 @@ async function extractFlatText(arrayBuffer) {
 /* Dokumenttyp-Erkennung                                                   */
 /* ---------------------------------------------------------------------- */
 function detectDocType(text) {
-  const isPolizeiauftrag = /Landesdirektion\s+Sachsen/i.test(text) &&
-    (/Personalien\s+der\s+abzuschiebenden/i.test(text) || /Durchf[üu]hrung\s+einer/i.test(text));
+  const isPolizeiauftrag = new RegExp(fuzzy('Landesdirektion Sachsen'), 'i').test(text) &&
+    (new RegExp(fuzzy('Personalien der abzuschiebenden'), 'i').test(text) ||
+     new RegExp(fuzzy('Durchführung einer'), 'i').test(text) ||
+     new RegExp(fuzzy('Abschiebung'), 'i').test(text) && new RegExp(fuzzy('Vollzugshilfe'), 'i').test(text));
   if (isPolizeiauftrag) return 'polizeiauftrag';
 
-  const isAM = /Asyl\.?\s*Abschlussmitteilung/i.test(text) &&
-    (/betroffene\s+Personen/i.test(text) || /Bundesamt\s+f[üu]r\s+Migration/i.test(text));
+  const isAM = new RegExp(fuzzy('Asyl') + '\\.?\\s*' + fuzzy('Abschlussmitteilung'), 'i').test(text) &&
+    (new RegExp(fuzzy('betroffene Personen'), 'i').test(text) ||
+     new RegExp(fuzzy('Bundesamt für Migration'), 'i').test(text));
   if (isAM) return 'am';
 
   return 'unknown';
@@ -356,33 +377,40 @@ function parsePolizeiauftrag(text) {
   const result = { kinder: [] };
   let m;
 
-  m = text.match(/ZAB\s*-\s*(\d+)/);
+  // ZAB-Aktenzeichen: mal mit Bindestrich ("ZAB-265278"), mal nur mit
+  // Leerzeichen ("ZAB 285869") — beides zulassen.
+  m = text.match(/ZAB[\s-]*(\d{4,8})/);
   if (m) result.zabNummer = m[1];
 
-  m = text.match(/Famil\w*name\s+([A-ZÄÖÜ][A-ZÄÖÜ\s\-]*?)\s+Vorname/i);
+  // "Familienname" wird in manchen PDFs durch Kerning mitten im Wort
+  // getrennt (z.B. "Familie n name"); außerdem existiert ein Dokument mit
+  // dem Tippfehler "Familiename" (nur ein n). Beides über ein optionales
+  // zweites "n" abdecken.
+  const familiennameLabel = 'F\\s*a\\s*m\\s*i\\s*l\\s*i\\s*e\\s*n?\\s*n\\s*a\\s*m\\s*e';
+  m = text.match(new RegExp(familiennameLabel + '\\s+([A-ZÄÖÜ][A-ZÄÖÜ\\s\\-]*?)\\s+' + fuzzy('Vorname'), 'i'));
   if (m) result.hauptFamilienname = cleanVal(m[1]);
 
-  m = text.match(/Vorname\(n\)\s+([A-ZÄÖÜa-zäöüß\-]+(?:\s[A-ZÄÖÜa-zäöüß\-]+)*?)\s+G\s*e\s*s\s*c\s*h\s*l\s*e\s*c\s*h\s*t/i);
+  m = text.match(new RegExp(fuzzy('Vorname') + '\\(n\\)\\s+([A-ZÄÖÜa-zäöüß\\-]+(?:\\s[A-ZÄÖÜa-zäöüß\\-]+)*?)\\s+' + fuzzy('Geschlecht'), 'i'));
   if (m) result.hauptVorname = cleanVal(m[1]);
 
-  m = text.match(/Geburtsdatum\s+(\d{2}\.\d{2}\.\d{4})\s+Geburtsort\s+([A-ZÄÖÜ][\wÀ-ÿ\-]*)/i);
+  m = text.match(new RegExp(fuzzy('Geburtsdatum') + '\\s+(\\d{2}\\.\\d{2}\\.\\d{4})\\s+' + fuzzy('Geburtsort') + '\\s+([A-ZÄÖÜ][\\wÀ-ÿ\\-]*)', 'i'));
   if (m) { result.hauptGeburtsdatum = m[1]; result.hauptGeburtsort = m[2]; }
 
   // Ehepartner-Block
-  const ehIdx = text.search(/Ehepartner\s+[A-ZÄÖÜ]/i);
+  const ehIdx = text.search(new RegExp(fuzzy('Ehepartner'), 'i'));
   if (ehIdx >= 0) {
     const sub = text.slice(ehIdx, ehIdx + 300);
-    m = sub.match(/Ehepartner\s+([A-ZÄÖÜ][A-ZÄÖÜ\s\-]*?)\s+Vorname/i);
+    m = sub.match(new RegExp(fuzzy('Ehepartner') + '\\s+([A-ZÄÖÜ][A-ZÄÖÜ\\s\\-]*?)\\s+' + fuzzy('Vorname'), 'i'));
     if (m) result.eheFamilienname = cleanVal(m[1]);
-    m = sub.match(/Vorname\(n\)\s+([A-ZÄÖÜa-zäöüß\-]+(?:\s[A-ZÄÖÜa-zäöüß\-]+)*?)\s+G\s*e\s*s\s*c\s*h\s*l\s*e\s*c\s*h\s*t/i);
+    m = sub.match(new RegExp(fuzzy('Vorname') + '\\(n\\)\\s+([A-ZÄÖÜa-zäöüß\\-]+(?:\\s[A-ZÄÖÜa-zäöüß\\-]+)*?)\\s+' + fuzzy('Geschlecht'), 'i'));
     if (m) result.eheVorname = cleanVal(m[1]);
-    m = sub.match(/Geburtstag\s+(\d{2}\.\d{2}\.\d{4})\s+Geburtsort\s+([A-ZÄÖÜ][\wÀ-ÿ\-]*)/i);
+    m = sub.match(new RegExp(fuzzy('Geburtstag') + '\\s+(\\d{2}\\.\\d{2}\\.\\d{4})\\s+' + fuzzy('Geburtsort') + '\\s+([A-ZÄÖÜ][\\wÀ-ÿ\\-]*)', 'i'));
     if (m) { result.eheGeburtsdatum = m[1]; result.eheGeburtsort = m[2]; }
   }
 
   // Kinder-Block
-  const kIdx = text.search(/\bKinder\b/i);
-  const apIdx = text.search(/Ansprechpartner/i);
+  const kIdx = text.search(new RegExp('\\b' + fuzzy('Kinder') + '\\b', 'i'));
+  const apIdx = text.search(new RegExp(fuzzy('Ansprechpartner'), 'i'));
   if (kIdx >= 0 && apIdx > kIdx) {
     const sub = text.slice(kIdx, apIdx);
     const childRe = /([A-ZÄÖÜß]{2,})\s*,\s*([A-ZÄÖÜa-zäöüß\-]+(?:\s[A-ZÄÖÜa-zäöüß\-]+)*?)\s*\*\s*(\d{2}\.\d{2}\.\d{4})\s*([mw])\b/g;
@@ -392,47 +420,53 @@ function parsePolizeiauftrag(text) {
     }
   }
 
-  m = text.match(/Ansprechpartner[\/\-\s\w]*\s+([A-ZÄÖÜ][\wäöüß\-]+\s[A-ZÄÖÜ][\wäöüß\-]+)\s+Durchwahl/i);
+  m = text.match(new RegExp(fuzzy('Ansprechpartner') + '[\\/\\-\\s\\w]*\\s+([A-ZÄÖÜ][\\wäöüß\\-]+\\s[A-ZÄÖÜ][\\wäöüß\\-]+)\\s+' + fuzzy('Durchwahl'), 'i'));
   if (m) result.sachbearbeiter = cleanVal(m[1]);
 
-  m = text.match(/Telefon\s+([\d\s+\-]+?)\s+Telefax/i);
+  m = text.match(new RegExp(fuzzy('Telefon') + '\\s+([\\d\\s+\\-]+?)\\s+' + fuzzy('Telefax'), 'i'));
   if (m) result.telefon = cleanVal(m[1]);
 
-  m = text.match(/Staatsangeh[öo]rigkeit\s*\/\s*Volkszugeh[öo]rigkeit\s+Staatsangeh[öo]rigkeit\s+([A-ZÄÖÜ][\wÀ-ÿ\-]*)/i);
+  m = text.match(new RegExp(fuzzy('Staatsangehörigkeit') + '\\s*\\/\\s*' + fuzzy('Volkszugehörigkeit') + '\\s+' + fuzzy('Staatsangehörigkeit') + '\\s+([A-ZÄÖÜ][\\wÀ-ÿ\\-]*)', 'i'));
   if (m) result.staatsangehoerigkeit = m[1];
 
-  m = text.match(/Abschiebetag\s+(\d{2}\.\d{2}\.\d{4})/i);
+  m = text.match(new RegExp(fuzzy('Abschiebetag') + '\\s+(\\d{2}\\.\\d{2}\\.\\d{4})', 'i'));
   if (m) result.abschiebedatum = m[1];
 
-  m = text.match(/Zielort\/?\s*Zielland\s+([A-ZÄÖÜ][^\n]*?)\s+Flughafen/i);
+  // Zwischen "Zielort" und dem "/" liegt je nach PDF mal ein Leerzeichen,
+  // mal keins — beides zulassen.
+  m = text.match(new RegExp(fuzzy('Zielort') + '\\s*\\/?\\s*' + fuzzy('Zielland') + '\\s+([A-ZÄÖÜ][^\\n]*?)\\s+' + fuzzy('Flughafen'), 'i'));
   if (m) result.zielort = cleanVal(m[1]);
 
-  m = text.match(/Flughafen\/?\s*BPol\s*-?\s*Dienststelle\s+([A-ZÄÖÜ0-9][^\n]*?)\s+[ÜU]bergabezeit/i);
+  // Das Feld heißt je nach Formularversion "Flughafen/BPol-Dienststelle"
+  // oder "Flughafen/BGS-Dienststelle" (oder andere Kürzel) — daher generisch
+  // alles zwischen "Flughafen" und "Dienststelle" überspringen statt eine
+  // feste Abkürzung zu verlangen.
+  m = text.match(new RegExp(fuzzy('Flughafen') + '[^\\n]{0,30}?' + fuzzy('Dienststelle') + '\\s+([A-ZÄÖÜ0-9][^\\n]*?)\\s+' + fuzzy('Übergabezeit'), 'i'));
   if (m) result.flughafen = cleanVal(m[1]);
-  // Landabschiebung: Grenzübergang statt Flughafen
+  // Landabschiebung: Grenzübergang statt Flughafen (falls dieses Label separat existiert)
   if (!result.flughafen) {
-    m = text.match(/Grenz[üu]bergang\s+([A-ZÄÖÜ0-9][^\n]*?)\s+[ÜU]bergabezeit/i);
+    m = text.match(new RegExp(fuzzy('Grenzübergang') + '\\s+([A-ZÄÖÜ0-9][^\\n]*?)\\s+' + fuzzy('Übergabezeit'), 'i'));
     if (m) result.grenzuebergang = cleanVal(m[1]);
   }
 
-  m = text.match(/[ÜU]bergabezeit\s+([^\n]*?)\s+Abflugzeit/i);
+  m = text.match(new RegExp(fuzzy('Übergabezeit') + '\\s+([^\\n]*?)\\s+' + fuzzy('Abflugzeit'), 'i'));
   if (m) result.uebergabezeit = cleanVal(m[1]);
 
-  m = text.match(/Abflugzeit\s+([\d:]+\s*Uhr)/i);
+  m = text.match(new RegExp(fuzzy('Abflugzeit') + '\\s+([\\d:]+\\s*Uhr)', 'i'));
   if (m) result.abflugzeit = m[1];
 
-  m = text.match(/Fluggesellschaft\s+([A-ZÄÖÜ][^\n]*?)\s+Flug\s*-?\s*Nr/i);
+  m = text.match(new RegExp(fuzzy('Fluggesellschaft') + '\\s+([A-ZÄÖÜ][^\\n]*?)\\s+' + fuzzy('Flug') + '-?\\s*' + fuzzy('Nr'), 'i'));
   if (m) result.fluggesellschaft = cleanVal(m[1]);
 
-  m = text.match(/Flug\s*-?\s*Nr\.?\s+([A-Z]{1,3}\s?\d{2,5})/i);
+  m = text.match(new RegExp(fuzzy('Flug') + '\\s*-?\\s*' + fuzzy('Nr') + '\\.?\\s+([A-Z]{1,3}\\s?\\d{2,5})', 'i'));
   if (m) result.flugnummer = cleanVal(m[1]).replace(/\s+/g, '');
 
   // Adresse (derzeitiger Aufenthalt)
-  const adrIdx = text.search(/auf\s+freiem\s+Fu[ßss]/i);
+  const adrIdx = text.search(new RegExp(fuzzy('auf freiem Fuß'), 'i'));
   if (adrIdx >= 0) {
     let sub = text.slice(adrIdx, adrIdx + 250);
-    const anIdx = sub.search(/Anschrift/i);
-    if (anIdx >= 0) sub = sub.slice(anIdx + 'Anschrift'.length);
+    const anMatch = sub.match(new RegExp(fuzzy('Anschrift'), 'i'));
+    if (anMatch) sub = sub.slice(anMatch.index + anMatch[0].length);
     m = sub.match(/\s*([A-ZÄÖÜ][\wäöüß\-]*(?:\s[A-ZÄÖÜa-zäöüß\-]+)*\s\d+[a-zA-Z]?)\s+(\d{5})\s+([A-ZÄÖÜ][\wäöüß\-]*)/);
     if (m) { result.strasse = cleanVal(m[1]); result.plz = m[2]; result.ort = m[3]; }
   }
@@ -473,14 +507,16 @@ function buildRows(polizei, am, own) {
       set(row, 'wohnortStrasse', polizei.strasse);
       set(row, 'abschiebedatum', polizei.abschiebedatum);
       set(row, 'zielort', polizei.zielort);
+      const hatFlugdaten = !!(polizei.flugnummer || polizei.fluggesellschaft);
       if (polizei.flughafen) {
-        // Nur die Flughafen-Abkürzung (Klammerinhalt) + Flugnummer übernehmen, z.B. "HAJ / TK1554"
+        // Nur die Flughafen-Abkürzung (Klammerinhalt) + Flugnummer übernehmen, z.B. "HAJ / TK1554".
+        // Ohne Flugdaten (z.B. Grenzübergangsstelle bei einer Landabschiebung) den Text unverändert lassen.
         const abbrMatch = polizei.flughafen.match(/\(([A-Z]{2,4})\)/);
         const abbr = abbrMatch ? abbrMatch[1] : polizei.flughafen;
         const flugInfo = polizei.flugnummer ? `${abbr} / ${polizei.flugnummer}` : abbr;
         set(row, 'flughafen', flugInfo);
-        set(row, 'abschiebeart', 'Luftabschiebung', 'inferred');
-        set(row, 'uebergabean', 'BPol', 'inferred');
+        set(row, 'abschiebeart', hatFlugdaten ? 'Luftabschiebung' : 'Landabschiebung', 'inferred');
+        if (hatFlugdaten) set(row, 'uebergabean', 'BPol', 'inferred');
       } else if (polizei.grenzuebergang) {
         set(row, 'flughafen', polizei.grenzuebergang);
         set(row, 'abschiebeart', 'Landabschiebung', 'inferred');
@@ -598,6 +634,7 @@ const ownSachbearbeiterInput = document.getElementById('ownSachbearbeiter');
 const ownTelefonInput = document.getElementById('ownTelefon');
 
 let uploadedFiles = []; // { name, type, polizei, am, url }
+let currentRows = []; // aktuell angezeigte, ggf. manuell reduzierte Zeilen
 
 /* ---------------------------------------------------------------------- */
 /* Eigene Angaben (Sachbearbeiter/Telefon) — lokal gespeichert             */
@@ -608,7 +645,7 @@ function loadOwnSettings() {
     const raw = localStorage.getItem(OWN_SETTINGS_KEY);
     if (raw) return JSON.parse(raw);
   } catch (e) { /* localStorage evtl. gesperrt — Default verwenden */ }
-  return { sachbearbeiter: 'PHK Denis Claßen', telefon: '0341 966-42219' };
+  return { sachbearbeiter: 'Herr PHK Claßen', telefon: '0341 966-42219' };
 }
 function saveOwnSettings(s) {
   try { localStorage.setItem(OWN_SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* ignorieren */ }
@@ -727,7 +764,19 @@ function render() {
 }
 
 function renderTable(rows) {
+  currentRows = rows;
+
   headRow.innerHTML = '';
+  const thCheck = document.createElement('th');
+  thCheck.className = 'rowcheck';
+  const selectAll = document.createElement('input');
+  selectAll.type = 'checkbox';
+  selectAll.title = 'Alle auswählen/abwählen';
+  selectAll.addEventListener('change', () => {
+    bodyRows.querySelectorAll('.rowSelect').forEach(cb => { cb.checked = selectAll.checked; });
+  });
+  thCheck.appendChild(selectAll);
+  headRow.appendChild(thCheck);
   const thLabel = document.createElement('th');
   thLabel.textContent = '';
   headRow.appendChild(thLabel);
@@ -740,6 +789,13 @@ function renderTable(rows) {
   bodyRows.innerHTML = '';
   rows.forEach((row, i) => {
     const tr = document.createElement('tr');
+    const tdCheck = document.createElement('td');
+    tdCheck.className = 'rowcheck';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'rowSelect';
+    tdCheck.appendChild(checkbox);
+    tr.appendChild(tdCheck);
     const tdLabel = document.createElement('td');
     tdLabel.className = 'rowlabel';
     tdLabel.textContent = row.vorname && row.vorname.value ? `${row.familie.value || 'Person'} ${i + 1}` : `Zeile ${i + 1}`;
@@ -800,8 +856,6 @@ function renderTable(rows) {
     }
     bodyRows.appendChild(tr);
   });
-
-  window._currentRows = rows;
 }
 
 function rowsToTSV(rows, includeHeader) {
@@ -832,9 +886,24 @@ async function copyText(text) {
 }
 
 document.getElementById('copyAllBtn').addEventListener('click', async () => {
-  const rows = window._currentRows || [];
+  const rows = currentRows || [];
   const ok = await copyText(rowsToTSV(rows, false));
   copyStatus.textContent = ok ? `${rows.length} Zeile(n) kopiert — in Excel einfügen (Strg/Cmd+V)` : 'Kopieren fehlgeschlagen — bitte manuell markieren und kopieren';
+});
+document.getElementById('copySelectedBtn').addEventListener('click', async () => {
+  const checkboxes = Array.from(bodyRows.querySelectorAll('.rowSelect'));
+  const selectedRows = checkboxes.map((cb, i) => cb.checked ? currentRows[i] : null).filter(Boolean);
+  if (!selectedRows.length) { copyStatus.textContent = 'Keine Zeile ausgewählt'; return; }
+  const ok = await copyText(rowsToTSV(selectedRows, false));
+  copyStatus.textContent = ok ? `${selectedRows.length} ausgewählte Zeile(n) kopiert` : 'Kopieren fehlgeschlagen';
+});
+document.getElementById('deleteSelectedBtn').addEventListener('click', () => {
+  const checkboxes = Array.from(bodyRows.querySelectorAll('.rowSelect'));
+  const selectedIdx = checkboxes.map((cb, i) => cb.checked ? i : -1).filter(i => i >= 0);
+  if (!selectedIdx.length) { copyStatus.textContent = 'Keine Zeile ausgewählt'; return; }
+  selectedIdx.sort((a, b) => b - a).forEach(i => currentRows.splice(i, 1));
+  renderTable(currentRows);
+  copyStatus.textContent = `${selectedIdx.length} Zeile(n) gelöscht`;
 });
 document.getElementById('copyHeaderBtn').addEventListener('click', async () => {
   const ok = await copyText(COLUMNS.map(c => c.label).join('\t'));
