@@ -190,7 +190,7 @@
 <main>
 
 <h1>Polizeiauftrag / AM → Excel-Konverter</h1>
-<p class="sub">Polizeiauftrag (Landesdirektion Sachsen), AM/Asyl.Abschlussmitteilung (BAMF) als PDF sowie Charter-Sammellisten als Excel hochladen, automatisch erkennen und die Felder passend zur Spaltenstruktur der Statistik-Excel zum Kopieren aufbereiten.</p>
+<p class="sub">Polizeiauftrag (Landesdirektion Sachsen), AM/Asyl.Abschlussmitteilung (BAMF) und Steuerungsschreiben (Bundespolizeipräsidium) als PDF sowie Charter-Sammellisten als Excel hochladen, automatisch erkennen und die Felder passend zur Spaltenstruktur der Statistik-Excel zum Kopieren aufbereiten.</p>
 
 <div class="notice">
   <span>🔒</span>
@@ -201,7 +201,7 @@
   <h2>1. Dateien hochladen</h2>
   <div id="dropzone">
     <div><strong>Dateien hierher ziehen</strong> oder klicken zum Auswählen</div>
-    <div class="hint">Polizeiauftrag- und AM-PDFs sowie Charter-Sammellisten (.xlsx) können zusammen oder einzeln hochgeladen werden — Typ und Format werden automatisch erkannt. Mehrere Fälle bzw. mehrere Charter-Listen nacheinander möglich.</div>
+    <div class="hint">Polizeiauftrag-, AM- und Steuerungsschreiben-PDFs sowie Charter-Sammellisten (.xlsx) können zusammen oder einzeln hochgeladen werden — Typ und Format werden automatisch erkannt. Flug-/Übergabedaten aus Charter-Titelzeile und Steuerungsschreiben werden bei gemeinsamem Upload automatisch zusammengeführt. Mehrere Fälle bzw. mehrere Charter-Listen nacheinander möglich.</div>
     <input type="file" id="fileInput" accept="application/pdf,.pdf,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple>
   </div>
   <ul id="fileList"></ul>
@@ -320,14 +320,6 @@ function cleanVal(s) {
   if (!s) return '';
   return s.replace(/\s*-\s*/g, '-').replace(/\s+/g, ' ').trim();
 }
-function titleCaseName(s) {
-  if (!s) return '';
-  return s.split(/(\s|-)/).map(part => {
-    if (part === ' ' || part === '-') return part;
-    if (part.length === 0) return part;
-    return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-  }).join('');
-}
 /* pdf.js reiht Textfragmente manchmal mit zusätzlichen Leerzeichen mitten in
    einem Wort aneinander (Kerning-Artefakte, z.B. "G e schlecht" statt
    "Geschlecht" — von PDF zu PDF unterschiedlich). fuzzy() baut aus einem
@@ -370,6 +362,10 @@ function detectDocType(text) {
     (new RegExp(fuzzy('betroffene Personen'), 'i').test(text) ||
      new RegExp(fuzzy('Bundesamt für Migration'), 'i').test(text));
   if (isAM) return 'am';
+
+  const isSteuerung = new RegExp(fuzzy('Steuerungsschreiben'), 'i').test(text) &&
+    (new RegExp(fuzzy('Chartermaßnahme'), 'i').test(text) || new RegExp(fuzzy('Bundespolizeipräsidium'), 'i').test(text));
+  if (isSteuerung) return 'steuerung';
 
   return 'unknown';
 }
@@ -510,6 +506,48 @@ function parsePolizeiauftrag(text) {
 }
 
 /* ---------------------------------------------------------------------- */
+/* Parser: Steuerungsschreiben (Bundespolizeipräsidium, Chartermaßnahme)   */
+/* ---------------------------------------------------------------------- */
+const GERMAN_MONTHS = {
+  januar: 1, februar: 2, 'märz': 3, april: 4, mai: 5, juni: 6,
+  juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12,
+};
+function parseSteuerungsschreiben(text) {
+  const result = {};
+  let m;
+
+  // "... Chartermaßnahme nach Tiflis/Georgien" -> Zielstadt + Staatsangehörigkeit/Zielland
+  m = text.match(new RegExp(fuzzy('nach') + '\\s+([A-ZÄÖÜ][\\wäöüß]*)\\s*\\/\\s*([A-ZÄÖÜ][\\wäöüß]*)', 'i'));
+  if (m) { result.zielstadt = m[1]; result.staatsangehoerigkeit = m[2]; }
+
+  // "... am 24. September 2026 ..." (ausgeschriebenes Datum)
+  m = text.match(/\bam\s+(\d{1,2})\.\s*([A-ZÄÖÜa-zäöüß]+)\s+(\d{4})\b/);
+  if (m) {
+    const monthNum = GERMAN_MONTHS[m[2].toLowerCase()];
+    if (monthNum) result.abschiebedatum = `${String(m[1]).padStart(2, '0')}.${String(monthNum).padStart(2, '0')}.${m[3]}`;
+  }
+
+  // "Streckenführung ... LEJ - TBS" -> liefert die Flughafencodes, um darüber
+  // gezielt die passende (abgehende) Zeile aus der Flugtabelle zu finden —
+  // ein Steuerungsschreiben listet i.d.R. sowohl den Überführungs- als auch
+  // den eigentlichen Rückführungsflug.
+  m = text.match(new RegExp(fuzzy('Streckenführung') + '\\s+\\d{1,2}\\.\\s*[A-Za-zäöüß]+\\s+\\d{4}\\s+([A-Z]{3})\\s*-\\s*([A-Z]{3})', 'i'));
+  if (m) {
+    const [, abflugCode, zielCode] = m;
+    result.abflugCode = abflugCode;
+    const flightRe = new RegExp('\\d{2}\\.\\d{2}\\.\\d{4}\\s+([A-Z0-9\\/]+\\s+\\d+)\\s+' + abflugCode + '\\s+(\\d{2}:\\d{2})\\s*Uhr\\s+' + zielCode + '\\s+(\\d{2}:\\d{2})\\s*Uhr');
+    const fm = text.match(flightRe);
+    if (fm) { result.flugnummer = fm[1]; result.abflugzeit = fm[2] + ' Uhr'; }
+  }
+
+  // "... führt Rückzuführende am ... ab 06:00 Uhr – 09:00 Uhr an den Flughafen Leipzig zu ..."
+  m = text.match(new RegExp(fuzzy('führt Rückzuführende am') + '[\\s\\S]{0,60}?ab\\s+(\\d{2}:\\d{2})\\s*Uhr\\s*[–\\-]\\s*(\\d{2}:\\d{2})\\s*Uhr\\s+an\\s+den\\s+' + fuzzy('Flughafen') + '\\s+([A-ZÄÖÜ][\\wäöüß]*)', 'i'));
+  if (m) { result.uebergabezeit = `${m[1]}-${m[2]} Uhr`; result.uebergabeort = m[3]; }
+
+  return result;
+}
+
+/* ---------------------------------------------------------------------- */
 /* Parser: Charter-Sammelliste (Excel)                                     */
 /* ---------------------------------------------------------------------- */
 /* Sucht in den ersten Zeilen nach der Kopfzeile (erkennbar an Zellen wie
@@ -565,9 +603,68 @@ function formatDateCell(v) {
 function mapGeschlechtCode(v) {
   if (!v) return '';
   const s = String(v).trim().toLowerCase();
-  if (s === 'm' || s === 'männlich') return 'Männlich';
-  if (s === 'w' || s === 'weiblich') return 'Weiblich';
+  if (s === 'm' || s === 'männlich') return 'männlich';
+  if (s === 'w' || s === 'weiblich') return 'weiblich';
   return String(v).trim();
+}
+/* Die Titelzeile von Charter-Sammellisten (Zelle A1) fasst die Eckdaten des
+   gesamten Flugs in einem Satz zusammen, z.B.:
+   "PD Leipzig_Charter Georgien am 24.09.26 FH: Leipzig ; Übergabe BPOL:
+   06-09 Uhr;  Abflug: 12:00 Uhr      Flugnr.: TGZ / A9 2780"
+   Das gilt für die gesamte Liste, nicht pro Person. */
+function parseCharterHeaderTitle(sheetRows) {
+  const title = sheetRows[0] && sheetRows[0][0] ? String(sheetRows[0][0]) : '';
+  if (!title) return {};
+  const result = {};
+  let m;
+  m = title.match(/Charter\s+([A-ZÄÖÜ][\wäöüß]*)/);
+  if (m) result.staatsangehoerigkeit = m[1];
+  m = title.match(/\bam\s+(\d{2})\.(\d{2})\.(\d{2,4})\b/);
+  if (m) result.abschiebedatum = `${m[1]}.${m[2]}.${m[3].length === 2 ? '20' + m[3] : m[3]}`;
+  m = title.match(/FH:\s*([A-ZÄÖÜ][\wäöüß]*)/);
+  if (m) result.abflugort = m[1];
+  m = title.match(/[ÜU]bergabe\s+([A-Z]+)\s*:\s*([\d:\-\s]+Uhr)/);
+  if (m) { result.uebergabean = m[1]; result.uebergabezeit = m[2].trim(); }
+  m = title.match(/Abflug:\s*([\d:]+\s*Uhr)/);
+  if (m) result.abflugzeit = m[1];
+  m = title.match(/Flugnr\.?:\s*([^\n;]+)/);
+  if (m) result.flugnummer = m[1].trim();
+  return result;
+}
+/* Führt die Flug-/Ziel-Eckdaten aus Charter-Titelzeile und Steuerungsschreiben
+   zusammen (beide optional, Steuerungsschreiben hat als strukturierteres
+   Dokument Vorrang) und liefert fertige {value,state}-Felder für jede Zeile
+   der Charter-Liste — diese Angaben gelten für den ganzen Flug gleich. */
+function buildCharterMeta(xlsxHeader, steuerung) {
+  xlsxHeader = xlsxHeader || {};
+  steuerung = steuerung || {};
+  const pick = (steuerungVal, xlsxVal) => {
+    if (steuerungVal) return { value: steuerungVal, state: 'extracted' };
+    if (xlsxVal) return { value: xlsxVal, state: 'inferred' };
+    return null;
+  };
+  const meta = {};
+  meta.staatsangehoerigkeit = pick(steuerung.staatsangehoerigkeit, xlsxHeader.staatsangehoerigkeit);
+  if (steuerung.zielstadt && steuerung.staatsangehoerigkeit) {
+    meta.zielort = { value: `${steuerung.zielstadt} / ${steuerung.staatsangehoerigkeit}`, state: 'extracted' };
+  } else if (xlsxHeader.staatsangehoerigkeit) {
+    meta.zielort = { value: xlsxHeader.staatsangehoerigkeit, state: 'inferred' };
+  }
+  meta.abschiebedatum = pick(steuerung.abschiebedatum, xlsxHeader.abschiebedatum);
+  meta.abflugszeit = pick(steuerung.abflugzeit, xlsxHeader.abflugzeit);
+  const flugnummer = pick(steuerung.flugnummer, xlsxHeader.flugnummer);
+  const abflugort = pick(steuerung.abflugCode, xlsxHeader.abflugort);
+  if (abflugort && flugnummer) {
+    meta.flughafen = { value: `${abflugort.value} / ${flugnummer.value}`, state: (abflugort.state === 'extracted' && flugnummer.state === 'extracted') ? 'extracted' : 'inferred' };
+  } else {
+    meta.flughafen = abflugort || flugnummer || null;
+  }
+  if (flugnummer) meta.abschiebeart = { value: 'Luftabschiebung', state: 'inferred' };
+  meta.uebergabezeit = pick(steuerung.uebergabezeit, xlsxHeader.uebergabezeit);
+  if (steuerung.uebergabeort) meta.uebergabeort = { value: steuerung.uebergabeort, state: 'extracted' };
+  const uebergabeanRaw = xlsxHeader.uebergabean || (steuerung.uebergabeort ? 'BPOL' : '');
+  if (uebergabeanRaw) meta.uebergabean = { value: /BPOL|BPol/i.test(uebergabeanRaw) ? 'BPol' : uebergabeanRaw, state: 'inferred' };
+  return meta;
 }
 /* Die Wohnort-Spalte in Charter-Listen ist Freitext (Adresse + oft weitere
    Notizen zu Angehörigen). Nur die erste, sauber erkennbare "Straße Nr, PLZ
@@ -612,9 +709,9 @@ function assignFamilyRoles(group) {
     const p = group[i];
     const adult = isAdult(p.geburtsdatum);
     if (adult === true) {
-      p.familieRole = { value: p.geschlecht === 'Männlich' ? 'Mann' : p.geschlecht === 'Weiblich' ? 'Frau' : '', state: 'inferred' };
+      p.familieRole = { value: p.geschlecht === 'männlich' ? 'Mann' : p.geschlecht === 'weiblich' ? 'Frau' : '', state: 'inferred' };
     } else if (adult === false) {
-      p.familieRole = { value: p.geschlecht === 'Männlich' ? 'Sohn' : p.geschlecht === 'Weiblich' ? 'Tochter' : '', state: 'inferred' };
+      p.familieRole = { value: p.geschlecht === 'männlich' ? 'Sohn' : p.geschlecht === 'weiblich' ? 'Tochter' : '', state: 'inferred' };
     } else {
       p.familieRole = { value: '', state: 'missing' };
     }
@@ -761,7 +858,7 @@ function buildRows(polizei, am, own, visSax) {
     const match = findAmMatch(amPersons, vorname);
     if (match) {
       set(row, 'azrNummer', match.azr);
-      if (!row.geschlecht.value) set(row, 'geschlecht', titleCaseName(match.geschlecht));
+      if (!row.geschlecht.value) set(row, 'geschlecht', match.geschlecht);
       if (!row.geburtsdatum.value) set(row, 'geburtsdatum', match.geburtsdatum);
     }
     return match;
@@ -785,7 +882,7 @@ function buildRows(polizei, am, own, visSax) {
     const row = makeRow();
     set(row, 'familienname', (p.familienname || '').toUpperCase());
     set(row, 'vorname', p.vorname);
-    set(row, 'geschlecht', titleCaseName(p.geschlecht));
+    set(row, 'geschlecht', p.geschlecht);
     set(row, 'geburtsdatum', p.geburtsdatum);
     set(row, 'azrNummer', p.azr);
     row.familie = { value: 'entfällt', state: 'inferred' };
@@ -814,7 +911,7 @@ function buildRows(polizei, am, own, visSax) {
       set(row, 'familienname', (kind.familienname || polizei.hauptFamilienname || '').toUpperCase());
       set(row, 'vorname', kind.vorname);
       set(row, 'geburtsdatum', kind.geburtsdatum);
-      set(row, 'geschlecht', titleCaseName(kind.geschlecht));
+      set(row, 'geschlecht', kind.geschlecht);
       set(row, 'staatsangehoerigkeit', polizei.staatsangehoerigkeit);
       enrichFromAM(row, kind.vorname);
       row.familie = { value: kind.geschlecht === 'männlich' ? 'Sohn' : 'Tochter', state: 'extracted' };
@@ -831,7 +928,7 @@ function buildRows(polizei, am, own, visSax) {
       const row = makeRow();
       set(row, 'familienname', (p.familienname || '').toUpperCase());
       set(row, 'vorname', p.vorname);
-      set(row, 'geschlecht', titleCaseName(p.geschlecht));
+      set(row, 'geschlecht', p.geschlecht);
       set(row, 'geburtsdatum', p.geburtsdatum);
       set(row, 'azrNummer', p.azr);
       row.familie = { value: '', state: 'missing' };
@@ -843,7 +940,8 @@ function buildRows(polizei, am, own, visSax) {
   return rows;
 }
 
-function buildRowsFromCharterliste(persons, own, visSax) {
+function buildRowsFromCharterliste(persons, own, visSax, meta) {
+  meta = meta || {};
   const rows = [];
   for (const p of persons) {
     const row = makeRow();
@@ -868,6 +966,17 @@ function buildRowsFromCharterliste(persons, own, visSax) {
     // assignFamilyRoles) — ohne gemeinsame ZAB-Nummer bleibt sie leer und
     // muss manuell ergänzt werden.
     row.familie = p.familieRole || { value: '', state: 'missing' };
+    // Flug-/Ziel-Eckdaten aus Charter-Titelzeile bzw. Steuerungsschreiben —
+    // gelten für den gesamten Flug, also für jede Zeile gleich.
+    if (meta.staatsangehoerigkeit) row.staatsangehoerigkeit = meta.staatsangehoerigkeit;
+    if (meta.zielort) row.zielort = meta.zielort;
+    if (meta.abschiebedatum) row.abschiebedatum = meta.abschiebedatum;
+    if (meta.abflugszeit) row.abflugszeit = meta.abflugszeit;
+    if (meta.flughafen) row.flughafen = meta.flughafen;
+    if (meta.abschiebeart) row.abschiebeart = meta.abschiebeart;
+    if (meta.uebergabezeit) row.uebergabezeit = meta.uebergabezeit;
+    if (meta.uebergabeort) row.uebergabeort = meta.uebergabeort;
+    if (meta.uebergabean) row.uebergabean = meta.uebergabean;
     set(row, 'sachbearbeiter', own && own.sachbearbeiter, 'own');
     set(row, 'telefon', own && own.telefon, 'own');
     set(row, 'visSax', visSax, 'own');
@@ -976,7 +1085,7 @@ async function handleFiles(fileList) {
 }
 
 async function processFile(file, kind) {
-  const entry = { name: file.name, type: 'unknown', polizei: null, am: null, charter: null, url: URL.createObjectURL(file), error: null };
+  const entry = { name: file.name, type: 'unknown', polizei: null, am: null, charter: null, charterHeader: null, steuerung: null, url: URL.createObjectURL(file), error: null };
   uploadedFiles.push(entry);
   try {
     if (kind === 'xlsx') {
@@ -988,6 +1097,7 @@ async function processFile(file, kind) {
       if (persons && persons.length) {
         entry.type = 'charterliste';
         entry.charter = persons;
+        entry.charterHeader = parseCharterHeaderTitle(rows);
       } else {
         entry.type = 'unknown';
       }
@@ -998,6 +1108,7 @@ async function processFile(file, kind) {
       entry.type = docType;
       if (docType === 'polizeiauftrag') entry.polizei = parsePolizeiauftrag(text);
       else if (docType === 'am') entry.am = parseAM(text);
+      else if (docType === 'steuerung') entry.steuerung = parseSteuerungsschreiben(text);
       else entry.rawText = text;
     }
   } catch (err) {
@@ -1009,6 +1120,7 @@ function docTypeLabel(f) {
   if (f.type === 'polizeiauftrag') return 'Polizeiauftrag erkannt';
   if (f.type === 'am') return 'AM / BAMF-Mitteilung erkannt';
   if (f.type === 'charterliste') return `Charter-Sammelliste erkannt (${f.charter.length} Personen)`;
+  if (f.type === 'steuerung') return 'Steuerungsschreiben erkannt';
   return 'Typ/Format nicht erkannt';
 }
 
@@ -1065,13 +1177,15 @@ function render() {
   const polizeiEntry = uploadedFiles.find(f => f.type === 'polizeiauftrag' && !f.error);
   const amEntry = uploadedFiles.find(f => f.type === 'am' && !f.error);
   const charterEntries = uploadedFiles.filter(f => f.type === 'charterliste' && !f.error);
+  const steuerungEntry = uploadedFiles.find(f => f.type === 'steuerung' && !f.error);
 
   let rows = [];
   if (polizeiEntry || amEntry) {
     rows = rows.concat(buildRows(polizeiEntry ? polizeiEntry.polizei : null, amEntry ? amEntry.am : null, ownSettings, currentVisSax));
   }
   for (const entry of charterEntries) {
-    rows = rows.concat(buildRowsFromCharterliste(entry.charter, ownSettings, currentVisSax));
+    const meta = buildCharterMeta(entry.charterHeader, steuerungEntry ? steuerungEntry.steuerung : null);
+    rows = rows.concat(buildRowsFromCharterliste(entry.charter, ownSettings, currentVisSax, meta));
   }
 
   if (!rows.length) {
