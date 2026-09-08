@@ -201,7 +201,7 @@
   <h2>1. Dateien hochladen</h2>
   <div id="dropzone">
     <div><strong>Dateien hierher ziehen</strong> oder klicken zum Auswählen</div>
-    <div class="hint">Polizeiauftrag-, AM- und Steuerungsschreiben-PDFs sowie Charter-Sammellisten (.xlsx) können zusammen oder einzeln hochgeladen werden — Typ und Format werden automatisch erkannt. Flug-/Übergabedaten aus Charter-Titelzeile und Steuerungsschreiben werden bei gemeinsamem Upload automatisch zusammengeführt. Mehrere Fälle bzw. mehrere Charter-Listen nacheinander möglich.</div>
+    <div class="hint">Polizeiauftrag-, AM- und Steuerungsschreiben-PDFs sowie Charter-Sammellisten und die Ausländerstatistik selbst (.xlsx) können zusammen oder einzeln hochgeladen werden — Typ und Format werden automatisch erkannt. Flug-/Übergabedaten aus Charter-Titelzeile und Steuerungsschreiben werden bei gemeinsamem Upload automatisch zusammengeführt. Die Ausländerstatistik selbst dient dem Ordner-Generator (Abschnitt 3) für einen wählbaren Zeilenbereich. Mehrere Fälle bzw. mehrere Charter-Listen nacheinander möglich.</div>
     <input type="file" id="fileInput" accept="application/pdf,.pdf,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple>
   </div>
   <ul id="fileList"></ul>
@@ -244,6 +244,34 @@
     <table id="resultTable">
       <thead><tr id="headRow"></tr></thead>
       <tbody id="bodyRows"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="folderSection" style="display:none;">
+  <h2>3. Leere Ordner aus der Ausländerstatistik erzeugen</h2>
+  <p class="hint">Erkannt: die hochgeladene Ausländerstatistik-Excel selbst (nicht die Charter-Liste). Zeilenbereich wählen (Excel-Zeilennummern, wie in Excel angezeigt) — es wird pro Zeile ein Ordner nach dem Muster <code>P_&lt;Spalte J&gt;_ZAB_&lt;Spalte H&gt;_&lt;Spalte N&gt;_&lt;Spalte A&gt;</code> vorgeschlagen. Browser können nicht direkt auf ein Laufwerk zugreifen — stattdessen wird ein Skript erzeugt, das die Ordner beim Ausführen anlegt.</p>
+  <div class="settingsRow">
+    <label>Von Zeile (Excel-Zeilennummer)
+      <input type="number" id="folderRowFrom" min="1" step="1">
+    </label>
+    <label>Bis Zeile (Excel-Zeilennummer)
+      <input type="number" id="folderRowTo" min="1" step="1">
+    </label>
+    <label>Zielpfad (optional, z.&nbsp;B. <code>Z:\Fälle\2026</code>)
+      <input type="text" id="folderTargetPath" placeholder="leer lassen = Ordner, in dem das Skript liegt">
+    </label>
+  </div>
+  <div class="toolbar">
+    <button class="primary" id="downloadBatBtn">Windows-Skript (.bat) herunterladen</button>
+    <button id="downloadShBtn">macOS/Linux-Skript (.sh) herunterladen</button>
+    <span class="status" id="folderStatus"></span>
+  </div>
+  <p class="hint">Skript auf das Ziellaufwerk bzw. in den Zielordner kopieren und dort per Doppelklick ausführen (Windows: <code>.bat</code>; macOS/Linux: <code>.sh</code> ggf. vorher mit <code>chmod +x</code> ausführbar machen). Bereits vorhandene Ordner werden übersprungen, es wird nichts überschrieben oder gelöscht. Namen mit Zeichen, die in Ordnernamen nicht erlaubt sind (<code>\ / : * ? " &lt; &gt; |</code>), werden automatisch durch <code>-</code> ersetzt.</p>
+  <div class="tablewrap">
+    <table id="folderTable">
+      <thead><tr><th>Excel-Zeile</th><th>Ordnername</th></tr></thead>
+      <tbody id="folderRows"></tbody>
     </table>
   </div>
 </section>
@@ -795,6 +823,96 @@ function parseCharterliste(sheetRows) {
 }
 
 /* ---------------------------------------------------------------------- */
+/* Ausländerstatistik (Master-Excel) — für Ordner-Generator                */
+/* ---------------------------------------------------------------------- */
+/* Erkennt die eigene Ziel-Statistik-Tabelle selbst (nicht die Charter-Liste
+   oder eine PDF-Quelle) anhand ihrer charakteristischen Kopfzeile — genau
+   die Kombination, die detectCharterlisteHeader bewusst ausschließt. */
+function detectStatistikHeader(sheetRows) {
+  for (let r = 0; r < Math.min(sheetRows.length, 5); r++) {
+    const row = sheetRows[r] || [];
+    const norm = row.map(c => (c == null ? '' : String(c)).trim());
+    const hasId = norm.some(c => /^ID\b/i.test(c));
+    const hasFamilienname = norm.some(c => /Familienname/i.test(c));
+    const hasZab = norm.some(c => /^ZAB-Nummer/i.test(c));
+    const hasZustaendigkeit = norm.some(c => /Zuständigkeitsbereich/i.test(c));
+    if (hasId && hasFamilienname && hasZab && hasZustaendigkeit) {
+      return { rowIndex: r, cells: norm };
+    }
+  }
+  return null;
+}
+function mapStatistikColumns(headerCells) {
+  const map = {};
+  headerCells.forEach((label, i) => {
+    if (!label) return;
+    if (/^ID\b/i.test(label)) map.id = i;
+    else if (/^P-Nummer/i.test(label)) map.pNummer = i;
+    else if (/^ZAB-Nummer/i.test(label)) map.zabNummer = i;
+    else if (/Zuständigkeitsbereich/i.test(label)) map.zustaendigkeit = i;
+  });
+  return map;
+}
+/* Zeichen, die Windows/macOS/Linux in Ordnernamen nicht erlauben, werden
+   durch "-" ersetzt statt die Erstellung fehlschlagen zu lassen. */
+function sanitizeFolderPart(v) {
+  if (v == null) return '';
+  return String(v).trim().replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ');
+}
+function buildFolderName(row) {
+  return `P_${sanitizeFolderPart(row.pNummer)}_ZAB_${sanitizeFolderPart(row.zab)}_${sanitizeFolderPart(row.zustaendigkeit)}_${sanitizeFolderPart(row.id)}`;
+}
+/* excelRowFrom/To sind Excel-Zeilennummern wie im Programm angezeigt (1 =
+   erste Zeile). Komplett leere Zeilen (z.B. am Ende der Tabelle) werden
+   übersprungen. */
+function extractFolderRows(sheetRows, headerInfo, excelRowFrom, excelRowTo) {
+  const map = mapStatistikColumns(headerInfo.cells);
+  const results = [];
+  const from = Math.max(1, Math.min(excelRowFrom, excelRowTo));
+  const to = Math.max(excelRowFrom, excelRowTo);
+  for (let excelRow = from; excelRow <= to; excelRow++) {
+    const row = sheetRows[excelRow - 1] || [];
+    const get = key => (map[key] != null ? row[map[key]] : undefined);
+    const id = get('id');
+    const zab = get('zabNummer');
+    const pNummer = get('pNummer');
+    const zustaendigkeit = get('zustaendigkeit');
+    const isEmpty = [id, zab, pNummer, zustaendigkeit].every(v => v == null || String(v).trim() === '');
+    if (isEmpty) continue;
+    results.push({
+      excelRow,
+      id: id != null ? String(id).trim() : '',
+      zab: zab != null ? String(zab).trim() : '',
+      pNummer: pNummer != null ? String(pNummer).trim() : '',
+      zustaendigkeit: zustaendigkeit != null ? String(zustaendigkeit).trim() : '',
+    });
+  }
+  return results;
+}
+function generateBatScript(rows, targetPath) {
+  const lines = ['@echo off', 'setlocal', ''];
+  if (targetPath) lines.push(`set "ZIEL=${targetPath.replace(/"/g, '')}"`);
+  else lines.push('set "ZIEL=%~dp0"');
+  lines.push('');
+  for (const row of rows) {
+    lines.push(`if not exist "%ZIEL%\\${buildFolderName(row)}" mkdir "%ZIEL%\\${buildFolderName(row)}"`);
+  }
+  lines.push('', 'echo Fertig.', 'pause');
+  return lines.join('\r\n');
+}
+function generateShScript(rows, targetPath) {
+  const lines = ['#!/bin/sh', 'set -e', ''];
+  if (targetPath) lines.push(`ZIEL="${targetPath.replace(/"/g, '\\"')}"`);
+  else lines.push('ZIEL="$(cd "$(dirname "$0")" && pwd)"');
+  lines.push('');
+  for (const row of rows) {
+    lines.push(`mkdir -p "$ZIEL/${buildFolderName(row).replace(/"/g, '\\"')}"`);
+  }
+  lines.push('', 'echo "Fertig."');
+  return lines.join('\n');
+}
+
+/* ---------------------------------------------------------------------- */
 /* Zusammenführen zu Zeilen im Excel-Format                                */
 /* ---------------------------------------------------------------------- */
 function makeRow(overrides) {
@@ -1001,6 +1119,12 @@ const ownSachbearbeiterInput = document.getElementById('ownSachbearbeiter');
 const ownTelefonInput = document.getElementById('ownTelefon');
 const visSaxModal = document.getElementById('visSaxModal');
 const visSaxInput = document.getElementById('visSaxInput');
+const folderSection = document.getElementById('folderSection');
+const folderRowFromInput = document.getElementById('folderRowFrom');
+const folderRowToInput = document.getElementById('folderRowTo');
+const folderTargetPathInput = document.getElementById('folderTargetPath');
+const folderRowsEl = document.getElementById('folderRows');
+const folderStatus = document.getElementById('folderStatus');
 
 let uploadedFiles = []; // { name, type, polizei, am, charter, url }
 let currentRows = []; // aktuell angezeigte, ggf. manuell reduzierte Zeilen
@@ -1085,7 +1209,7 @@ async function handleFiles(fileList) {
 }
 
 async function processFile(file, kind) {
-  const entry = { name: file.name, type: 'unknown', polizei: null, am: null, charter: null, charterHeader: null, steuerung: null, url: URL.createObjectURL(file), error: null };
+  const entry = { name: file.name, type: 'unknown', polizei: null, am: null, charter: null, charterHeader: null, steuerung: null, statistikRows: null, statistikHeader: null, url: URL.createObjectURL(file), error: null };
   uploadedFiles.push(entry);
   try {
     if (kind === 'xlsx') {
@@ -1099,7 +1223,14 @@ async function processFile(file, kind) {
         entry.charter = persons;
         entry.charterHeader = parseCharterHeaderTitle(rows);
       } else {
-        entry.type = 'unknown';
+        const statistikHeader = detectStatistikHeader(rows);
+        if (statistikHeader) {
+          entry.type = 'statistik';
+          entry.statistikRows = rows;
+          entry.statistikHeader = statistikHeader;
+        } else {
+          entry.type = 'unknown';
+        }
       }
     } else {
       const buf = await file.arrayBuffer();
@@ -1121,6 +1252,7 @@ function docTypeLabel(f) {
   if (f.type === 'am') return 'AM / BAMF-Mitteilung erkannt';
   if (f.type === 'charterliste') return `Charter-Sammelliste erkannt (${f.charter.length} Personen)`;
   if (f.type === 'steuerung') return 'Steuerungsschreiben erkannt';
+  if (f.type === 'statistik') return 'Ausländerstatistik erkannt — Ordner-Generator verfügbar';
   return 'Typ/Format nicht erkannt';
 }
 
@@ -1178,6 +1310,9 @@ function render() {
   const amEntry = uploadedFiles.find(f => f.type === 'am' && !f.error);
   const charterEntries = uploadedFiles.filter(f => f.type === 'charterliste' && !f.error);
   const steuerungEntry = uploadedFiles.find(f => f.type === 'steuerung' && !f.error);
+  const statistikEntry = uploadedFiles.find(f => f.type === 'statistik' && !f.error);
+
+  renderFolderSection(statistikEntry);
 
   let rows = [];
   if (polizeiEntry || amEntry) {
@@ -1196,6 +1331,92 @@ function render() {
   renderTable(rows);
   resultSection.style.display = '';
 }
+
+/* ---------------------------------------------------------------------- */
+/* Ordner-Generator (aus der Ausländerstatistik selbst)                    */
+/* ---------------------------------------------------------------------- */
+let currentFolderRows = [];
+let statistikActiveEntry = null;
+/* Manche Statistik-Tabellen haben zwischen Kopfzeile und den echten
+   Datenzeilen noch eine Vorlagen-/Label-Zeile (z.B. "Vorlagen Auftrag") —
+   für einen sinnvollen Default wird daher die erste Zeile mit tatsächlich
+   gefülltem ID/ZAB/P-Nummer/Zuständigkeitsbereich gesucht statt blind die
+   Zeile direkt unter der Kopfzeile anzunehmen. */
+function findFirstDataExcelRow(sheetRows, headerInfo) {
+  const map = mapStatistikColumns(headerInfo.cells);
+  const limit = Math.min(sheetRows.length, headerInfo.rowIndex + 50);
+  for (let r = headerInfo.rowIndex + 1; r < limit; r++) {
+    const row = sheetRows[r] || [];
+    const idVal = map.id != null ? row[map.id] : undefined;
+    // Echte ID-Werte sind fortlaufende Zahlen — anders als ein evtl.
+    // vorhandener Vorlagen-/Beschriftungstext in derselben Spalte einer
+    // Zeile direkt unter der Kopfzeile (z.B. "Vorlagen Auftrag").
+    if (idVal != null && /^\d+$/.test(String(idVal).trim())) return r + 1; // Excel-Zeilennummer (1-basiert)
+  }
+  return headerInfo.rowIndex + 2;
+}
+function renderFolderSection(statistikEntry) {
+  statistikActiveEntry = statistikEntry || null;
+  if (!statistikEntry) {
+    folderSection.style.display = 'none';
+    return;
+  }
+  folderSection.style.display = '';
+  if (!folderRowFromInput.value && !folderRowToInput.value) {
+    const firstDataRow = findFirstDataExcelRow(statistikEntry.statistikRows, statistikEntry.statistikHeader);
+    folderRowFromInput.value = firstDataRow;
+    folderRowToInput.value = Math.min(firstDataRow + 9, statistikEntry.statistikRows.length);
+  }
+  updateFolderPreview();
+}
+function updateFolderPreview() {
+  folderRowsEl.innerHTML = '';
+  currentFolderRows = [];
+  if (!statistikActiveEntry) return;
+  const from = parseInt(folderRowFromInput.value, 10);
+  const to = parseInt(folderRowToInput.value, 10);
+  if (!Number.isFinite(from) || !Number.isFinite(to)) return;
+  if (to - from > 2000) {
+    folderStatus.textContent = 'Bereich zu groß (max. 2000 Zeilen auf einmal)';
+    return;
+  }
+  currentFolderRows = extractFolderRows(statistikActiveEntry.statistikRows, statistikActiveEntry.statistikHeader, from, to);
+  for (const row of currentFolderRows) {
+    const tr = document.createElement('tr');
+    const tdRow = document.createElement('td');
+    tdRow.textContent = row.excelRow;
+    const tdName = document.createElement('td');
+    tdName.textContent = buildFolderName(row);
+    const missing = !row.id || !row.zab || !row.pNummer || !row.zustaendigkeit;
+    if (missing) { tdName.className = 'missing'; tdName.title = 'Mindestens ein Wert (ID/ZAB-Nummer/P-Nummer/Zuständigkeitsbereich) fehlt in dieser Zeile'; }
+    tr.appendChild(tdRow);
+    tr.appendChild(tdName);
+    folderRowsEl.appendChild(tr);
+  }
+  folderStatus.textContent = `${currentFolderRows.length} Ordner werden vorgeschlagen`;
+}
+[folderRowFromInput, folderRowToInput].forEach(el => el.addEventListener('input', updateFolderPreview));
+function downloadTextFile(filename, content) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+document.getElementById('downloadBatBtn').addEventListener('click', () => {
+  if (!currentFolderRows.length) { folderStatus.textContent = 'Keine Zeilen im gewählten Bereich'; return; }
+  downloadTextFile('ordner_erstellen.bat', generateBatScript(currentFolderRows, folderTargetPathInput.value.trim()));
+  folderStatus.textContent = `${currentFolderRows.length} Ordner im .bat-Skript vorbereitet`;
+});
+document.getElementById('downloadShBtn').addEventListener('click', () => {
+  if (!currentFolderRows.length) { folderStatus.textContent = 'Keine Zeilen im gewählten Bereich'; return; }
+  downloadTextFile('ordner_erstellen.sh', generateShScript(currentFolderRows, folderTargetPathInput.value.trim()));
+  folderStatus.textContent = `${currentFolderRows.length} Ordner im .sh-Skript vorbereitet`;
+});
 
 function renderTable(rows) {
   currentRows = rows;
