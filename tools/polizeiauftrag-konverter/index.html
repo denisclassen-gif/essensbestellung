@@ -162,25 +162,47 @@
   footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 2rem; }
   .hint { font-size: .8rem; color: var(--muted); margin-top: .5rem; }
   code { background: var(--extracted); padding: .1rem .35rem; border-radius: 4px; }
+
+  .modalOverlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 100;
+  }
+  .modalOverlay[hidden] { display: none; }
+  .modalBox {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.5rem; max-width: 28rem; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,.3);
+  }
+  .modalBox h3 { margin: 0 0 .5rem; font-size: 1.1rem; }
+  .modalBox input {
+    width: 100%; margin-top: .75rem; padding: .55rem .65rem;
+    border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--text);
+    font-size: .95rem;
+  }
+  .modalActions { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.25rem; }
+  .modalActions button {
+    font-size: .85rem; padding: .45rem .9rem; border-radius: 6px; border: 1px solid var(--line);
+    background: transparent; color: var(--text); cursor: pointer;
+  }
+  .modalActions button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
 </style>
 </head>
 <body>
 <main>
 
 <h1>Polizeiauftrag / AM → Excel-Konverter</h1>
-<p class="sub">Polizeiauftrag (Landesdirektion Sachsen) und AM/Asyl.Abschlussmitteilung (BAMF) als PDF hochladen, automatisch erkennen und die Felder passend zur Spaltenstruktur der Statistik-Excel zum Kopieren aufbereiten.</p>
+<p class="sub">Polizeiauftrag (Landesdirektion Sachsen), AM/Asyl.Abschlussmitteilung (BAMF) als PDF sowie Charter-Sammellisten als Excel hochladen, automatisch erkennen und die Felder passend zur Spaltenstruktur der Statistik-Excel zum Kopieren aufbereiten.</p>
 
 <div class="notice">
   <span>🔒</span>
-  <span><b>Alles bleibt lokal im Browser.</b> Die PDFs werden ausschließlich auf diesem Rechner mit JavaScript ausgelesen (pdf.js, lokal eingebunden). Es findet kein Upload an einen Server statt — auch nicht an Anthropic/Claude. Die Seite funktioniert ohne Internetverbindung.</span>
+  <span><b>Alles bleibt lokal im Browser.</b> PDFs und Excel-Dateien werden ausschließlich auf diesem Rechner mit JavaScript ausgelesen (pdf.js und SheetJS, beide lokal eingebunden). Es findet kein Upload an einen Server statt — auch nicht an Anthropic/Claude. Die Seite funktioniert ohne Internetverbindung. Die hochgeladene Excel-Datei wird nur gelesen, nie verändert oder zurückgeschrieben.</span>
 </div>
 
 <section>
-  <h2>1. PDFs hochladen</h2>
+  <h2>1. Dateien hochladen</h2>
   <div id="dropzone">
-    <div><strong>PDFs hierher ziehen</strong> oder klicken zum Auswählen</div>
-    <div class="hint">Polizeiauftrag und AM-Mitteilung können zusammen oder einzeln hochgeladen werden — der Typ wird automatisch erkannt. Mehrere Fälle nacheinander möglich.</div>
-    <input type="file" id="fileInput" accept="application/pdf" multiple>
+    <div><strong>Dateien hierher ziehen</strong> oder klicken zum Auswählen</div>
+    <div class="hint">Polizeiauftrag- und AM-PDFs sowie Charter-Sammellisten (.xlsx) können zusammen oder einzeln hochgeladen werden — Typ und Format werden automatisch erkannt. Mehrere Fälle bzw. mehrere Charter-Listen nacheinander möglich.</div>
+    <input type="file" id="fileInput" accept="application/pdf,.pdf,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple>
   </div>
   <ul id="fileList"></ul>
   <div id="previewArea"></div>
@@ -232,7 +254,20 @@
 
 </main>
 
+<div class="modalOverlay" id="visSaxModal" hidden>
+  <div class="modalBox">
+    <h3>VIS.SAX Zeichen</h3>
+    <p class="hint">Für die gerade hochgeladene(n) Datei(en) steht das VIS.SAX-Zeichen in keiner Quelle — bitte einmal eintragen, es wird in jede neu erzeugte Zeile übernommen. Kann in der Tabelle jederzeit pro Zeile nachträglich korrigiert werden.</p>
+    <input type="text" id="visSaxInput" placeholder="z. B. PDL-R2-2314/93/12-2026/98122">
+    <div class="modalActions">
+      <button id="visSaxSkip">Ohne fortfahren</button>
+      <button class="primary" id="visSaxConfirm">Übernehmen</button>
+    </div>
+  </div>
+</div>
+
 <script src="vendor/pdf.min.js"></script>
+<script src="vendor/xlsx.core.min.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
 
@@ -475,6 +510,121 @@ function parsePolizeiauftrag(text) {
 }
 
 /* ---------------------------------------------------------------------- */
+/* Parser: Charter-Sammelliste (Excel)                                     */
+/* ---------------------------------------------------------------------- */
+/* Sucht in den ersten Zeilen nach der Kopfzeile (erkennbar an Zellen wie
+   "AZR", "Vorname", "Geb. Datum") — funktioniert auch, wenn Spaltenreihenfolge
+   oder genaue Beschriftung von Liste zu Liste leicht variiert. */
+function detectCharterlisteHeader(sheetRows) {
+  for (let r = 0; r < Math.min(sheetRows.length, 15); r++) {
+    const row = sheetRows[r] || [];
+    const norm = row.map(c => (c == null ? '' : String(c)).trim());
+    const hasAZR = norm.some(c => /AZR/i.test(c));
+    const hasVorname = norm.some(c => /Vorname/i.test(c));
+    const hasGeb = norm.some(c => /Geb\.?\s*-?\s*Datum|Geburtsdatum/i.test(c));
+    // "Familienname" (ausgeschrieben) ist das Kennzeichen der Ziel-Statistik-Tabelle
+    // selbst, nicht der Charter-Sammelliste (die nutzt nur "Name") — bei Treffer
+    // NICHT als Charter-Liste behandeln, sonst würde die eigene Zieltabelle beim
+    // versehentlichen Hochladen mit falscher Spaltenzuordnung "importiert".
+    const hasFamilienname = norm.some(c => /Familienname/i.test(c));
+    // Zusätzliches, charter-listen-typisches Merkmal verlangen, um Verwechslungen
+    // mit anderen AZR/Vorname/Geburtsdatum-haltigen Tabellen auszuschließen.
+    const hasCharterMarker = norm.some(c => /^lfd|Zugriff|Übernahmeort/i.test(c));
+    if (hasAZR && hasVorname && hasGeb && !hasFamilienname && hasCharterMarker) {
+      return { rowIndex: r, cells: norm };
+    }
+  }
+  return null;
+}
+function mapCharterColumns(headerCells) {
+  const map = {};
+  headerCells.forEach((label, i) => {
+    if (!label) return;
+    if (/ZAB/i.test(label)) map.zab = i;
+    else if (/AZR/i.test(label)) map.azr = i;
+    else if (/Vorname/i.test(label)) map.vorname = i;
+    else if (/^Name$/i.test(label) || (/Name/i.test(label) && !/Vorname/i.test(label))) map.familienname = i;
+    else if (/Geb/i.test(label)) map.geburtsdatum = i;
+    else if (/^m\s*\/\s*w$/i.test(label) || /Geschlecht/i.test(label)) map.geschlecht = i;
+    else if (/Wohnort|Aufenthalt/i.test(label)) map.wohnort = i;
+    else if (/Besonderheit/i.test(label)) map.besonderheiten = i;
+    else if (/^lfd/i.test(label)) map.lfd = i;
+  });
+  return map;
+}
+function formatDateCell(v) {
+  if (v instanceof Date && !isNaN(v)) {
+    const dd = String(v.getDate()).padStart(2, '0');
+    const mm = String(v.getMonth() + 1).padStart(2, '0');
+    const yyyy = v.getFullYear();
+    return `${dd}.${mm}.${yyyy}`;
+  }
+  if (typeof v === 'string') return v.trim();
+  return '';
+}
+function mapGeschlechtCode(v) {
+  if (!v) return '';
+  const s = String(v).trim().toLowerCase();
+  if (s === 'm' || s === 'männlich') return 'Männlich';
+  if (s === 'w' || s === 'weiblich') return 'Weiblich';
+  return String(v).trim();
+}
+/* Die Wohnort-Spalte in Charter-Listen ist Freitext (Adresse + oft weitere
+   Notizen zu Angehörigen). Nur die erste, sauber erkennbare "Straße Nr, PLZ
+   Ort"-Zeile wird automatisch in Straße/PLZ+Ort aufgeteilt; alles andere
+   bleibt unverändert als Zusatztext erhalten statt riskant zusammengekürzt
+   zu werden. */
+function splitWohnort(raw) {
+  if (!raw) return { strasse: '', plzOrt: '', rest: '' };
+  const firstLine = raw.split(/\r?\n/)[0].split(';')[0].trim();
+  const m = firstLine.match(/^(.*?\d+[a-zA-Z]?)\s*,\s*(\d{5})\s+(.+)$/);
+  const rest = raw.length > firstLine.length ? raw.slice(firstLine.length).replace(/^[;,\s]+/, '').trim() : '';
+  if (m) return { strasse: m[1].trim(), plzOrt: `${m[2]} ${m[3].trim()}`, rest };
+  return { strasse: '', plzOrt: '', rest: raw };
+}
+function parseCharterliste(sheetRows) {
+  const headerInfo = detectCharterlisteHeader(sheetRows);
+  if (!headerInfo) return null;
+  const map = mapCharterColumns(headerInfo.cells);
+  const persons = [];
+  // Zeilen, in denen nur eine einzige Zelle (i.d.R. Spalte A) gefüllt ist,
+  // werden als Abschnitts-Trenner interpretiert (z.B. "PD Leipzig" über einer
+  // Gruppe von Personen) und als Zuständigkeitsbereich für die folgenden
+  // Personen übernommen — bitte prüfen, ob diese Annahme zur Liste passt.
+  let currentZustaendigkeit = '';
+  for (let r = headerInfo.rowIndex + 1; r < sheetRows.length; r++) {
+    const row = sheetRows[r] || [];
+    const get = key => (map[key] != null ? row[map[key]] : undefined);
+    const name = get('familienname');
+    const geb = get('geburtsdatum');
+    const nonEmptyCount = row.filter(c => c !== undefined && c !== null && String(c).trim() !== '').length;
+    if ((!name || !String(name).trim()) && !geb) {
+      const firstCell = row[0];
+      if (nonEmptyCount === 1 && firstCell && String(firstCell).trim()) {
+        currentZustaendigkeit = String(firstCell).trim();
+      }
+      continue;
+    }
+    const wohnortRaw = get('wohnort') ? String(get('wohnort')).trim() : '';
+    const split = splitWohnort(wohnortRaw);
+    persons.push({
+      zab: get('zab') != null ? String(get('zab')).trim() : '',
+      azr: get('azr') != null ? String(get('azr')).trim() : '',
+      familienname: name ? String(name).trim() : '',
+      vorname: get('vorname') ? String(get('vorname')).trim() : '',
+      geburtsdatum: formatDateCell(geb),
+      geschlecht: mapGeschlechtCode(get('geschlecht')),
+      wohnortStrasse: split.strasse,
+      wohnortPlzOrt: split.plzOrt,
+      wohnortRest: split.rest,
+      besonderheiten: get('besonderheiten') ? String(get('besonderheiten')).trim() : '',
+      zustaendigkeit: currentZustaendigkeit,
+    });
+  }
+  return persons;
+}
+
+/* ---------------------------------------------------------------------- */
 /* Zusammenführen zu Zeilen im Excel-Format                                */
 /* ---------------------------------------------------------------------- */
 function makeRow(overrides) {
@@ -494,7 +644,7 @@ function findAmMatch(amPersons, vorname) {
   return amPersons.find(p => norm(p.vorname) === norm(vorname)) || null;
 }
 
-function buildRows(polizei, am, own) {
+function buildRows(polizei, am, own, visSax) {
   const rows = [];
   const amPersons = am ? am.persons : [];
 
@@ -530,6 +680,7 @@ function buildRows(polizei, am, own) {
     // sondern aus den "Eigenen Angaben" — gelten für jede Zeile gleich.
     set(row, 'sachbearbeiter', own && own.sachbearbeiter, 'own');
     set(row, 'telefon', own && own.telefon, 'own');
+    set(row, 'visSax', visSax, 'own');
     row.kostenlegung = { value: 'noch offen', state: 'inferred' };
   }
 
@@ -619,6 +770,36 @@ function buildRows(polizei, am, own) {
   return rows;
 }
 
+function buildRowsFromCharterliste(persons, own, visSax) {
+  const rows = [];
+  for (const p of persons) {
+    const row = makeRow();
+    set(row, 'familienname', (p.familienname || '').toUpperCase());
+    set(row, 'vorname', p.vorname);
+    set(row, 'geschlecht', p.geschlecht);
+    set(row, 'geburtsdatum', p.geburtsdatum);
+    set(row, 'zabNummer', p.zab);
+    set(row, 'azrNummer', p.azr);
+    set(row, 'wohnortStrasse', p.wohnortStrasse);
+    set(row, 'wohnortPlzOrt', p.wohnortPlzOrt);
+    // Nicht sauber zuordenbarer Adress-/Notiztext bleibt vollständig erhalten,
+    // aber als "bitte prüfen" markiert statt als sicher erkannt.
+    set(row, 'wohnortHaus', p.wohnortRest, 'inferred');
+    set(row, 'zustaendigkeit', p.zustaendigkeit, 'inferred');
+    set(row, 'besonderheiten', p.besonderheiten);
+    // Charter-Listen kennzeichnen keine Familienrollen (Mann/Frau/Sohn/Tochter)
+    // — trotz gleicher Nachnamen/Adressen bewusst nicht geraten, sondern zur
+    // manuellen Prüfung freigelassen.
+    row.familie = { value: '', state: 'missing' };
+    set(row, 'sachbearbeiter', own && own.sachbearbeiter, 'own');
+    set(row, 'telefon', own && own.telefon, 'own');
+    set(row, 'visSax', visSax, 'own');
+    row.kostenlegung = { value: 'noch offen', state: 'inferred' };
+    rows.push(row);
+  }
+  return rows;
+}
+
 /* ---------------------------------------------------------------------- */
 /* UI                                                                       */
 /* ---------------------------------------------------------------------- */
@@ -632,9 +813,38 @@ const bodyRows = document.getElementById('bodyRows');
 const copyStatus = document.getElementById('copyStatus');
 const ownSachbearbeiterInput = document.getElementById('ownSachbearbeiter');
 const ownTelefonInput = document.getElementById('ownTelefon');
+const visSaxModal = document.getElementById('visSaxModal');
+const visSaxInput = document.getElementById('visSaxInput');
 
-let uploadedFiles = []; // { name, type, polizei, am, url }
+let uploadedFiles = []; // { name, type, polizei, am, charter, url }
 let currentRows = []; // aktuell angezeigte, ggf. manuell reduzierte Zeilen
+let currentVisSax = ''; // gilt nur für die laufende Sitzung, nicht gespeichert (fallspezifisch)
+
+/* ---------------------------------------------------------------------- */
+/* VIS.SAX-Zeichen-Abfrage (Popup) — einmal je neu hochgeladener Datei-Charge */
+/* ---------------------------------------------------------------------- */
+function askVisSax() {
+  return new Promise(resolve => {
+    visSaxInput.value = currentVisSax;
+    visSaxModal.hidden = false;
+    visSaxInput.focus();
+    function cleanup(value) {
+      visSaxModal.hidden = true;
+      confirmBtn.removeEventListener('click', onConfirm);
+      skipBtn.removeEventListener('click', onSkip);
+      visSaxInput.removeEventListener('keydown', onKeydown);
+      resolve(value);
+    }
+    const confirmBtn = document.getElementById('visSaxConfirm');
+    const skipBtn = document.getElementById('visSaxSkip');
+    function onConfirm() { cleanup(visSaxInput.value.trim()); }
+    function onSkip() { cleanup(currentVisSax); }
+    function onKeydown(e) { if (e.key === 'Enter') onConfirm(); if (e.key === 'Escape') onSkip(); }
+    confirmBtn.addEventListener('click', onConfirm);
+    skipBtn.addEventListener('click', onSkip);
+    visSaxInput.addEventListener('keydown', onKeydown);
+  });
+}
 
 /* ---------------------------------------------------------------------- */
 /* Eigene Angaben (Sachbearbeiter/Telefon) — lokal gespeichert             */
@@ -672,34 +882,57 @@ dropzone.addEventListener('drop', e => {
 fileInput.addEventListener('change', () => handleFiles(fileInput.files));
 
 async function handleFiles(fileList) {
+  const before = uploadedFiles.length;
   for (const file of fileList) {
-    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) continue;
-    await processFile(file);
+    const lower = file.name.toLowerCase();
+    const isPdf = file.type === 'application/pdf' || lower.endsWith('.pdf');
+    const isXlsx = lower.endsWith('.xlsx') || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    if (!isPdf && !isXlsx) continue;
+    await processFile(file, isXlsx ? 'xlsx' : 'pdf');
   }
   fileInput.value = '';
+  const newlyRecognized = uploadedFiles.slice(before).some(f => f.type !== 'unknown' && !f.error);
+  if (newlyRecognized) {
+    currentVisSax = await askVisSax();
+  }
   render();
 }
 
-async function processFile(file) {
-  const entry = { name: file.name, type: 'unknown', polizei: null, am: null, url: URL.createObjectURL(file), error: null };
+async function processFile(file, kind) {
+  const entry = { name: file.name, type: 'unknown', polizei: null, am: null, charter: null, url: URL.createObjectURL(file), error: null };
   uploadedFiles.push(entry);
   try {
-    const buf = await file.arrayBuffer();
-    const text = await extractFlatText(buf.slice(0));
-    const docType = detectDocType(text);
-    entry.type = docType;
-    if (docType === 'polizeiauftrag') entry.polizei = parsePolizeiauftrag(text);
-    else if (docType === 'am') entry.am = parseAM(text);
-    else entry.rawText = text;
+    if (kind === 'xlsx') {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+      const persons = parseCharterliste(rows);
+      if (persons && persons.length) {
+        entry.type = 'charterliste';
+        entry.charter = persons;
+      } else {
+        entry.type = 'unknown';
+      }
+    } else {
+      const buf = await file.arrayBuffer();
+      const text = await extractFlatText(buf.slice(0));
+      const docType = detectDocType(text);
+      entry.type = docType;
+      if (docType === 'polizeiauftrag') entry.polizei = parsePolizeiauftrag(text);
+      else if (docType === 'am') entry.am = parseAM(text);
+      else entry.rawText = text;
+    }
   } catch (err) {
     entry.error = err.message || String(err);
   }
 }
 
-function docTypeLabel(type) {
-  if (type === 'polizeiauftrag') return 'Polizeiauftrag erkannt';
-  if (type === 'am') return 'AM / BAMF-Mitteilung erkannt';
-  return 'Typ nicht erkannt';
+function docTypeLabel(f) {
+  if (f.type === 'polizeiauftrag') return 'Polizeiauftrag erkannt';
+  if (f.type === 'am') return 'AM / BAMF-Mitteilung erkannt';
+  if (f.type === 'charterliste') return `Charter-Sammelliste erkannt (${f.charter.length} Personen)`;
+  return 'Typ/Format nicht erkannt';
 }
 
 function renderFileList() {
@@ -708,19 +941,21 @@ function renderFileList() {
     const li = document.createElement('li');
     const badge = document.createElement('span');
     badge.className = 'badge ' + (f.type === 'unknown' ? 'unknown' : 'ok');
-    badge.textContent = f.error ? 'Fehler beim Lesen' : docTypeLabel(f.type);
+    badge.textContent = f.error ? 'Fehler beim Lesen' : docTypeLabel(f);
     const name = document.createElement('span');
     name.className = 'filename';
     name.textContent = f.name;
     const actions = document.createElement('span');
     actions.className = 'fileActions';
-    const viewBtn = document.createElement('button');
-    viewBtn.textContent = 'PDF anzeigen';
-    viewBtn.onclick = () => togglePreview(f, idx);
+    if (f.name.toLowerCase().endsWith('.pdf')) {
+      const viewBtn = document.createElement('button');
+      viewBtn.textContent = 'PDF anzeigen';
+      viewBtn.onclick = () => togglePreview(f, idx);
+      actions.appendChild(viewBtn);
+    }
     const removeBtn = document.createElement('button');
     removeBtn.textContent = 'Entfernen';
     removeBtn.onclick = () => { uploadedFiles.splice(idx, 1); render(); };
-    actions.appendChild(viewBtn);
     actions.appendChild(removeBtn);
     li.appendChild(badge);
     li.appendChild(name);
@@ -752,13 +987,21 @@ function render() {
 
   const polizeiEntry = uploadedFiles.find(f => f.type === 'polizeiauftrag' && !f.error);
   const amEntry = uploadedFiles.find(f => f.type === 'am' && !f.error);
+  const charterEntries = uploadedFiles.filter(f => f.type === 'charterliste' && !f.error);
 
-  if (!polizeiEntry && !amEntry) {
+  let rows = [];
+  if (polizeiEntry || amEntry) {
+    rows = rows.concat(buildRows(polizeiEntry ? polizeiEntry.polizei : null, amEntry ? amEntry.am : null, ownSettings, currentVisSax));
+  }
+  for (const entry of charterEntries) {
+    rows = rows.concat(buildRowsFromCharterliste(entry.charter, ownSettings, currentVisSax));
+  }
+
+  if (!rows.length) {
     resultSection.style.display = 'none';
     return;
   }
 
-  const rows = buildRows(polizeiEntry ? polizeiEntry.polizei : null, amEntry ? amEntry.am : null, ownSettings);
   renderTable(rows);
   resultSection.style.display = '';
 }
