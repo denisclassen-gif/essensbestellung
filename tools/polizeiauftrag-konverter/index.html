@@ -582,6 +582,44 @@ function splitWohnort(raw) {
   if (m) return { strasse: m[1].trim(), plzOrt: `${m[2]} ${m[3].trim()}`, rest };
   return { strasse: '', plzOrt: '', rest: raw };
 }
+/* Alter in Jahren zu einem ISO-Datumsstring, grob (Referenz: heute) —
+   ausreichend, um erwachsen/minderjährig für die Familienrollen-Zuordnung
+   zu unterscheiden; für eine exakte Fallreferenz (Abschiebedatum) fehlt bei
+   Charter-Listen ein strukturiert auslesbares Datumsfeld. */
+function isAdult(ddmmyyyy) {
+  const m = ddmmyyyy && ddmmyyyy.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (!m) return null;
+  const birth = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const md = now.getMonth() - birth.getMonth();
+  if (md < 0 || (md === 0 && now.getDate() < birth.getDate())) age--;
+  return age >= 18;
+}
+/* Weist innerhalb einer Gruppe von Personen mit gemeinsamer (ggf. von einer
+   vorherigen Zeile übernommener) ZAB-Nummer die Familienrolle zu: die erste
+   Person der Gruppe (die, deren Zeile die ZAB-Nummer ursprünglich trug) gilt
+   als Bezugsperson ("entfällt"), weitere Erwachsene als Mann/Frau, Minder-
+   jährige als Sohn/Tochter — jeweils als Vorschlag, nicht als sichere
+   Zuordnung, da die Liste selbst keine Rollen ausweist. */
+function assignFamilyRoles(group) {
+  if (group.length === 1) {
+    group[0].familieRole = { value: 'entfällt', state: 'inferred' };
+    return;
+  }
+  group[0].familieRole = { value: 'entfällt', state: 'inferred' };
+  for (let i = 1; i < group.length; i++) {
+    const p = group[i];
+    const adult = isAdult(p.geburtsdatum);
+    if (adult === true) {
+      p.familieRole = { value: p.geschlecht === 'Männlich' ? 'Mann' : p.geschlecht === 'Weiblich' ? 'Frau' : '', state: 'inferred' };
+    } else if (adult === false) {
+      p.familieRole = { value: p.geschlecht === 'Männlich' ? 'Sohn' : p.geschlecht === 'Weiblich' ? 'Tochter' : '', state: 'inferred' };
+    } else {
+      p.familieRole = { value: '', state: 'missing' };
+    }
+  }
+}
 function parseCharterliste(sheetRows) {
   const headerInfo = detectCharterlisteHeader(sheetRows);
   if (!headerInfo) return null;
@@ -592,6 +630,16 @@ function parseCharterliste(sheetRows) {
   // Gruppe von Personen) und als Zuständigkeitsbereich für die folgenden
   // Personen übernommen — bitte prüfen, ob diese Annahme zur Liste passt.
   let currentZustaendigkeit = '';
+  // ZAB-Nummer-Vererbung an nachfolgende Zeilen ohne eigene ZAB-Nummer: nur
+  // erlaubt, solange der Nachname mit der Zeile übereinstimmt, die die
+  // ZAB-Nummer zuletzt tatsächlich selbst trug. Das verhindert, dass eine
+  // Familie ganz ohne eigene ZAB-Nummer (kommt vor) versehentlich der
+  // ZAB-Nummer einer vorherigen, unverwandten Person zugeordnet wird — auf
+  // Kosten dessen, dass Angehörige mit abweichendem Nachnamen (z.B. Ehefrau
+  // mit Geburtsname) nicht automatisch mitgruppiert werden und manuell
+  // nachgetragen werden müssen.
+  let lastOwnZab = '';
+  let lastOwnSurname = null;
   for (let r = headerInfo.rowIndex + 1; r < sheetRows.length; r++) {
     const row = sheetRows[r] || [];
     const get = key => (map[key] != null ? row[map[key]] : undefined);
@@ -602,15 +650,31 @@ function parseCharterliste(sheetRows) {
       const firstCell = row[0];
       if (nonEmptyCount === 1 && firstCell && String(firstCell).trim()) {
         currentZustaendigkeit = String(firstCell).trim();
+        lastOwnZab = '';
+        lastOwnSurname = null;
       }
       continue;
+    }
+    const familienname = name ? String(name).trim() : '';
+    const ownZab = get('zab') != null ? String(get('zab')).trim() : '';
+    let effectiveZab = '';
+    let zabIsOwn = false;
+    if (ownZab) {
+      effectiveZab = ownZab;
+      zabIsOwn = true;
+      lastOwnZab = ownZab;
+      lastOwnSurname = familienname;
+    } else if (lastOwnZab && familienname && familienname === lastOwnSurname) {
+      effectiveZab = lastOwnZab;
     }
     const wohnortRaw = get('wohnort') ? String(get('wohnort')).trim() : '';
     const split = splitWohnort(wohnortRaw);
     persons.push({
-      zab: get('zab') != null ? String(get('zab')).trim() : '',
+      lfd: get('lfd') != null ? String(get('lfd')).trim() : '',
+      zab: effectiveZab,
+      zabIsOwn,
       azr: get('azr') != null ? String(get('azr')).trim() : '',
-      familienname: name ? String(name).trim() : '',
+      familienname,
       vorname: get('vorname') ? String(get('vorname')).trim() : '',
       geburtsdatum: formatDateCell(geb),
       geschlecht: mapGeschlechtCode(get('geschlecht')),
@@ -621,6 +685,15 @@ function parseCharterliste(sheetRows) {
       zustaendigkeit: currentZustaendigkeit,
     });
   }
+
+  const groups = new Map();
+  for (const p of persons) {
+    if (!p.zab) continue;
+    if (!groups.has(p.zab)) groups.set(p.zab, []);
+    groups.get(p.zab).push(p);
+  }
+  for (const group of groups.values()) assignFamilyRoles(group);
+
   return persons;
 }
 
@@ -778,8 +851,12 @@ function buildRowsFromCharterliste(persons, own, visSax) {
     set(row, 'vorname', p.vorname);
     set(row, 'geschlecht', p.geschlecht);
     set(row, 'geburtsdatum', p.geburtsdatum);
-    set(row, 'zabNummer', p.zab);
+    // ZAB-Nummer: eigene Angabe = sicher erkannt, von einer Angehörigen-Zeile
+    // übernommene Nummer = abgeleitet, daher unterschiedliche Markierung.
+    set(row, 'zabNummer', p.zab, p.zabIsOwn ? 'extracted' : 'inferred');
     set(row, 'azrNummer', p.azr);
+    // Spalte A der Charter-Liste ("lfd Nr.") ist die Charter-/P-Nummer.
+    set(row, 'pNummer', p.lfd);
     set(row, 'wohnortStrasse', p.wohnortStrasse);
     set(row, 'wohnortPlzOrt', p.wohnortPlzOrt);
     // Nicht sauber zuordenbarer Adress-/Notiztext bleibt vollständig erhalten,
@@ -787,10 +864,10 @@ function buildRowsFromCharterliste(persons, own, visSax) {
     set(row, 'wohnortHaus', p.wohnortRest, 'inferred');
     set(row, 'zustaendigkeit', p.zustaendigkeit, 'inferred');
     set(row, 'besonderheiten', p.besonderheiten);
-    // Charter-Listen kennzeichnen keine Familienrollen (Mann/Frau/Sohn/Tochter)
-    // — trotz gleicher Nachnamen/Adressen bewusst nicht geraten, sondern zur
-    // manuellen Prüfung freigelassen.
-    row.familie = { value: '', state: 'missing' };
+    // Familienrolle wird über gemeinsame ZAB-Nummer abgeleitet (siehe
+    // assignFamilyRoles) — ohne gemeinsame ZAB-Nummer bleibt sie leer und
+    // muss manuell ergänzt werden.
+    row.familie = p.familieRole || { value: '', state: 'missing' };
     set(row, 'sachbearbeiter', own && own.sachbearbeiter, 'own');
     set(row, 'telefon', own && own.telefon, 'own');
     set(row, 'visSax', visSax, 'own');
@@ -1101,11 +1178,23 @@ function renderTable(rows) {
   });
 }
 
+/* Zellwerte (v.a. Besonderheiten/Wohnort-Notizen aus dem Excel-Import)
+   können mehrzeiligen Text mit echten Zeilenumbrüchen enthalten. In der
+   Tabelle ist das gewollt (lesbar), aber im TSV für die Zwischenablage
+   zerstört ein eingebetteter Zeilenumbruch die Zeilen-/Spaltenausrichtung
+   beim Einfügen in Excel — Excel interpretiert ihn als neue Tabellenzeile,
+   wodurch alle folgenden Werte verrutschen. Deshalb hier auf einzeilig
+   reduzieren (Tabs ebenfalls, da sie sonst als Spaltenwechsel wirken).
+   Beim gezielten Kopieren einer einzelnen Zelle (⧉) ist das nicht nötig,
+   dort bleiben Zeilenumbrüche erhalten. */
+function sanitizeForTSV(value) {
+  return String(value).replace(/\r\n|\r|\n/g, ' ').replace(/\t/g, ' ');
+}
 function rowsToTSV(rows, includeHeader) {
   const lines = [];
   if (includeHeader) lines.push(COLUMNS.map(c => c.label).join('\t'));
   for (const row of rows) {
-    lines.push(COLUMNS.map(c => (row[c.key] && row[c.key].value ? row[c.key].value : '')).join('\t'));
+    lines.push(COLUMNS.map(c => sanitizeForTSV(row[c.key] && row[c.key].value ? row[c.key].value : '')).join('\t'));
   }
   return lines.join('\n');
 }
