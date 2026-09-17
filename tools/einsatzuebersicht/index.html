@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PES-Einsatzübersicht</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --text: #1c1c1a;
+    --muted: #5c5c56;
+    --line: #dcdcd6;
+    --accent: #2f6f4e;
+    --accent-dark: #1f4d36;
+    --extracted: #eaf5ee;
+    --missing: #fbeceb;
+    --missing-border: #d98a84;
+    --own: #e8f0fb;
+    --own-border: #6c93c7;
+    --hidden-bg: #efefec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171a;
+      --card: #1f2126;
+      --text: #ececea;
+      --muted: #a3a39c;
+      --line: #33353b;
+      --accent: #7fc4a0;
+      --accent-dark: #a9dcc1;
+      --extracted: #1c2c22;
+      --missing: #341f1e;
+      --missing-border: #7a3a35;
+      --own: #16232f;
+      --own-border: #4a72a6;
+      --hidden-bg: #202226;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 1.5rem 1rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 74rem; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
+  h2.weekday { font-size: 1.15rem; margin: 1.75rem 0 .75rem; padding-bottom: .35rem; border-bottom: 2px solid var(--accent); color: var(--accent-dark); }
+  h2.weekday:first-of-type { margin-top: .5rem; }
+  p.sub { color: var(--muted); margin: 0 0 1.5rem; }
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.25rem 1.4rem;
+    margin-bottom: 1.25rem;
+  }
+  .notice {
+    display: flex; gap: .6rem; align-items: flex-start;
+    background: var(--extracted); border: 1px solid var(--accent);
+    border-radius: 10px; padding: .8rem 1rem; margin-bottom: 1.25rem; font-size: .9rem;
+  }
+  .notice b { color: var(--accent-dark); }
+
+  #dropzone {
+    border: 2px dashed var(--line);
+    border-radius: 10px;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  #dropzone.dragover { border-color: var(--accent); background: var(--extracted); }
+  #dropzone strong { color: var(--text); }
+  #fileInput { display: none; }
+
+  #fileList { list-style: none; padding: 0; margin: 1rem 0 0; display: flex; flex-direction: column; gap: .5rem; }
+  #fileList li {
+    display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+    border: 1px solid var(--line); border-radius: 8px; padding: .5rem .75rem; font-size: .875rem;
+  }
+  .badge { padding: .15rem .55rem; border-radius: 999px; font-size: .75rem; font-weight: 600; white-space: nowrap; }
+  .badge.ok { background: var(--extracted); color: var(--accent-dark); border: 1px solid var(--accent); }
+  .badge.unknown { background: var(--missing); color: #a33; border: 1px solid var(--missing-border); }
+  .filename { flex: 1; min-width: 12rem; word-break: break-all; }
+  .fileActions button {
+    font-size: .8rem; padding: .3rem .6rem; border-radius: 6px; border: 1px solid var(--line);
+    background: transparent; color: var(--text); cursor: pointer;
+  }
+  .fileActions button:hover { border-color: var(--accent); color: var(--accent-dark); }
+
+  .toolbar { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .toolbar button {
+    font-size: .85rem; padding: .45rem .8rem; border-radius: 6px; border: 1px solid var(--line);
+    background: transparent; color: var(--text); cursor: pointer;
+  }
+  .toolbar button:hover { border-color: var(--accent); color: var(--accent-dark); }
+  .toolbar button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  .toolbar button.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+  .toolbar .status { font-size: .85rem; color: var(--muted); }
+
+  .legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin-bottom: .75rem; }
+
+  /* --- Einsatz-Karte --- */
+  .einsatz {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: .85rem 1rem; margin-bottom: .7rem;
+  }
+  .einsatz.hidden { background: var(--hidden-bg); opacity: .55; }
+  .einsatz.hidden .einsatzBody { display: none; }
+  .einsatzHead { display: flex; align-items: flex-start; gap: .6rem; }
+  .einsatzHead .toggleHide { cursor: pointer; margin-top: .3rem; flex: 0 0 auto; }
+  .anlass {
+    flex: 1; font-weight: 700; font-size: 1rem; outline: none; padding: .1rem .3rem; border-radius: 4px;
+    min-width: 8rem;
+  }
+  .anlass:focus { background: var(--extracted); }
+  .einsatzHead .cardActions { display: flex; gap: .35rem; flex: 0 0 auto; }
+  .einsatzHead .cardActions button {
+    font-size: .75rem; padding: .25rem .5rem; border-radius: 5px; border: 1px solid var(--line);
+    background: transparent; color: var(--muted); cursor: pointer;
+  }
+  .einsatzHead .cardActions button:hover { border-color: var(--accent); color: var(--accent-dark); }
+
+  .metaRow { display: flex; gap: 1.2rem; flex-wrap: wrap; margin: .5rem 0 .5rem 1.6rem; font-size: .85rem; }
+  .metaField { display: flex; flex-direction: column; gap: .15rem; min-width: 10rem; flex: 1 1 12rem; }
+  .metaField label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+  .metaField .val {
+    outline: none; padding: .2rem .35rem; border-radius: 4px; min-height: 1.4em; border: 1px solid transparent;
+  }
+  .metaField .val:focus { background: var(--extracted); border-color: var(--accent); }
+  .metaField .val.missing { background: var(--missing); border: 1px dashed var(--missing-border); }
+  .metaField .val.missing:empty::before { content: "bitte ergänzen"; color: var(--muted); font-style: italic; }
+  .metaField .val.zeitraum { white-space: pre-wrap; }
+
+  .kraefte { margin: .4rem 0 .2rem 1.6rem; }
+  .kraefteLabel { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+  .orgGroup { display: flex; align-items: baseline; gap: .4rem; padding: .15rem 0; flex-wrap: wrap; border-bottom: 1px dotted var(--line); }
+  .orgGroup:last-of-type { border-bottom: none; }
+  .orgName { font-weight: 600; outline: none; padding: .05rem .3rem; border-radius: 4px; min-width: 4rem; }
+  .orgName:focus { background: var(--extracted); }
+  .typList { display: flex; gap: .3rem; flex-wrap: wrap; flex: 1; align-items: baseline; }
+  .typItem { display: inline-flex; align-items: baseline; gap: .15rem; background: var(--extracted); border-radius: 4px; padding: .05rem .3rem; }
+  .typItem .anzahl { width: 2.1em; outline: none; text-align: right; border-radius: 3px; }
+  .typItem .anzahl:focus, .typItem .typ:focus { background: var(--own); }
+  .typItem .typ { outline: none; border-radius: 3px; min-width: 2em; }
+  .typItem .rmTyp { border: none; background: none; color: var(--muted); cursor: pointer; font-size: .8rem; padding: 0 .15rem; }
+  .typItem .rmTyp:hover { color: #b33; }
+  .orgGroup .rmOrg, .orgGroup .addTyp {
+    border: none; background: none; color: var(--muted); cursor: pointer; font-size: .8rem; padding: 0 .2rem;
+  }
+  .orgGroup .rmOrg:hover { color: #b33; }
+  .orgGroup .addTyp:hover { color: var(--accent-dark); }
+  .addOrgBtn {
+    font-size: .8rem; color: var(--accent-dark); background: none; border: 1px dashed var(--line);
+    border-radius: 5px; padding: .15rem .5rem; cursor: pointer; margin-top: .25rem;
+  }
+  .addOrgBtn:hover { border-color: var(--accent); }
+
+  .phaseHint { font-size: .72rem; color: var(--muted); margin-left: 1.6rem; font-style: italic; }
+
+  footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 2rem; }
+  .hint { font-size: .8rem; color: var(--muted); margin-top: .5rem; }
+  code { background: var(--extracted); padding: .1rem .35rem; border-radius: 4px; }
+
+  #emptyHint { color: var(--muted); font-size: .9rem; }
+
+  /* ---------------------------------------------------------------- */
+  /* Druckansicht                                                      */
+  /* ---------------------------------------------------------------- */
+  @media print {
+    body { background: #fff; padding: 0; font-size: 9.5px; }
+    main { max-width: none; }
+    p.sub, .notice, #uploadSection, .toolbar, .legend, .fileActions,
+    .cardActions, .toggleHide, .rmOrg, .rmTyp, .addTyp, .addOrgBtn, .phaseHint,
+    #resultHeading, footer { display: none !important; }
+    h1 { font-size: 15px; margin: 0 0 8px; }
+    section { border: none; padding: 0; margin: 0; box-shadow: none; background: transparent; }
+    h2.weekday {
+      font-size: 12px; margin: 6px 0 3px; padding-bottom: 1px; border-bottom: 1.5px solid #000;
+      color: #000; break-after: avoid;
+    }
+    .einsatz {
+      border: none; border-bottom: 1px solid #ccc; border-radius: 0;
+      padding: 2px 0; margin-bottom: 0; break-inside: avoid;
+    }
+    .einsatz.hidden { display: none; }
+    .einsatzHead { gap: .3rem; }
+    .anlass { font-size: 10px; padding: 0; }
+    .metaRow { margin: 1px 0 1px .3rem; gap: .6rem; font-size: 9px; }
+    .metaField { min-width: 6rem; }
+    .metaField label { font-size: 7px; }
+    .metaField .val { padding: 0; border: none !important; background: transparent !important; }
+    .metaField .val.missing:empty::before { content: "" !important; }
+    .kraefte { margin: 1px 0 1px .3rem; }
+    .kraefteLabel { font-size: 7px; }
+    .orgGroup { border-bottom: none; padding: 0; gap: .3rem; }
+    .orgName { padding: 0; }
+    .typItem { background: transparent; padding: 0; }
+    .typItem .anzahl, .typItem .typ { padding: 0; width: auto; }
+    #resultArea { display: block !important; }
+    @page { size: A4 portrait; margin: 10mm 9mm; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<h1>PES-Einsatzübersicht</h1>
+<p class="sub">PES-Kräftekoordination (PDF-Export aus EMS-Web) hochladen, automatisch nach Einsatz/Wochentag aufbereiten, prüfen &amp; ergänzen, dann kompakt ausdrucken oder als PDF speichern.</p>
+
+<div class="notice">
+  <span>🔒</span>
+  <span><b>Alles bleibt lokal im Browser.</b> PDFs werden ausschließlich auf diesem Rechner mit JavaScript ausgelesen (pdf.js, lokal eingebunden). Es findet kein Upload an einen Server statt — auch nicht an Anthropic/Claude. Die Seite funktioniert ohne Internetverbindung.</span>
+</div>
+
+<section id="uploadSection">
+  <h2>1. PES-Kräftekoordination (PDF) hochladen</h2>
+  <div id="dropzone">
+    <p><strong>Dateien hierher ziehen</strong> oder klicken zum Auswählen</p>
+    <p class="hint">Ein oder mehrere PES-Kräftekoordinations-PDFs (EMS-Web-Export) gleichzeitig möglich — z.&nbsp;B. für mehrere Wochen. Die Einsätze werden automatisch zusammengeführt und nach Wochentag/Zeit sortiert.</p>
+  </div>
+  <input type="file" id="fileInput" accept="application/pdf" multiple>
+  <ul id="fileList"></ul>
+  <p class="hint">Übernommen werden nur Kräfte mit PES-Status <code>zugewiesen</code>, <code>geplant</code>, <code>aufgerufen</code> oder <code>angefordert</code> — abgesagte, entlassene, abkommandierte, zugesagte und besetzte Einträge werden nicht angezeigt. Einsätze ganz ohne verbleibende Kräfte werden übersprungen.</p>
+</section>
+
+<section id="resultSection" style="display:none;">
+  <h2 id="resultHeading">2. Einsatzübersicht — prüfen, ergänzen &amp; drucken</h2>
+  <div class="legend">
+    <span>Jedes Feld ist direkt anklick- und editierbar.</span>
+    <span>👁 blendet einen Einsatz aus (auch im Ausdruck).</span>
+    <span>„+“ fügt Kräfte/Organisationen hinzu, die nicht im PDF standen.</span>
+  </div>
+  <div class="toolbar">
+    <button class="primary" id="printBtn">Druckansicht / Als PDF speichern</button>
+    <button id="addEinsatzBtn">+ Einsatz manuell hinzufügen</button>
+    <button id="showAllBtn">Alle ausgeblendeten wieder einblenden</button>
+    <button id="resetBtn">Zurücksetzen</button>
+    <span class="status" id="statusMsg"></span>
+  </div>
+  <div id="resultArea"></div>
+  <p id="emptyHint" style="display:none;">Keine Einsätze gefunden — bitte PDF prüfen oder Einsatz manuell hinzufügen.</p>
+</section>
+
+<footer>Lokales Hilfswerkzeug · keine Datenübertragung · Quelltext einsehbar in dieser Datei</footer>
+
+</main>
+
+<script src="vendor/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
+
+/* ---------------------------------------------------------------------- */
+/* PES-Kräftekoordination: Extraktion aus dem PDF-Textlayer                */
+/* ---------------------------------------------------------------------- */
+/* Kalibriert und validiert gegen zwei reale PES-Kräftekoordinations-PDFs
+   (16 bzw. 10 Seiten, EMS-Web-Export der Polizeidirektion Leipzig). Arbeitet
+   rein positionsbasiert (x/y der Text-Fragmente), nicht über den
+   verketteten Fließtext, da dieser bei einer zweispaltigen Tabelle wie
+   dieser nicht zuverlässig auswertbar ist. */
+
+const BOILERPLATE_EXACT = new Set([
+  'Polizei des Freistaates Sachsen', 'PD Leipzig', 'PES - Kräftekoordination',
+  'Einsatzdaten', 'Mitgeteilte Kräfte', 'Interner Bearbeitungsstand',
+  'Anlass, eins-führ. Org-Eh, Status', 'EZ, MZ', 'Anz, Typ', 'PES - Status',
+  'Org-Eh', 'Org-Eh, Name', 'KO - Status',
+]);
+const BOILERPLATE_RE = [
+  /^Seite\s+\d+\s+von\s+\d+$/,
+  /^EMS-Web/,
+  /^Mitgeteilte Kräfte und Interner Bearbeitungsstand/,
+];
+const WEEKDAY_RE = /^(Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag),\s*(\d{2})\.(\d{2})\.(\d{4})$/;
+const STATUS_INCLUDE = new Set(['zugewiesen', 'geplant', 'aufgerufen', 'angefordert']);
+const WEEKDAY_ORDER = { montag: 0, dienstag: 1, mittwoch: 2, donnerstag: 3, freitag: 4, samstag: 5, sonntag: 6 };
+
+function isBoilerplate(text) {
+  const t = text.trim();
+  if (!t) return true;
+  if (BOILERPLATE_EXACT.has(t)) return true;
+  return BOILERPLATE_RE.some(re => re.test(t));
+}
+
+// Grobe Spaltengrenzen der "Mitgeteilte Kräfte"-Tabellenhälfte (in PDF-Punkten,
+// unskaliert) — aus der Kopfzeile der Beispiel-PDFs ermittelt. Die zweite
+// Tabellenhälfte ("Interner Bearbeitungsstand", x >= 478) wird ignoriert, da
+// dort in der Praxis keine Daten stehen und sie vom Nutzer nicht benötigt wird.
+function classifyColumn(x) {
+  if (x >= 55 && x < 125) return 'org';
+  if (x >= 125 && x < 180) return 'title';
+  if (x >= 180 && x < 270) return 'ezmz';
+  if (x >= 270 && x < 340) return 'anztyp';
+  if (x >= 340 && x < 415) return 'status';
+  if (x >= 415 && x < 478) return 'orgeh';
+  return null;
+}
+const COL_ORDER = { ezmz: 0, anztyp: 1, status: 2, orgeh: 3 };
+
+// Fügt umgebrochene Zeilen innerhalb einer Zelle zusammen. Endet das vorige
+// Fragment auf einem Buchstaben und beginnt das nächste klein, handelt es
+// sich sehr wahrscheinlich um einen erzwungenen Zeilenumbruch mitten im Wort
+// (zu schmale Spalte) -> ohne Leerzeichen zusammenfügen. Sonst mit
+// Leerzeichen (normale, getrennte Token/Zeilen).
+function joinWrapped(parts) {
+  let out = '';
+  for (const p of parts) {
+    if (!out) { out = p; continue; }
+    const prevChar = out[out.length - 1];
+    const nextChar = p[0];
+    const isWordBreak = /[A-Za-zÄÖÜäöüß]/.test(prevChar) && /[a-zäöüß]/.test(nextChar);
+    out += (isWordBreak ? '' : ' ') + p;
+  }
+  return out.trim().replace(/\s+/g, ' ');
+}
+
+function extractEinsaetzeFromItems(pagesItems) {
+  const einsaetze = [];
+  let currentWeekday = null;
+  let currentAnlass = null;
+  let rowCells = { ezmz: [], anztyp: [], status: [], orgeh: [] };
+  let lastCol = null;
+  let rowMaxIndex = -1;
+  let lastSeenEzmz = '';
+
+  function resetRow() {
+    rowCells = { ezmz: [], anztyp: [], status: [], orgeh: [] };
+    lastCol = null;
+    rowMaxIndex = -1;
+  }
+
+  function flushRow() {
+    if (!currentAnlass) { resetRow(); return; }
+    // Der Berichtsgenerator lässt ein wiederholtes, identisches EZ/MZ leer
+    // -> letzten bekannten Wert übernehmen statt das Zeitfenster leer zu lassen.
+    let ezmz = joinWrapped(rowCells.ezmz);
+    if (!ezmz) ezmz = lastSeenEzmz; else lastSeenEzmz = ezmz;
+    const anztypRaw = joinWrapped(rowCells.anztyp);
+    const status = joinWrapped(rowCells.status);
+    const orgeh = joinWrapped(rowCells.orgeh);
+    // Ein Fragment, das NUR EZ/MZ enthält (kein Typ/Status/Org-Eh), ist ein
+    // Seitenumbruch-Artefakt der Quell-PDF ohne Informationsgehalt.
+    if (anztypRaw || status || orgeh) {
+      const m = anztypRaw.match(/^(\d+)\s*(.*)$/);
+      const anzahl = m ? parseInt(m[1], 10) : 1;
+      const typ = m ? m[2].trim() : anztypRaw;
+      currentAnlass.rows.push({ ezmz, anzahl, typ, status, orgeh });
+    }
+    resetRow();
+  }
+
+  for (const items of pagesItems) {
+    for (const it of items) {
+      const text = it.str;
+      if (isBoilerplate(text)) continue;
+      const col = classifyColumn(it.x);
+      if (col === null) continue;
+
+      if (col === 'org') {
+        flushRow();
+        const t = text.trim();
+        const wd = t.match(WEEKDAY_RE);
+        if (wd) {
+          currentWeekday = t;
+          currentAnlass = null;
+          continue;
+        }
+        if (/^Phase\s/.test(t) || /^\(/.test(t)) {
+          if (currentAnlass) currentAnlass.phase = (currentAnlass.phase ? currentAnlass.phase + ' ' : '') + t;
+          continue;
+        }
+        currentAnlass = { weekday: currentWeekday, orgEh: t, title: '', phase: '', rows: [] };
+        einsaetze.push(currentAnlass);
+        lastSeenEzmz = '';
+        continue;
+      }
+      if (col === 'title') {
+        if (currentAnlass) currentAnlass.title += (currentAnlass.title ? ' ' : '') + text.trim();
+        continue;
+      }
+      // Kräfte-Spalten: eine neue Zeile beginnt, sobald eine Spalte erneut
+      // auftaucht, die auf oder vor dem bisher weitesten Spaltenindex der
+      // aktuellen Zeile liegt (und keine reine Umbruch-Fortsetzung derselben
+      // Spalte ist) — deckt auch Zeilen ab, bei denen EZ/MZ fehlt (s.o.).
+      const idx = COL_ORDER[col];
+      if (col !== lastCol && rowMaxIndex >= 0 && idx <= rowMaxIndex) {
+        flushRow();
+      }
+      rowCells[col].push(text.trim());
+      lastCol = col;
+      rowMaxIndex = Math.max(rowMaxIndex, idx);
+    }
+  }
+  flushRow();
+  return einsaetze;
+}
+
+async function extractFromPdf(arrayBuffer) {
+  const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pagesItems = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    pagesItems.push(content.items.map(it => ({ str: it.str, x: it.transform[4], y: it.transform[5] })));
+  }
+  return extractEinsaetzeFromItems(pagesItems);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Umwandlung Roh-Einsatz -> editierbares Datenmodell                      */
+/* ---------------------------------------------------------------------- */
+let nextId = 1;
+function uid() { return nextId++; }
+
+function extractStartMinutes(ezmz) {
+  let m = ezmz.match(/^(\d{2}):(\d{2})/);
+  if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  m = ezmz.match(/MZ:\s*(\d{2}):(\d{2})/);
+  if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  return null;
+}
+
+function weekdayDate(weekdayLabel) {
+  const m = weekdayLabel && weekdayLabel.match(WEEKDAY_RE);
+  if (!m) return null;
+  return new Date(parseInt(m[4], 10), parseInt(m[3], 10) - 1, parseInt(m[2], 10));
+}
+
+function buildEinsatzRecord(raw) {
+  const included = raw.rows.filter(r => STATUS_INCLUDE.has(r.status.toLowerCase()));
+  if (!included.length) return null;
+
+  // Zeitfenster: eindeutige EZ/MZ-Werte in Reihenfolge des ersten Auftretens.
+  const zeitfensterSeen = new Set();
+  const zeitfenster = [];
+  let minStart = Infinity;
+  for (const r of included) {
+    if (!zeitfensterSeen.has(r.ezmz)) { zeitfensterSeen.add(r.ezmz); zeitfenster.push(r.ezmz); }
+    const start = extractStartMinutes(r.ezmz);
+    if (start != null && start < minStart) minStart = start;
+  }
+
+  // Kräfte nach Organisationseinheit gruppieren, je Einheit nach Typ
+  // zusammengezählt (gefasst).
+  const byOrg = new Map();
+  for (const r of included) {
+    if (!byOrg.has(r.orgeh)) byOrg.set(r.orgeh, new Map());
+    const typMap = byOrg.get(r.orgeh);
+    typMap.set(r.typ, (typMap.get(r.typ) || 0) + r.anzahl);
+  }
+  const kraefte = [...byOrg.entries()].map(([orgEh, typMap]) => ({
+    id: uid(),
+    orgEh,
+    typen: [...typMap.entries()].map(([typ, anzahl]) => ({ id: uid(), typ, anzahl })),
+  }));
+
+  return {
+    id: uid(),
+    weekday: raw.weekday || '',
+    anlass: raw.title || raw.orgEh || '(ohne Bezeichnung)',
+    revierbereich: '',
+    fuehrung: raw.orgEh || '',
+    zeitraum: zeitfenster.join('\n'),
+    kraefte,
+    hidden: false,
+    sortKey: minStart === Infinity ? Infinity : minStart,
+    source: 'pdf',
+  };
+}
+
+/* ---------------------------------------------------------------------- */
+/* UI-Zustand                                                              */
+/* ---------------------------------------------------------------------- */
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const fileListEl = document.getElementById('fileList');
+const resultSection = document.getElementById('resultSection');
+const resultArea = document.getElementById('resultArea');
+const emptyHint = document.getElementById('emptyHint');
+const statusMsg = document.getElementById('statusMsg');
+
+let uploadedFiles = []; // { name, count, error }
+let einsaetze = []; // flat list of editable Einsatz-records
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+
+async function handleFiles(fileList) {
+  for (const file of fileList) {
+    const lower = file.name.toLowerCase();
+    if (!lower.endsWith('.pdf') && file.type !== 'application/pdf') continue;
+    const entry = { name: file.name, count: 0, error: null };
+    uploadedFiles.push(entry);
+    try {
+      const buf = await file.arrayBuffer();
+      const raw = await extractFromPdf(buf);
+      let count = 0;
+      for (const r of raw) {
+        const rec = buildEinsatzRecord(r);
+        if (rec) { einsaetze.push(rec); count++; }
+      }
+      entry.count = count;
+    } catch (err) {
+      entry.error = err.message || String(err);
+    }
+  }
+  fileInput.value = '';
+  render();
+}
+
+function renderFileList() {
+  fileListEl.innerHTML = '';
+  uploadedFiles.forEach((f, idx) => {
+    const li = document.createElement('li');
+    const badge = document.createElement('span');
+    badge.className = 'badge ' + (f.error ? 'unknown' : 'ok');
+    badge.textContent = f.error ? 'Fehler beim Lesen' : `${f.count} Einsätze erkannt`;
+    const name = document.createElement('span');
+    name.className = 'filename';
+    name.textContent = f.name;
+    const actions = document.createElement('span');
+    actions.className = 'fileActions';
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Entfernen';
+    removeBtn.onclick = () => {
+      uploadedFiles.splice(idx, 1);
+      // Die zu dieser Datei gehörenden Einsätze lassen sich im flachen
+      // Modell nicht mehr zuordnen (keine Datei-Referenz je Einsatz) —
+      // stattdessen wird die gesamte Übersicht neu aus den verbleibenden
+      // Dateien aufgebaut, manuell hinzugefügte Einsätze bleiben erhalten.
+      rebuildFromRemainingFiles();
+    };
+    actions.appendChild(removeBtn);
+    li.appendChild(badge);
+    li.appendChild(name);
+    li.appendChild(actions);
+    fileListEl.appendChild(li);
+    if (f.error) {
+      const err = document.createElement('div');
+      err.style.color = '#c0392b';
+      err.style.fontSize = '.8rem';
+      err.style.flexBasis = '100%';
+      err.textContent = 'Konnte nicht gelesen werden: ' + f.error;
+      li.appendChild(err);
+    }
+  });
+}
+
+async function rebuildFromRemainingFiles() {
+  // Hinweis: Da hochgeladene Dateien nicht als Blob zwischengespeichert
+  // werden (nur Name/Anzahl), kann beim Entfernen einer Datei nicht neu aus
+  // ihr geparst werden — bereits erzeugte, editierbare Einsätze bleiben
+  // grundsätzlich erhalten und werden nur bei "Zurücksetzen" komplett
+  // gelöscht. Ein Entfernen aus der Dateiliste dient hier nur der
+  // Übersicht, nicht dem Zurücknehmen der geparsten Daten.
+  render();
+}
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Wirklich alles zurücksetzen? Alle Einsätze und Änderungen gehen verloren.')) return;
+  uploadedFiles = [];
+  einsaetze = [];
+  render();
+});
+
+document.getElementById('addEinsatzBtn').addEventListener('click', () => {
+  einsaetze.push({
+    id: uid(),
+    weekday: einsaetze.length ? (einsaetze[einsaetze.length - 1].weekday || '') : '',
+    anlass: 'Neuer Einsatz',
+    revierbereich: '',
+    fuehrung: '',
+    zeitraum: '',
+    kraefte: [],
+    hidden: false,
+    sortKey: Infinity,
+    source: 'manual',
+  });
+  render();
+  statusMsg.textContent = 'Einsatz hinzugefügt — bitte Felder ausfüllen.';
+});
+
+document.getElementById('showAllBtn').addEventListener('click', () => {
+  einsaetze.forEach(e => { e.hidden = false; });
+  render();
+});
+
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+/* ---------------------------------------------------------------------- */
+/* Rendering                                                                */
+/* ---------------------------------------------------------------------- */
+function render() {
+  renderFileList();
+
+  if (!einsaetze.length) {
+    resultSection.style.display = 'none';
+    return;
+  }
+  resultSection.style.display = '';
+
+  // Nach Wochentag (chronologisch nach Datum, falls vorhanden — sonst nach
+  // Reihenfolge des ersten Auftretens) gruppieren, innerhalb eines Tages
+  // nach frühester erkannter Uhrzeit sortieren.
+  const groups = new Map();
+  const groupOrderKey = new Map();
+  einsaetze.forEach((e, idx) => {
+    const key = e.weekday || '(ohne Datum)';
+    if (!groups.has(key)) {
+      groups.set(key, []);
+      const d = weekdayDate(e.weekday);
+      groupOrderKey.set(key, d ? d.getTime() : (1e15 + idx));
+    }
+    groups.get(key).push(e);
+  });
+  const sortedKeys = [...groups.keys()].sort((a, b) => groupOrderKey.get(a) - groupOrderKey.get(b));
+
+  resultArea.innerHTML = '';
+  let anyVisible = false;
+  for (const key of sortedKeys) {
+    const list = groups.get(key).slice().sort((a, b) => (a.sortKey === Infinity ? 1e9 : a.sortKey) - (b.sortKey === Infinity ? 1e9 : b.sortKey));
+    const h2 = document.createElement('h2');
+    h2.className = 'weekday';
+    h2.textContent = key;
+    resultArea.appendChild(h2);
+    for (const e of list) {
+      resultArea.appendChild(renderEinsatzCard(e));
+      if (!e.hidden) anyVisible = true;
+    }
+  }
+  emptyHint.style.display = anyVisible || einsaetze.length ? 'none' : '';
+}
+
+function renderEinsatzCard(e) {
+  const card = document.createElement('div');
+  card.className = 'einsatz' + (e.hidden ? ' hidden' : '');
+
+  const head = document.createElement('div');
+  head.className = 'einsatzHead';
+
+  const toggle = document.createElement('span');
+  toggle.className = 'toggleHide';
+  toggle.title = e.hidden ? 'Einsatz wieder einblenden' : 'Einsatz ausblenden (auch im Ausdruck)';
+  toggle.textContent = e.hidden ? '🚫' : '👁';
+  toggle.addEventListener('click', () => { e.hidden = !e.hidden; render(); });
+  head.appendChild(toggle);
+
+  const anlass = document.createElement('div');
+  anlass.className = 'anlass';
+  anlass.contentEditable = 'true';
+  anlass.textContent = e.anlass;
+  anlass.addEventListener('input', () => { e.anlass = anlass.textContent; });
+  head.appendChild(anlass);
+
+  const actions = document.createElement('div');
+  actions.className = 'cardActions';
+  const delBtn = document.createElement('button');
+  delBtn.textContent = '🗑 Löschen';
+  delBtn.addEventListener('click', () => {
+    if (!confirm('Diesen Einsatz endgültig löschen?')) return;
+    einsaetze = einsaetze.filter(x => x.id !== e.id);
+    render();
+  });
+  actions.appendChild(delBtn);
+  head.appendChild(actions);
+
+  card.appendChild(head);
+
+  const body = document.createElement('div');
+  body.className = 'einsatzBody';
+
+  if (e.phase) {
+    const ph = document.createElement('div');
+    ph.className = 'phaseHint';
+    ph.textContent = e.phase;
+    body.appendChild(ph);
+  }
+
+  const metaRow = document.createElement('div');
+  metaRow.className = 'metaRow';
+  metaRow.appendChild(makeMetaField('Revierbereich', e, 'revierbereich', false));
+  metaRow.appendChild(makeMetaField('Führung (Org-Einheit)', e, 'fuehrung', false));
+  metaRow.appendChild(makeMetaField('Einsatzzeitraum', e, 'zeitraum', true));
+  body.appendChild(metaRow);
+
+  const kraefteWrap = document.createElement('div');
+  kraefteWrap.className = 'kraefte';
+  const label = document.createElement('div');
+  label.className = 'kraefteLabel';
+  label.textContent = 'Einsatzkräfte nach Organisation';
+  kraefteWrap.appendChild(label);
+
+  for (const grp of e.kraefte) {
+    kraefteWrap.appendChild(renderOrgGroup(e, grp));
+  }
+  const addOrgBtn = document.createElement('button');
+  addOrgBtn.className = 'addOrgBtn';
+  addOrgBtn.textContent = '+ Organisation hinzufügen';
+  addOrgBtn.addEventListener('click', () => {
+    e.kraefte.push({ id: uid(), orgEh: '', typen: [{ id: uid(), typ: 'EK', anzahl: 1 }] });
+    render();
+  });
+  kraefteWrap.appendChild(addOrgBtn);
+  body.appendChild(kraefteWrap);
+
+  card.appendChild(body);
+  return card;
+}
+
+function makeMetaField(labelText, e, key, isZeitraum) {
+  const field = document.createElement('div');
+  field.className = 'metaField';
+  const label = document.createElement('label');
+  label.textContent = labelText;
+  field.appendChild(label);
+  const val = document.createElement('div');
+  val.className = 'val' + (isZeitraum ? ' zeitraum' : '') + (!e[key] ? ' missing' : '');
+  val.contentEditable = 'true';
+  val.textContent = e[key] || '';
+  val.addEventListener('input', () => {
+    e[key] = val.textContent;
+    val.classList.toggle('missing', !val.textContent.trim());
+  });
+  field.appendChild(val);
+  return field;
+}
+
+function renderOrgGroup(e, grp) {
+  const row = document.createElement('div');
+  row.className = 'orgGroup';
+
+  const orgName = document.createElement('span');
+  orgName.className = 'orgName';
+  orgName.contentEditable = 'true';
+  orgName.textContent = grp.orgEh;
+  orgName.addEventListener('input', () => { grp.orgEh = orgName.textContent; });
+  row.appendChild(orgName);
+  const colon = document.createElement('span');
+  colon.textContent = ':';
+  colon.style.color = 'var(--muted)';
+  row.appendChild(colon);
+
+  const typList = document.createElement('span');
+  typList.className = 'typList';
+  for (const t of grp.typen) {
+    typList.appendChild(renderTypItem(e, grp, t));
+  }
+  row.appendChild(typList);
+
+  const addTyp = document.createElement('button');
+  addTyp.className = 'addTyp';
+  addTyp.title = 'Weiteren Kräfte-Typ in dieser Organisation hinzufügen';
+  addTyp.textContent = '+';
+  addTyp.addEventListener('click', () => {
+    grp.typen.push({ id: uid(), typ: 'EK', anzahl: 1 });
+    render();
+  });
+  row.appendChild(addTyp);
+
+  const rmOrg = document.createElement('button');
+  rmOrg.className = 'rmOrg';
+  rmOrg.title = 'Diese Organisation entfernen';
+  rmOrg.textContent = '🗑';
+  rmOrg.addEventListener('click', () => {
+    e.kraefte = e.kraefte.filter(g => g.id !== grp.id);
+    render();
+  });
+  row.appendChild(rmOrg);
+
+  return row;
+}
+
+function renderTypItem(e, grp, t) {
+  const item = document.createElement('span');
+  item.className = 'typItem';
+
+  const anzahl = document.createElement('span');
+  anzahl.className = 'anzahl';
+  anzahl.contentEditable = 'true';
+  anzahl.textContent = String(t.anzahl);
+  anzahl.addEventListener('input', () => {
+    const n = parseInt(anzahl.textContent.replace(/\D/g, ''), 10);
+    t.anzahl = Number.isFinite(n) ? n : 0;
+  });
+  item.appendChild(anzahl);
+
+  const x = document.createElement('span');
+  x.textContent = '×';
+  x.style.color = 'var(--muted)';
+  item.appendChild(x);
+
+  const typ = document.createElement('span');
+  typ.className = 'typ';
+  typ.contentEditable = 'true';
+  typ.textContent = t.typ;
+  typ.addEventListener('input', () => { t.typ = typ.textContent; });
+  item.appendChild(typ);
+
+  const rm = document.createElement('button');
+  rm.className = 'rmTyp';
+  rm.title = 'Diesen Kräfte-Typ entfernen';
+  rm.textContent = '×';
+  rm.addEventListener('click', () => {
+    grp.typen = grp.typen.filter(x => x.id !== t.id);
+    if (!grp.typen.length) e.kraefte = e.kraefte.filter(g => g.id !== grp.id);
+    render();
+  });
+  item.appendChild(rm);
+
+  return item;
+}
+</script>
+</body>
+</html>
