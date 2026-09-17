@@ -186,9 +186,14 @@
   .typItem .anzahl { width: 2.1em; outline: none; text-align: right; border-radius: 3px; }
   .typItem .anzahl:focus, .typItem .typ:focus, .typItem .zeit:focus { background: var(--own); }
   .typItem .typ { outline: none; border-radius: 3px; min-width: 2em; }
-  .typItem .zeitParen { color: var(--muted); }
-  .typItem .zeit { outline: none; border-radius: 3px; min-width: 1em; font-size: .78em; color: var(--muted); }
-  .typItem .zeit:empty::before { content: attr(data-placeholder); color: var(--muted); opacity: .55; font-style: italic; }
+  .zeitWrap { color: var(--muted); font-size: .78em; }
+  .zeitWrap.groupZeit { font-size: .82em; font-weight: 600; }
+  .typItem .zeit { outline: none; border-radius: 3px; min-width: 1em; }
+  .typItem .zeit:empty::before { content: "Zeit"; opacity: .55; font-style: italic; }
+  .typItem .notiz {
+    outline: none; border-radius: 3px; font-size: .78em; font-style: italic; color: var(--accent-dark);
+    background: var(--own); padding: 0 .3rem; margin-left: .1rem;
+  }
   .typItem .rmTyp { border: none; background: none; color: var(--muted); cursor: pointer; font-size: .8rem; padding: 0 .15rem; }
   .typItem .rmTyp:hover { color: #b33; }
   .orgGroup .rmOrg, .orgGroup .addTyp {
@@ -202,11 +207,19 @@
   }
   .addOrgBtn:hover { border-color: var(--accent); }
 
+  .dragHandle {
+    cursor: grab; color: var(--muted); font-size: .95rem; flex: 0 0 auto; user-select: none;
+    padding: 0 .1rem;
+  }
+  .dragHandle:active { cursor: grabbing; }
+  .orgGroup.dragging, .abschnittRow.dragging { opacity: .4; }
+  .orgGroup.dragOver, .abschnittRow.dragOver { outline: 2px dashed var(--accent); outline-offset: 1px; }
+
   .abschnittRow {
     display: flex; align-items: baseline; gap: .5rem; margin: .6rem 0 .35rem; padding-bottom: .2rem;
     border-bottom: 2px solid var(--accent); justify-content: space-between;
   }
-  .abschnittName { font-weight: 700; font-size: .88rem; color: var(--accent-dark); outline: none; border-radius: 4px; padding: 0 .2rem; }
+  .abschnittName { font-weight: 700; font-size: .88rem; color: var(--accent-dark); outline: none; border-radius: 4px; padding: 0 .2rem; flex: 1; }
   .abschnittName:focus { background: var(--extracted); }
 
   .bemerkungWrap { margin: .55rem 0 0 1.6rem; }
@@ -239,32 +252,40 @@
   /* Druckansicht                                                      */
   /* ---------------------------------------------------------------- */
   @media print {
+    :root {
+      --extracted: #cdeedd;
+      --central-bg: #ffe6a3;
+    }
     body { background: #fff; padding: 0; font-size: 9.5px; }
     main { max-width: none; }
     h1, p.sub, .notice, #uploadSection, .toolbar, .legend, .fileActions,
     .cardActions, .toggleHide, .rmOrg, .rmTyp, .addTyp, .addOrgBtn, .phaseHint,
-    #resultHeading, footer { display: none !important; }
+    .dragHandle, #resultHeading, footer { display: none !important; }
     section { border: none; padding: 0; margin: 0; box-shadow: none; background: transparent; }
 
     #printHeader {
-      display: block; border-bottom: 2.5px solid var(--accent-dark); padding-bottom: 6px; margin-bottom: 10px;
+      display: block; margin-bottom: 12px; padding-bottom: 7px;
+      border-bottom: 3px solid var(--accent-dark); position: relative;
+    }
+    #printHeader::after {
+      content: ""; display: block; height: 1px; margin-top: 4px; background: var(--accent);
     }
     #printHeader h1 {
-      display: block !important; font-size: 16px; margin: 0 0 3px; color: #000;
+      display: block !important; font-size: 17px; margin: 0 0 4px; color: var(--accent-dark); font-weight: 800;
     }
-    #printHeader .printMeta { display: flex; gap: 1.2rem; font-size: 8.5px; color: #444; }
+    #printHeader .printMeta { display: flex; gap: 1.4rem; font-size: 9px; color: #333; font-weight: 600; }
 
     h2.weekday {
       font-size: 11.5px; margin: 10px 0 4px; padding: 3px 7px; border-radius: 4px;
       background: var(--extracted); color: var(--accent-dark); break-after: avoid;
     }
     .einsatz {
-      border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 5px;
-      margin-bottom: 4px; break-inside: avoid; box-shadow: none;
+      border: 1.4px solid var(--accent); border-left: 5px solid var(--accent-dark); border-radius: 5px;
+      margin-bottom: 5px; break-inside: avoid; box-shadow: none;
     }
-    .einsatz.central { border-left-color: var(--central-border); }
+    .einsatz.central { border-color: var(--central-border); border-left-color: #b8790c; }
     .einsatz.hidden { display: none; }
-    .einsatzHead { gap: .3rem; padding: 3px 7px; }
+    .einsatzHead { gap: .3rem; padding: 4px 7px; border-bottom: 1px solid rgba(0,0,0,.12); }
     .einsatzBody { padding: 2px 7px 5px; }
     .anlass { font-size: 10.5px; padding: 0; color: #000; }
     .metaRow { margin: 2px 0 2px .2rem; gap: .7rem; font-size: 8.5px; }
@@ -284,7 +305,10 @@
     .typItem { background: rgba(255,255,255,.55); padding: 0 3px; }
     .typItem .anzahl, .typItem .typ, .typItem .zeit { padding: 0; width: auto; }
     .typItem .zeit { font-size: 7.5px; }
+    .typItem .notiz { font-size: 7px; padding: 0 3px; }
     .zeitWrap:has(.zeit:empty) { display: none; }
+    .zeitWrap.groupZeit { font-size: 7.5px; font-weight: 700; }
+    .zeitWrap.groupZeit .zeit { font-size: 7.5px; }
     .bemerkungWrap { margin: 2px 0 0 .2rem; }
     .bemerkungWrap label { font-size: 7px; }
     .bemerkungWrap .val { font-size: 8.5px; }
@@ -533,6 +557,19 @@ function extractStartMinutes(ezmz) {
   return null;
 }
 
+// Besonderheit nur für Einsätze "Rahmenbefehl 02": Kräfte der IZD, deren
+// Schicht zwischen 06:00 und 10:00 Uhr beginnt, gelten als Tagpräsenz,
+// solche die ab ca. 15:00 Uhr beginnen als Nachtpräsenz — automatisch
+// vorbefüllt, bleibt aber wie jedes andere Feld editierbar/löschbar.
+function praesenzNotiz(orgEh, zeit) {
+  if (!/IZD/i.test(orgEh || '')) return '';
+  const start = extractStartMinutes(zeit || '');
+  if (start == null) return '';
+  if (start >= 6 * 60 && start < 10 * 60) return 'Präsenz-Tag';
+  if (start >= 15 * 60) return 'Präsenz-Nacht';
+  return '';
+}
+
 function weekdayDate(weekdayLabel) {
   const m = weekdayLabel && weekdayLabel.match(WEEKDAY_RE);
   if (!m) return null;
@@ -567,11 +604,15 @@ function buildEinsatzRecord(raw) {
     if (!typMap.has(key)) typMap.set(key, { typ: r.typ, zeit: r.ezmz, anzahl: 0 });
     typMap.get(key).anzahl += r.anzahl;
   }
+  const istRahmenbefehl02 = /Rahmenbefehl\s*02/i.test(raw.title || '');
   const kraefte = [...byOrg.entries()].map(([orgEh, typMap]) => ({
     id: uid(),
     kind: 'org',
     orgEh,
-    typen: [...typMap.values()].map(v => ({ id: uid(), typ: v.typ, anzahl: v.anzahl, zeit: v.zeit })),
+    typen: [...typMap.values()].map(v => ({
+      id: uid(), typ: v.typ, anzahl: v.anzahl, zeit: v.zeit,
+      notiz: istRahmenbefehl02 ? praesenzNotiz(orgEh, v.zeit) : '',
+    })),
   }));
 
   return {
@@ -975,7 +1016,7 @@ function renderEinsatzCard(e, effHidden) {
   addOrgBtn.className = 'addOrgBtn';
   addOrgBtn.textContent = '+ Organisation hinzufügen';
   addOrgBtn.addEventListener('click', () => {
-    e.kraefte.push({ id: uid(), kind: 'org', orgEh: '', typen: [{ id: uid(), typ: 'EK', anzahl: 1, zeit: '' }] });
+    e.kraefte.push({ id: uid(), kind: 'org', orgEh: '', typen: [{ id: uid(), typ: 'EK', anzahl: 1, zeit: '', notiz: '' }] });
     render();
   });
   kraefteBtnRow.appendChild(addOrgBtn);
@@ -1026,9 +1067,55 @@ function makeMetaField(labelText, e, key, isMultiline) {
   return field;
 }
 
+/* ---------------------------------------------------------------------- */
+/* Drag & Drop: Einsatzkräfte-Zeilen (Organisationen/Abschnitte) innerhalb  */
+/* eines Einsatzes umsortieren, damit sich Organisationen per Ziehen unter  */
+/* einen Einsatzabschnitt einordnen lassen.                                */
+/* ---------------------------------------------------------------------- */
+let dragState = null; // { einsatzId, itemId }
+function attachDragHandlers(row, handle, e, item) {
+  handle.draggable = true;
+  handle.addEventListener('dragstart', ev => {
+    dragState = { einsatzId: e.id, itemId: item.id };
+    ev.dataTransfer.effectAllowed = 'move';
+    ev.dataTransfer.setData('text/plain', String(item.id));
+    row.classList.add('dragging');
+  });
+  handle.addEventListener('dragend', () => {
+    row.classList.remove('dragging');
+    document.querySelectorAll('.dragOver').forEach(el => el.classList.remove('dragOver'));
+    dragState = null;
+  });
+  row.addEventListener('dragover', ev => {
+    if (!dragState || dragState.einsatzId !== e.id || dragState.itemId === item.id) return;
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'move';
+    row.classList.add('dragOver');
+  });
+  row.addEventListener('dragleave', () => row.classList.remove('dragOver'));
+  row.addEventListener('drop', ev => {
+    ev.preventDefault();
+    row.classList.remove('dragOver');
+    if (!dragState || dragState.einsatzId !== e.id || dragState.itemId === item.id) return;
+    const fromIdx = e.kraefte.findIndex(x => x.id === dragState.itemId);
+    if (fromIdx === -1) return;
+    const [moved] = e.kraefte.splice(fromIdx, 1);
+    const targetIdx = e.kraefte.findIndex(x => x.id === item.id);
+    e.kraefte.splice(targetIdx + 1, 0, moved);
+    dragState = null;
+    render();
+  });
+}
+
 function renderAbschnitt(e, abschnitt) {
   const row = document.createElement('div');
   row.className = 'abschnittRow';
+
+  const handle = document.createElement('span');
+  handle.className = 'dragHandle';
+  handle.title = 'Ziehen zum Umsortieren';
+  handle.textContent = '⠿';
+  row.appendChild(handle);
 
   const name = document.createElement('span');
   name.className = 'abschnittName';
@@ -1047,12 +1134,19 @@ function renderAbschnitt(e, abschnitt) {
   });
   row.appendChild(rm);
 
+  attachDragHandlers(row, handle, e, abschnitt);
   return row;
 }
 
 function renderOrgGroup(e, grp) {
   const row = document.createElement('div');
   row.className = 'orgGroup ' + orgColorClass(grp.orgEh);
+
+  const handle = document.createElement('span');
+  handle.className = 'dragHandle';
+  handle.title = 'Ziehen, um diese Organisation z.B. unter einen Einsatzabschnitt zu verschieben';
+  handle.textContent = '⠿';
+  row.appendChild(handle);
 
   const orgName = document.createElement('span');
   orgName.className = 'orgName';
@@ -1065,19 +1159,42 @@ function renderOrgGroup(e, grp) {
   colon.style.color = 'var(--muted)';
   row.appendChild(colon);
 
+  // Wenn alle Kräfte-Typen dieser Organisation dieselbe (nicht leere) Zeit
+  // haben, wird sie nur EINMAL am Ende der Zeile gezeigt statt bei jedem
+  // Typ wiederholt — bei unterschiedlichen Zeiten bleibt es bei der Angabe
+  // je Kraft-Typ.
+  const zeiten = grp.typen.map(t => (t.zeit || '').trim());
+  const commonZeit = zeiten.length && zeiten.every(z => z && z === zeiten[0]) ? zeiten[0] : null;
+
   const typList = document.createElement('span');
   typList.className = 'typList';
   for (const t of grp.typen) {
-    typList.appendChild(renderTypItem(e, grp, t));
+    typList.appendChild(renderTypItem(e, grp, t, commonZeit != null));
   }
   row.appendChild(typList);
+
+  if (commonZeit != null) {
+    const groupZeitWrap = document.createElement('span');
+    groupZeitWrap.className = 'zeitWrap groupZeit';
+    groupZeitWrap.appendChild(document.createTextNode('('));
+    const groupZeit = document.createElement('span');
+    groupZeit.className = 'zeit';
+    groupZeit.contentEditable = 'true';
+    groupZeit.textContent = commonZeit;
+    groupZeit.addEventListener('input', () => {
+      for (const t of grp.typen) t.zeit = groupZeit.textContent;
+    });
+    groupZeitWrap.appendChild(groupZeit);
+    groupZeitWrap.appendChild(document.createTextNode(')'));
+    row.appendChild(groupZeitWrap);
+  }
 
   const addTyp = document.createElement('button');
   addTyp.className = 'addTyp';
   addTyp.title = 'Weiteren Kräfte-Typ in dieser Organisation hinzufügen';
   addTyp.textContent = '+';
   addTyp.addEventListener('click', () => {
-    grp.typen.push({ id: uid(), typ: 'EK', anzahl: 1, zeit: '' });
+    grp.typen.push({ id: uid(), typ: 'EK', anzahl: 1, zeit: '', notiz: '' });
     render();
   });
   row.appendChild(addTyp);
@@ -1092,10 +1209,11 @@ function renderOrgGroup(e, grp) {
   });
   row.appendChild(rmOrg);
 
+  attachDragHandlers(row, handle, e, grp);
   return row;
 }
 
-function renderTypItem(e, grp, t) {
+function renderTypItem(e, grp, t, hideZeit) {
   const item = document.createElement('span');
   item.className = 'typItem';
 
@@ -1121,24 +1239,35 @@ function renderTypItem(e, grp, t) {
   typ.addEventListener('input', () => { t.typ = typ.textContent; });
   item.appendChild(typ);
 
-  const zeitWrap = document.createElement('span');
-  zeitWrap.className = 'zeitWrap';
-  const zeitOpen = document.createElement('span');
-  zeitOpen.className = 'zeitParen';
-  zeitOpen.textContent = '(';
-  zeitWrap.appendChild(zeitOpen);
-  const zeit = document.createElement('span');
-  zeit.className = 'zeit';
-  zeit.contentEditable = 'true';
-  zeit.textContent = t.zeit || '';
-  zeit.dataset.placeholder = 'Zeit';
-  zeit.addEventListener('input', () => { t.zeit = zeit.textContent; });
-  zeitWrap.appendChild(zeit);
-  const zeitClose = document.createElement('span');
-  zeitClose.className = 'zeitParen';
-  zeitClose.textContent = ')';
-  zeitWrap.appendChild(zeitClose);
-  item.appendChild(zeitWrap);
+  // Zeit je Kraft-Typ nur zeigen, wenn sie sich innerhalb der Organisation
+  // unterscheidet — sonst zeigt renderOrgGroup sie einmal gesammelt an.
+  if (!hideZeit) {
+    const zeitWrap = document.createElement('span');
+    zeitWrap.className = 'zeitWrap';
+    zeitWrap.appendChild(document.createTextNode('('));
+    const zeit = document.createElement('span');
+    zeit.className = 'zeit';
+    zeit.contentEditable = 'true';
+    zeit.textContent = t.zeit || '';
+    zeit.dataset.placeholder = 'Zeit';
+    zeit.addEventListener('input', () => { t.zeit = zeit.textContent; });
+    zeitWrap.appendChild(zeit);
+    zeitWrap.appendChild(document.createTextNode(')'));
+    item.appendChild(zeitWrap);
+  }
+
+  // Nur anzeigen, wenn tatsächlich eine Notiz vorhanden ist (z.B.
+  // automatisch bei Rahmenbefehl 02 / IZD vorbefüllt) — sonst unnötige
+  // Unruhe bei den vielen "normalen" Kräfte-Einträgen ohne Notiz.
+  if (t.notiz) {
+    const notiz = document.createElement('span');
+    notiz.className = 'notiz';
+    notiz.contentEditable = 'true';
+    notiz.textContent = t.notiz;
+    notiz.title = 'Notiz zu dieser Kraft — leeren, um sie zu entfernen';
+    notiz.addEventListener('input', () => { t.notiz = notiz.textContent; });
+    item.appendChild(notiz);
+  }
 
   const rm = document.createElement('button');
   rm.className = 'rmTyp';
