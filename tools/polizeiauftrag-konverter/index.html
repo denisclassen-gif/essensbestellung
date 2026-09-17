@@ -273,11 +273,18 @@
     </label>
   </div>
   <div class="toolbar">
-    <button class="primary" id="downloadBatBtn">Windows-Skript (.bat) herunterladen</button>
-    <button id="downloadShBtn">macOS/Linux-Skript (.sh) herunterladen</button>
+    <button class="primary" id="createFoldersBtn">Ordner jetzt direkt hier erstellen</button>
     <span class="status" id="folderStatus"></span>
   </div>
-  <p class="hint">Skript auf das Ziellaufwerk bzw. in den Zielordner kopieren und dort per Doppelklick ausführen (Windows: <code>.bat</code>; macOS/Linux: <code>.sh</code> ggf. vorher mit <code>chmod +x</code> ausführbar machen). Bereits vorhandene Ordner werden übersprungen, es wird nichts überschrieben oder gelöscht. Namen mit Zeichen, die in Ordnernamen nicht erlaubt sind (<code>\ / : * ? " &lt; &gt; |</code>), werden automatisch durch <code>-</code> ersetzt.</p>
+  <p class="hint" id="createFoldersHint">Öffnet einen normalen Ordner-Auswahl-Dialog des Browsers (wie „Speichern unter“) — nach Bestätigung legt der Browser die Ordner direkt dort an. Es wird dabei <strong>nichts heruntergeladen oder ausgeführt</strong>, daher funktioniert das auch, wenn Skript-Ausführung (z.&nbsp;B. durch HP Wolf/Sure Click) gesperrt ist. Bereits vorhandene Ordner werden übersprungen, es wird nichts überschrieben oder gelöscht. Funktioniert in aktuellem Chrome/Edge; falls der Button unten ausgegraut ist, bitte stattdessen eines der Skripte verwenden.</p>
+  <details>
+    <summary class="hint" style="cursor:pointer;">Alternative: Skript zum Ausführen herunterladen (falls die direkte Erstellung oben nicht funktioniert)</summary>
+    <div class="toolbar" style="margin-top:.75rem;">
+      <button id="downloadBatBtn">Windows-Skript (.bat) herunterladen</button>
+      <button id="downloadShBtn">macOS/Linux-Skript (.sh) herunterladen</button>
+    </div>
+    <p class="hint">Skript auf das Ziellaufwerk bzw. in den Zielordner kopieren und dort per Doppelklick ausführen (Windows: <code>.bat</code>; macOS/Linux: <code>.sh</code> ggf. vorher mit <code>chmod +x</code> ausführbar machen). Bereits vorhandene Ordner werden übersprungen, es wird nichts überschrieben oder gelöscht. Namen mit Zeichen, die in Ordnernamen nicht erlaubt sind (<code>\ / : * ? " &lt; &gt; |</code>), werden automatisch durch <code>-</code> ersetzt.</p>
+  </details>
   <div class="tablewrap">
     <table id="folderTable">
       <thead><tr><th id="folderColHeader">Excel-Zeile</th><th>Ordnername</th></tr></thead>
@@ -1885,6 +1892,48 @@ document.getElementById('downloadShBtn').addEventListener('click', () => {
   if (!currentFolderRows.length) { folderStatus.textContent = 'Keine Zeilen im gewählten Bereich'; return; }
   downloadTextFile('ordner_erstellen.sh', generateShScript(currentFolderRows, folderTargetPathInput.value.trim()));
   folderStatus.textContent = `${currentFolderRows.length} Ordner im .sh-Skript vorbereitet`;
+});
+
+/* ---------------------------------------------------------------------- */
+/* Ordner direkt anlegen (File System Access API) — ohne Skript-Download/  */
+/* -Ausführung, daher auch nutzbar wenn Skript-Ausführung durch            */
+/* Endpoint-Schutz (z.B. HP Wolf/Sure Click) gesperrt ist.                 */
+/* ---------------------------------------------------------------------- */
+const createFoldersBtn = document.getElementById('createFoldersBtn');
+const createFoldersHint = document.getElementById('createFoldersHint');
+if (!window.showDirectoryPicker) {
+  createFoldersBtn.disabled = true;
+  createFoldersBtn.title = 'Dieser Browser unterstützt die direkte Ordner-Erstellung nicht (benötigt aktuelles Chrome/Edge). Bitte eines der Skripte unten verwenden.';
+  createFoldersHint.innerHTML = '<strong>Dieser Browser unterstützt die direkte Ordner-Erstellung nicht</strong> (benötigt aktuelles Chrome/Edge). Bitte stattdessen eines der Skripte unten verwenden.';
+}
+createFoldersBtn.addEventListener('click', async () => {
+  if (!currentFolderRows.length) { folderStatus.textContent = 'Keine Zeilen im gewählten Bereich'; return; }
+  let dirHandle;
+  try {
+    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+  } catch (e) {
+    if (e.name === 'AbortError') return; // Nutzer hat den Dialog abgebrochen
+    folderStatus.textContent = 'Zugriff auf den Ordner wurde verweigert oder ist nicht möglich: ' + (e.message || e.name);
+    return;
+  }
+  folderStatus.textContent = 'Ordner werden angelegt …';
+  let created = 0, existed = 0, failed = 0;
+  for (const row of currentFolderRows) {
+    const name = buildFolderName(row);
+    try {
+      // Vorab prüfen (ohne anzulegen), ob der Ordner schon existiert, nur
+      // für eine korrekte Rückmeldung — angelegt wird über create:true so
+      // oder so nichts überschrieben, falls der Ordner schon da ist.
+      let alreadyThere = true;
+      try { await dirHandle.getDirectoryHandle(name, { create: false }); }
+      catch (e) { alreadyThere = false; }
+      await dirHandle.getDirectoryHandle(name, { create: true });
+      if (alreadyThere) existed++; else created++;
+    } catch (e) {
+      failed++;
+    }
+  }
+  folderStatus.textContent = `${created} Ordner neu angelegt, ${existed} bereits vorhanden übersprungen` + (failed ? `, ${failed} fehlgeschlagen` : '') + '.';
 });
 
 function renderTable(rows) {
