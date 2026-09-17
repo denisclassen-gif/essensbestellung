@@ -259,13 +259,13 @@
 </section>
 
 <section id="folderSection" style="display:none;">
-  <h2>3. Leere Ordner aus der Ausländerstatistik erzeugen</h2>
-  <p class="hint">Erkannt: die hochgeladene Ausländerstatistik-Excel selbst (nicht die Charter-Liste). Zeilenbereich wählen (Excel-Zeilennummern, wie in Excel angezeigt) — es wird pro Zeile ein Ordner nach dem Muster <code>P_&lt;Spalte J&gt;_ZAB_&lt;Spalte H&gt;_&lt;Spalte N&gt;_&lt;Spalte A&gt;</code> vorgeschlagen. Browser können nicht direkt auf ein Laufwerk zugreifen — stattdessen wird ein Skript erzeugt, das die Ordner beim Ausführen anlegt.</p>
+  <h2 id="folderHeading">3. Leere Ordner erzeugen</h2>
+  <p class="hint" id="folderIntro"></p>
   <div class="settingsRow">
-    <label>Von Zeile (Excel-Zeilennummer)
+    <label id="folderFromLabel">Von Zeile (Excel-Zeilennummer)
       <input type="number" id="folderRowFrom" min="1" step="1">
     </label>
-    <label>Bis Zeile (Excel-Zeilennummer)
+    <label id="folderToLabel">Bis Zeile (Excel-Zeilennummer)
       <input type="number" id="folderRowTo" min="1" step="1">
     </label>
     <label>Zielpfad (optional, z.&nbsp;B. <code>Z:\Fälle\2026</code>)
@@ -280,7 +280,7 @@
   <p class="hint">Skript auf das Ziellaufwerk bzw. in den Zielordner kopieren und dort per Doppelklick ausführen (Windows: <code>.bat</code>; macOS/Linux: <code>.sh</code> ggf. vorher mit <code>chmod +x</code> ausführbar machen). Bereits vorhandene Ordner werden übersprungen, es wird nichts überschrieben oder gelöscht. Namen mit Zeichen, die in Ordnernamen nicht erlaubt sind (<code>\ / : * ? " &lt; &gt; |</code>), werden automatisch durch <code>-</code> ersetzt.</p>
   <div class="tablewrap">
     <table id="folderTable">
-      <thead><tr><th>Excel-Zeile</th><th>Ordnername</th></tr></thead>
+      <thead><tr><th id="folderColHeader">Excel-Zeile</th><th>Ordnername</th></tr></thead>
       <tbody id="folderRows"></tbody>
     </table>
   </div>
@@ -1473,6 +1473,11 @@ const ownTelefonInput = document.getElementById('ownTelefon');
 const visSaxModal = document.getElementById('visSaxModal');
 const visSaxInput = document.getElementById('visSaxInput');
 const folderSection = document.getElementById('folderSection');
+const folderHeading = document.getElementById('folderHeading');
+const folderIntro = document.getElementById('folderIntro');
+const folderFromLabel = document.getElementById('folderFromLabel');
+const folderToLabel = document.getElementById('folderToLabel');
+const folderColHeader = document.getElementById('folderColHeader');
 const folderRowFromInput = document.getElementById('folderRowFrom');
 const folderRowToInput = document.getElementById('folderRowTo');
 const folderTargetPathInput = document.getElementById('folderTargetPath');
@@ -1709,7 +1714,7 @@ function render() {
   const steuerungEntry = uploadedFiles.find(f => f.type === 'steuerung' && !f.error);
   const statistikEntry = uploadedFiles.find(f => f.type === 'statistik' && !f.error);
 
-  renderFolderSection(statistikEntry);
+  renderFolderSection(statistikEntry, charterEntries[0] || null);
 
   let rows = [];
   if (polizeiEntries.length) {
@@ -1744,10 +1749,18 @@ function render() {
 }
 
 /* ---------------------------------------------------------------------- */
-/* Ordner-Generator (aus der Ausländerstatistik selbst)                    */
+/* Ordner-Generator (aus der Ausländerstatistik ODER einer Charter-Liste)  */
 /* ---------------------------------------------------------------------- */
+/* Funktioniert wahlweise mit der großen Ausländerstatistik-Excel (dort ist
+   eine Zeilenbereichs-Auswahl per Excel-Zeilennummer nötig, da die Tabelle
+   tausende Zeilen haben kann) oder — falls keine Statistik, aber eine
+   Charter-Sammelliste hochgeladen wurde — direkt mit deren bereits erkannten
+   Personen (dort ist der Bereich schlicht die Position in der Liste). Bei
+   beiden hochgeladen hat die Statistik Vorrang (Ursprungsverhalten). */
 let currentFolderRows = [];
 let statistikActiveEntry = null;
+let charterActiveEntry = null;
+let folderSourceKind = null; // 'statistik' | 'charter' | null
 /* Manche Statistik-Tabellen haben zwischen Kopfzeile und den echten
    Datenzeilen noch eine Vorlagen-/Label-Zeile (z.B. "Vorlagen Auftrag") —
    für einen sinnvollen Default wird daher die erste Zeile mit tatsächlich
@@ -1766,24 +1779,67 @@ function findFirstDataExcelRow(sheetRows, headerInfo) {
   }
   return headerInfo.rowIndex + 2;
 }
-function renderFolderSection(statistikEntry) {
-  statistikActiveEntry = statistikEntry || null;
-  if (!statistikEntry) {
-    folderSection.style.display = 'none';
-    return;
+// Charter-Listen sind bereits vollständig geparst (siehe parseCharterliste)
+// und deutlich kürzer als die Master-Statistik — als "id"-Bestandteil des
+// Ordnernamens (sonst nur bei der Statistik über die fortlaufende Spalte A
+// vorhanden) wird hier der Familienname verwendet, das ergibt lesbarere,
+// eindeutigere Ordnernamen als ein leerer Platzhalter.
+function extractFolderRowsFromCharter(persons, indexFrom, indexTo) {
+  const results = [];
+  const from = Math.max(1, Math.min(indexFrom, indexTo));
+  const to = Math.max(indexFrom, indexTo);
+  for (let i = from; i <= to; i++) {
+    const p = persons[i - 1];
+    if (!p) continue;
+    results.push({
+      excelRow: i,
+      id: p.familienname || '',
+      zab: p.zab || '',
+      pNummer: p.lfd || '',
+      zustaendigkeit: p.zustaendigkeit || '',
+    });
   }
-  folderSection.style.display = '';
-  if (!folderRowFromInput.value && !folderRowToInput.value) {
-    const firstDataRow = findFirstDataExcelRow(statistikEntry.statistikRows, statistikEntry.statistikHeader);
-    folderRowFromInput.value = firstDataRow;
-    folderRowToInput.value = Math.min(firstDataRow + 9, statistikEntry.statistikRows.length);
+  return results;
+}
+function renderFolderSection(statistikEntry, charterEntry) {
+  statistikActiveEntry = statistikEntry || null;
+  charterActiveEntry = statistikEntry ? null : (charterEntry || null);
+  if (statistikActiveEntry) {
+    folderSourceKind = 'statistik';
+    folderSection.style.display = '';
+    folderHeading.textContent = '3. Leere Ordner aus der Ausländerstatistik erzeugen';
+    folderIntro.innerHTML = 'Erkannt: die hochgeladene Ausländerstatistik-Excel selbst (nicht die Charter-Liste). Zeilenbereich wählen (Excel-Zeilennummern, wie in Excel angezeigt) — es wird pro Zeile ein Ordner nach dem Muster <code>P_&lt;Spalte J&gt;_ZAB_&lt;Spalte H&gt;_&lt;Spalte N&gt;_&lt;Spalte A&gt;</code> vorgeschlagen. Browser können nicht direkt auf ein Laufwerk zugreifen — stattdessen wird ein Skript erzeugt, das die Ordner beim Ausführen anlegt.';
+    folderFromLabel.firstChild.textContent = 'Von Zeile (Excel-Zeilennummer) ';
+    folderToLabel.firstChild.textContent = 'Bis Zeile (Excel-Zeilennummer) ';
+    folderColHeader.textContent = 'Excel-Zeile';
+    if (!folderRowFromInput.value && !folderRowToInput.value) {
+      const firstDataRow = findFirstDataExcelRow(statistikEntry.statistikRows, statistikEntry.statistikHeader);
+      folderRowFromInput.value = firstDataRow;
+      folderRowToInput.value = Math.min(firstDataRow + 9, statistikEntry.statistikRows.length);
+    }
+  } else if (charterActiveEntry) {
+    folderSourceKind = 'charter';
+    folderSection.style.display = '';
+    folderHeading.textContent = '3. Leere Ordner aus der Charter-Liste erzeugen';
+    folderIntro.innerHTML = 'Erkannt: die hochgeladene Charter-Sammelliste. Bereich wählen (Position in der Liste, 1 = erste Person) — es wird pro Person ein Ordner nach dem Muster <code>P_&lt;lfd-Nr.&gt;_ZAB_&lt;ZAB-Nummer&gt;_&lt;Zuständigkeitsbereich&gt;_&lt;Familienname&gt;</code> vorgeschlagen. Browser können nicht direkt auf ein Laufwerk zugreifen — stattdessen wird ein Skript erzeugt, das die Ordner beim Ausführen anlegt.';
+    folderFromLabel.firstChild.textContent = 'Von Position in der Liste ';
+    folderToLabel.firstChild.textContent = 'Bis Position in der Liste ';
+    folderColHeader.textContent = 'Position';
+    if (!folderRowFromInput.value && !folderRowToInput.value) {
+      folderRowFromInput.value = 1;
+      folderRowToInput.value = charterActiveEntry.charter.length;
+    }
+  } else {
+    folderSection.style.display = 'none';
+    folderSourceKind = null;
+    return;
   }
   updateFolderPreview();
 }
 function updateFolderPreview() {
   folderRowsEl.innerHTML = '';
   currentFolderRows = [];
-  if (!statistikActiveEntry) return;
+  if (!folderSourceKind) return;
   const from = parseInt(folderRowFromInput.value, 10);
   const to = parseInt(folderRowToInput.value, 10);
   if (!Number.isFinite(from) || !Number.isFinite(to)) return;
@@ -1791,7 +1847,9 @@ function updateFolderPreview() {
     folderStatus.textContent = 'Bereich zu groß (max. 2000 Zeilen auf einmal)';
     return;
   }
-  currentFolderRows = extractFolderRows(statistikActiveEntry.statistikRows, statistikActiveEntry.statistikHeader, from, to);
+  currentFolderRows = folderSourceKind === 'statistik'
+    ? extractFolderRows(statistikActiveEntry.statistikRows, statistikActiveEntry.statistikHeader, from, to)
+    : extractFolderRowsFromCharter(charterActiveEntry.charter, from, to);
   for (const row of currentFolderRows) {
     const tr = document.createElement('tr');
     const tdRow = document.createElement('td');
