@@ -5,37 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PES-Einsatzübersicht</title>
 <style>
+  /* Bewusst immer helles, freundliches Farbschema — kein automatischer
+     Dunkelmodus, wie gewünscht. */
   :root {
-    --bg: #f7f7f5;
+    --bg: #f4f8fb;
     --card: #ffffff;
-    --text: #1c1c1a;
-    --muted: #5c5c56;
-    --line: #dcdcd6;
-    --accent: #2f6f4e;
-    --accent-dark: #1f4d36;
-    --extracted: #eaf5ee;
-    --missing: #fbeceb;
-    --missing-border: #d98a84;
-    --own: #e8f0fb;
-    --own-border: #6c93c7;
-    --hidden-bg: #efefec;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #16171a;
-      --card: #1f2126;
-      --text: #ececea;
-      --muted: #a3a39c;
-      --line: #33353b;
-      --accent: #7fc4a0;
-      --accent-dark: #a9dcc1;
-      --extracted: #1c2c22;
-      --missing: #341f1e;
-      --missing-border: #7a3a35;
-      --own: #16232f;
-      --own-border: #4a72a6;
-      --hidden-bg: #202226;
-    }
+    --text: #22282f;
+    --muted: #667085;
+    --line: #e1e8f0;
+    --accent: #2f7a5c;
+    --accent-dark: #1f5940;
+    --extracted: #eaf6ef;
+    --missing: #fdeeee;
+    --missing-border: #e2a29c;
+    --own: #eaf1fc;
+    --own-border: #7fa8de;
+    --hidden-bg: #eef1f5;
+
+    --org-pdl-bg: #e6f0fd; --org-pdl-border: #5c8fe0; --org-pdl-text: #1f4e91;
+    --org-bpp-bg: #fdefe1; --org-bpp-border: #e08a35; --org-bpp-text: #94530f;
+    --org-ppsi-bg: #e6f8ea; --org-ppsi-border: #4caf6a; --org-ppsi-text: #1f6b38;
+    --org-c0-bg: #f3e9fb; --org-c0-border: #a06bd6; --org-c0-text: #6a3999;
+    --org-c1-bg: #fdeaf0; --org-c1-border: #dd5a8e; --org-c1-text: #9c2d5c;
+    --org-c2-bg: #fff6da; --org-c2-border: #cf9f1e; --org-c2-text: #7d5f0c;
+    --org-c3-bg: #e2f6f6; --org-c3-border: #2fa3a3; --org-c3-text: #17696e;
+    --org-c4-bg: #fdeae7; --org-c4-border: #d9614f; --org-c4-text: #93362a;
+    --org-c5-bg: #eceffb; --org-c5-border: #6d7bd1; --org-c5-text: #3a4499;
+    --org-c6-bg: #f0ece2; --org-c6-border: #a1815a; --org-c6-text: #6b4f2e;
+
+    --central-bg: #fff9e0; --central-border: #e0b12f;
   }
   * { box-sizing: border-box; }
   body {
@@ -43,19 +41,23 @@
     padding: 1.5rem 1rem 4rem;
     background: var(--bg);
     color: var(--text);
-    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
-  main { max-width: 74rem; margin: 0 auto; }
-  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
-  h2.weekday { font-size: 1.15rem; margin: 1.75rem 0 .75rem; padding-bottom: .35rem; border-bottom: 2px solid var(--accent); color: var(--accent-dark); }
+  main { max-width: 76rem; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 .25rem; color: var(--accent-dark); }
+  h2.weekday {
+    font-size: 1.2rem; margin: 2rem 0 .85rem; padding: .4rem .8rem;
+    background: var(--extracted); border-radius: 8px; color: var(--accent-dark);
+  }
   h2.weekday:first-of-type { margin-top: .5rem; }
   p.sub { color: var(--muted); margin: 0 0 1.5rem; }
   section {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 1.25rem 1.4rem;
     margin-bottom: 1.25rem;
+    box-shadow: 0 1px 3px rgba(30, 41, 59, .04);
   }
   .notice {
     display: flex; gap: .6rem; align-items: flex-start;
@@ -94,28 +96,37 @@
 
   .toolbar { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
   .toolbar button {
-    font-size: .85rem; padding: .45rem .8rem; border-radius: 6px; border: 1px solid var(--line);
-    background: transparent; color: var(--text); cursor: pointer;
+    font-size: .85rem; padding: .45rem .8rem; border-radius: 8px; border: 1px solid var(--line);
+    background: #fff; color: var(--text); cursor: pointer; transition: border-color .12s, color .12s, background .12s;
   }
   .toolbar button:hover { border-color: var(--accent); color: var(--accent-dark); }
   .toolbar button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
   .toolbar button.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+  .toolbar button.toggle.active { background: var(--accent-dark); color: #fff; border-color: var(--accent-dark); font-weight: 600; }
   .toolbar .status { font-size: .85rem; color: var(--muted); }
+  .toolbar input[type=text] {
+    font-size: .85rem; padding: .43rem .7rem; border-radius: 8px; border: 1px solid var(--line);
+    background: #fff; color: var(--text);
+  }
+  .toolbar label.inline { display: inline-flex; align-items: center; gap: .4rem; font-size: .82rem; color: var(--muted); }
 
   .legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin-bottom: .75rem; }
 
   /* --- Einsatz-Karte --- */
   .einsatz {
-    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-    padding: .85rem 1rem; margin-bottom: .7rem;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: .9rem 1.1rem; margin-bottom: .8rem; border-left: 4px solid var(--line);
+    transition: box-shadow .12s;
   }
-  .einsatz.hidden { background: var(--hidden-bg); opacity: .55; }
+  .einsatz:hover { box-shadow: 0 2px 8px rgba(30, 41, 59, .06); }
+  .einsatz.central { background: var(--central-bg); border-left-color: var(--central-border); }
+  .einsatz.hidden { background: var(--hidden-bg); opacity: .55; border-left-color: var(--line); }
   .einsatz.hidden .einsatzBody { display: none; }
   .einsatzHead { display: flex; align-items: flex-start; gap: .6rem; }
   .einsatzHead .toggleHide { cursor: pointer; margin-top: .3rem; flex: 0 0 auto; }
   .anlass {
-    flex: 1; font-weight: 700; font-size: 1rem; outline: none; padding: .1rem .3rem; border-radius: 4px;
-    min-width: 8rem;
+    flex: 1; font-weight: 700; font-size: 1.05rem; outline: none; padding: .1rem .3rem; border-radius: 4px;
+    min-width: 8rem; color: var(--accent-dark);
   }
   .anlass:focus { background: var(--extracted); }
   .einsatzHead .cardActions { display: flex; gap: .35rem; flex: 0 0 auto; }
@@ -125,7 +136,7 @@
   }
   .einsatzHead .cardActions button:hover { border-color: var(--accent); color: var(--accent-dark); }
 
-  .metaRow { display: flex; gap: 1.2rem; flex-wrap: wrap; margin: .5rem 0 .5rem 1.6rem; font-size: .85rem; }
+  .metaRow { display: flex; gap: 1.2rem; flex-wrap: wrap; margin: .55rem 0 .55rem 1.6rem; font-size: .85rem; }
   .metaField { display: flex; flex-direction: column; gap: .15rem; min-width: 10rem; flex: 1 1 12rem; }
   .metaField label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
   .metaField .val {
@@ -134,16 +145,38 @@
   .metaField .val:focus { background: var(--extracted); border-color: var(--accent); }
   .metaField .val.missing { background: var(--missing); border: 1px dashed var(--missing-border); }
   .metaField .val.missing:empty::before { content: "bitte ergänzen"; color: var(--muted); font-style: italic; }
-  .metaField .val.zeitraum { white-space: pre-wrap; }
+  .metaField .val.multiline { white-space: pre-wrap; }
 
-  .kraefte { margin: .4rem 0 .2rem 1.6rem; }
-  .kraefteLabel { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
-  .orgGroup { display: flex; align-items: baseline; gap: .4rem; padding: .15rem 0; flex-wrap: wrap; border-bottom: 1px dotted var(--line); }
-  .orgGroup:last-of-type { border-bottom: none; }
-  .orgName { font-weight: 600; outline: none; padding: .05rem .3rem; border-radius: 4px; min-width: 4rem; }
-  .orgName:focus { background: var(--extracted); }
+  .kraefte { margin: .5rem 0 .2rem 1.6rem; }
+  .kraefteLabel { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .3rem; }
+  .orgGroup {
+    display: flex; align-items: baseline; gap: .5rem; padding: .3rem .55rem; flex-wrap: wrap;
+    border-radius: 7px; margin-bottom: .3rem; border-left: 3px solid var(--line); background: var(--extracted);
+  }
+  .orgGroup.org-pdl { background: var(--org-pdl-bg); border-left-color: var(--org-pdl-border); }
+  .orgGroup.org-bpp { background: var(--org-bpp-bg); border-left-color: var(--org-bpp-border); }
+  .orgGroup.org-ppsi { background: var(--org-ppsi-bg); border-left-color: var(--org-ppsi-border); }
+  .orgGroup.org-c0 { background: var(--org-c0-bg); border-left-color: var(--org-c0-border); }
+  .orgGroup.org-c1 { background: var(--org-c1-bg); border-left-color: var(--org-c1-border); }
+  .orgGroup.org-c2 { background: var(--org-c2-bg); border-left-color: var(--org-c2-border); }
+  .orgGroup.org-c3 { background: var(--org-c3-bg); border-left-color: var(--org-c3-border); }
+  .orgGroup.org-c4 { background: var(--org-c4-bg); border-left-color: var(--org-c4-border); }
+  .orgGroup.org-c5 { background: var(--org-c5-bg); border-left-color: var(--org-c5-border); }
+  .orgGroup.org-c6 { background: var(--org-c6-bg); border-left-color: var(--org-c6-border); }
+  .orgName { font-weight: 700; outline: none; padding: .05rem .3rem; border-radius: 4px; min-width: 4rem; }
+  .org-pdl .orgName { color: var(--org-pdl-text); }
+  .org-bpp .orgName { color: var(--org-bpp-text); }
+  .org-ppsi .orgName { color: var(--org-ppsi-text); }
+  .org-c0 .orgName { color: var(--org-c0-text); }
+  .org-c1 .orgName { color: var(--org-c1-text); }
+  .org-c2 .orgName { color: var(--org-c2-text); }
+  .org-c3 .orgName { color: var(--org-c3-text); }
+  .org-c4 .orgName { color: var(--org-c4-text); }
+  .org-c5 .orgName { color: var(--org-c5-text); }
+  .org-c6 .orgName { color: var(--org-c6-text); }
+  .orgName:focus { background: rgba(255,255,255,.6); }
   .typList { display: flex; gap: .3rem; flex-wrap: wrap; flex: 1; align-items: baseline; }
-  .typItem { display: inline-flex; align-items: baseline; gap: .15rem; background: var(--extracted); border-radius: 4px; padding: .05rem .3rem; }
+  .typItem { display: inline-flex; align-items: baseline; gap: .15rem; background: rgba(255,255,255,.65); border-radius: 4px; padding: .05rem .35rem; }
   .typItem .anzahl { width: 2.1em; outline: none; text-align: right; border-radius: 3px; }
   .typItem .anzahl:focus, .typItem .typ:focus { background: var(--own); }
   .typItem .typ { outline: none; border-radius: 3px; min-width: 2em; }
@@ -160,7 +193,26 @@
   }
   .addOrgBtn:hover { border-color: var(--accent); }
 
+  .zeitenLine { margin: .4rem 0 0 1.6rem; font-size: .8rem; color: var(--muted); }
+  .zeitenLine b { color: var(--text); font-weight: 600; }
+
+  .bemerkungWrap { margin: .55rem 0 0 1.6rem; }
+  .bemerkungWrap label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+  .bemerkungWrap .val { font-size: .85rem; min-height: 1.4em; }
+
   .phaseHint { font-size: .72rem; color: var(--muted); margin-left: 1.6rem; font-style: italic; }
+
+  /* --- Zusammenfassungen (Kräfte gesamt / nach Dienststelle) --- */
+  .summaryPanel {
+    background: var(--own); border: 1px solid var(--own-border); border-radius: 10px;
+    padding: .8rem 1rem; margin: 1.25rem 0; font-size: .88rem;
+  }
+  .summaryPanel h3 { margin: 0 0 .5rem; font-size: .95rem; color: var(--accent-dark); }
+  .summaryPanel .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .summaryPanel .chip {
+    background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: .25rem .7rem;
+  }
+  .summaryPanel .chip b { color: var(--accent-dark); }
 
   footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 2rem; }
   .hint { font-size: .8rem; color: var(--muted); margin-top: .5rem; }
@@ -168,39 +220,56 @@
 
   #emptyHint { color: var(--muted); font-size: .9rem; }
 
+  #printHeader { display: none; }
+
   /* ---------------------------------------------------------------- */
   /* Druckansicht                                                      */
   /* ---------------------------------------------------------------- */
   @media print {
     body { background: #fff; padding: 0; font-size: 9.5px; }
     main { max-width: none; }
-    p.sub, .notice, #uploadSection, .toolbar, .legend, .fileActions,
+    h1, p.sub, .notice, #uploadSection, .toolbar, .legend, .fileActions,
     .cardActions, .toggleHide, .rmOrg, .rmTyp, .addTyp, .addOrgBtn, .phaseHint,
     #resultHeading, footer { display: none !important; }
-    h1 { font-size: 15px; margin: 0 0 8px; }
     section { border: none; padding: 0; margin: 0; box-shadow: none; background: transparent; }
+
+    #printHeader {
+      display: block; border-bottom: 2.5px solid var(--accent-dark); padding-bottom: 6px; margin-bottom: 10px;
+    }
+    #printHeader h1 {
+      display: block !important; font-size: 16px; margin: 0 0 3px; color: #000;
+    }
+    #printHeader .printMeta { display: flex; gap: 1.2rem; font-size: 8.5px; color: #444; }
+
     h2.weekday {
-      font-size: 12px; margin: 6px 0 3px; padding-bottom: 1px; border-bottom: 1.5px solid #000;
-      color: #000; break-after: avoid;
+      font-size: 11.5px; margin: 10px 0 4px; padding: 3px 7px; border-radius: 4px;
+      background: var(--extracted); color: var(--accent-dark); break-after: avoid;
     }
     .einsatz {
-      border: none; border-bottom: 1px solid #ccc; border-radius: 0;
-      padding: 2px 0; margin-bottom: 0; break-inside: avoid;
+      border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 5px;
+      padding: 4px 7px; margin-bottom: 4px; break-inside: avoid; box-shadow: none;
     }
+    .einsatz.central { border-left-color: var(--central-border); }
     .einsatz.hidden { display: none; }
     .einsatzHead { gap: .3rem; }
-    .anlass { font-size: 10px; padding: 0; }
-    .metaRow { margin: 1px 0 1px .3rem; gap: .6rem; font-size: 9px; }
+    .anlass { font-size: 10.5px; padding: 0; color: #000; }
+    .metaRow { margin: 2px 0 2px .2rem; gap: .7rem; font-size: 8.5px; }
     .metaField { min-width: 6rem; }
     .metaField label { font-size: 7px; }
     .metaField .val { padding: 0; border: none !important; background: transparent !important; }
     .metaField .val.missing:empty::before { content: "" !important; }
-    .kraefte { margin: 1px 0 1px .3rem; }
+    .kraefte { margin: 3px 0 2px .2rem; }
     .kraefteLabel { font-size: 7px; }
-    .orgGroup { border-bottom: none; padding: 0; gap: .3rem; }
-    .orgName { padding: 0; }
-    .typItem { background: transparent; padding: 0; }
+    .orgGroup { padding: 1px 5px; gap: .3rem; margin-bottom: 2px; border-radius: 4px; }
+    .orgName { padding: 0; font-size: 9px; }
+    .typItem { background: rgba(255,255,255,.55); padding: 0 3px; }
     .typItem .anzahl, .typItem .typ { padding: 0; width: auto; }
+    .zeitenLine { margin: 2px 0 0 .2rem; font-size: 8px; }
+    .bemerkungWrap { margin: 2px 0 0 .2rem; }
+    .bemerkungWrap label { font-size: 7px; }
+    .bemerkungWrap .val { font-size: 8.5px; }
+    .bemerkungWrap .val:empty { display: none; }
+    .summaryPanel { break-inside: avoid; }
     #resultArea { display: block !important; }
     @page { size: A4 portrait; margin: 10mm 9mm; }
   }
@@ -234,15 +303,36 @@
     <span>Jedes Feld ist direkt anklick- und editierbar.</span>
     <span>👁 blendet einen Einsatz aus (auch im Ausdruck).</span>
     <span>„+“ fügt Kräfte/Organisationen hinzu, die nicht im PDF standen.</span>
+    <span>🔵 PD-L · 🟠 BPP · 🟢 PPSI · weitere Dienststellen in weiteren Farben.</span>
   </div>
   <div class="toolbar">
     <button class="primary" id="printBtn">Druckansicht / Als PDF speichern</button>
     <button id="addEinsatzBtn">+ Einsatz manuell hinzufügen</button>
     <button id="showAllBtn">Alle ausgeblendeten wieder einblenden</button>
     <button id="resetBtn">Zurücksetzen</button>
+  </div>
+  <div class="toolbar">
+    <button class="toggle" id="hideSchutzBtn" title="Blendet alle Einsätze aus, deren Anlass „Schutzmaßnahme(n)“ enthält">Schutzmaßnahmen ausblenden</button>
+    <button class="toggle" id="highlightCentralBtn" title="Hebt Einsätze unter Führung PD-L/FüSt, PD-L/Ref* oder nur PD-L farblich hervor">Zentrale Führung (PD-L/FüSt, PD-L/Ref*, PD-L) hervorheben</button>
+    <button class="toggle" id="showTotalBtn">Kräfte gesamt anzeigen</button>
+    <button class="toggle" id="showByOeBtn">Kräfte nach Dienststelle anzeigen</button>
     <span class="status" id="statusMsg"></span>
   </div>
+  <div class="toolbar">
+    <label class="inline">Ersteller-Name (optional, für Ausdruck)
+      <input type="text" id="erstellerName" placeholder="z. B. PHK Mustermann" style="margin-left:.4rem;">
+    </label>
+  </div>
+  <div id="printHeader">
+    <h1>Einsatzübersicht mit Kräften der Polizeidirektion Leipzig</h1>
+    <div class="printMeta">
+      <span>Stand: <span id="printStand"></span></span>
+      <span>Ersteller: Referat 2 Einsatz<span id="printErsteller"></span></span>
+    </div>
+  </div>
   <div id="resultArea"></div>
+  <div id="summaryTotal" class="summaryPanel" style="display:none;"></div>
+  <div id="summaryByOe" class="summaryPanel" style="display:none;"></div>
   <p id="emptyHint" style="display:none;">Keine Einsätze gefunden — bitte PDF prüfen oder Einsatz manuell hinzufügen.</p>
 </section>
 
@@ -462,13 +552,51 @@ function buildEinsatzRecord(raw) {
     weekday: raw.weekday || '',
     anlass: raw.title || raw.orgEh || '(ohne Bezeichnung)',
     revierbereich: '',
+    einsatzort: '',
     fuehrung: raw.orgEh || '',
-    zeitraum: zeitfenster.join('\n'),
+    zeitraum: zeitfenster.join(', '),
+    bemerkung: '',
     kraefte,
     hidden: false,
     sortKey: minStart === Infinity ? Infinity : minStart,
     source: 'pdf',
   };
+}
+
+/* ---------------------------------------------------------------------- */
+/* Farbzuordnung Einsatzkräfte nach Dienststelle                           */
+/* ---------------------------------------------------------------------- */
+/* PD-L = blau, BPP = orange, PPSI = grün (fest zugeordnet, wie gewünscht),
+   alle weiteren Dienststellen bekommen fortlaufend eine von 7 weiteren
+   Farben zugewiesen — konsistent für dieselbe Dienststelle über die ganze
+   Sitzung hinweg. */
+const ORG_COLOR_FIXED = { 'PD-L': 'org-pdl', 'BPP': 'org-bpp', 'PPSI': 'org-ppsi' };
+const ORG_COLOR_PALETTE = ['org-c0', 'org-c1', 'org-c2', 'org-c3', 'org-c4', 'org-c5', 'org-c6'];
+let orgColorAssignments = {};
+let orgColorCounter = 0;
+function dienststelle(orgEh) {
+  return (orgEh || '').split('/')[0].trim().toUpperCase();
+}
+function orgColorClass(orgEh) {
+  const d = dienststelle(orgEh);
+  if (!d) return '';
+  if (ORG_COLOR_FIXED[d]) return ORG_COLOR_FIXED[d];
+  if (!orgColorAssignments[d]) {
+    orgColorAssignments[d] = ORG_COLOR_PALETTE[orgColorCounter % ORG_COLOR_PALETTE.length];
+    orgColorCounter++;
+  }
+  return orgColorAssignments[d];
+}
+
+/* ---------------------------------------------------------------------- */
+/* Filter/Hervorhebungs-Kriterien                                          */
+/* ---------------------------------------------------------------------- */
+function isSchutzmassnahme(anlass) {
+  return /Schutzma(ß|ss)nahme/i.test(anlass || '');
+}
+function isZentraleFuehrung(fuehrung) {
+  const f = (fuehrung || '').trim();
+  return /^PD-L\/F(ü|ue)St$/i.test(f) || /^PD-L\/Ref/i.test(f) || /^PD-L$/i.test(f);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -481,9 +609,22 @@ const resultSection = document.getElementById('resultSection');
 const resultArea = document.getElementById('resultArea');
 const emptyHint = document.getElementById('emptyHint');
 const statusMsg = document.getElementById('statusMsg');
+const hideSchutzBtn = document.getElementById('hideSchutzBtn');
+const highlightCentralBtn = document.getElementById('highlightCentralBtn');
+const showTotalBtn = document.getElementById('showTotalBtn');
+const showByOeBtn = document.getElementById('showByOeBtn');
+const summaryTotalEl = document.getElementById('summaryTotal');
+const summaryByOeEl = document.getElementById('summaryByOe');
+const erstellerNameInput = document.getElementById('erstellerName');
+const printStandEl = document.getElementById('printStand');
+const printErstellerEl = document.getElementById('printErsteller');
 
 let uploadedFiles = []; // { name, count, error }
 let einsaetze = []; // flat list of editable Einsatz-records
+let hideSchutzmassnahmen = false;
+let highlightCentral = false;
+let showTotalSummary = false;
+let showByOeSummary = false;
 
 dropzone.addEventListener('click', () => fileInput.click());
 dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
@@ -579,8 +720,10 @@ document.getElementById('addEinsatzBtn').addEventListener('click', () => {
     weekday: einsaetze.length ? (einsaetze[einsaetze.length - 1].weekday || '') : '',
     anlass: 'Neuer Einsatz',
     revierbereich: '',
+    einsatzort: '',
     fuehrung: '',
     zeitraum: '',
+    bemerkung: '',
     kraefte: [],
     hidden: false,
     sortKey: Infinity,
@@ -595,11 +738,42 @@ document.getElementById('showAllBtn').addEventListener('click', () => {
   render();
 });
 
-document.getElementById('printBtn').addEventListener('click', () => window.print());
+document.getElementById('printBtn').addEventListener('click', () => {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  printStandEl.textContent = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}, ${pad(now.getHours())}:${pad(now.getMinutes())} Uhr`;
+  printErstellerEl.textContent = erstellerNameInput.value.trim() ? ' — ' + erstellerNameInput.value.trim() : '';
+  window.print();
+});
+
+hideSchutzBtn.addEventListener('click', () => {
+  hideSchutzmassnahmen = !hideSchutzmassnahmen;
+  hideSchutzBtn.classList.toggle('active', hideSchutzmassnahmen);
+  render();
+});
+highlightCentralBtn.addEventListener('click', () => {
+  highlightCentral = !highlightCentral;
+  highlightCentralBtn.classList.toggle('active', highlightCentral);
+  render();
+});
+showTotalBtn.addEventListener('click', () => {
+  showTotalSummary = !showTotalSummary;
+  showTotalBtn.classList.toggle('active', showTotalSummary);
+  render();
+});
+showByOeBtn.addEventListener('click', () => {
+  showByOeSummary = !showByOeSummary;
+  showByOeBtn.classList.toggle('active', showByOeSummary);
+  render();
+});
 
 /* ---------------------------------------------------------------------- */
 /* Rendering                                                                */
 /* ---------------------------------------------------------------------- */
+function isEffectivelyHidden(e) {
+  return e.hidden || (hideSchutzmassnahmen && isSchutzmassnahme(e.anlass));
+}
+
 function render() {
   renderFileList();
 
@@ -627,6 +801,7 @@ function render() {
 
   resultArea.innerHTML = '';
   let anyVisible = false;
+  const visibleEinsaetze = [];
   for (const key of sortedKeys) {
     const list = groups.get(key).slice().sort((a, b) => (a.sortKey === Infinity ? 1e9 : a.sortKey) - (b.sortKey === Infinity ? 1e9 : b.sortKey));
     const h2 = document.createElement('h2');
@@ -634,16 +809,77 @@ function render() {
     h2.textContent = key;
     resultArea.appendChild(h2);
     for (const e of list) {
-      resultArea.appendChild(renderEinsatzCard(e));
-      if (!e.hidden) anyVisible = true;
+      const effHidden = isEffectivelyHidden(e);
+      resultArea.appendChild(renderEinsatzCard(e, effHidden));
+      if (!effHidden) { anyVisible = true; visibleEinsaetze.push(e); }
     }
   }
   emptyHint.style.display = anyVisible || einsaetze.length ? 'none' : '';
+
+  renderSummaryPanels(visibleEinsaetze);
+
+  hideSchutzBtn.classList.toggle('active', hideSchutzmassnahmen);
+  highlightCentralBtn.classList.toggle('active', highlightCentral);
+  showTotalBtn.classList.toggle('active', showTotalSummary);
+  showByOeBtn.classList.toggle('active', showByOeSummary);
 }
 
-function renderEinsatzCard(e) {
+function renderSummaryPanels(visibleEinsaetze) {
+  summaryTotalEl.style.display = showTotalSummary ? '' : 'none';
+  summaryByOeEl.style.display = showByOeSummary ? '' : 'none';
+  summaryTotalEl.innerHTML = '';
+  summaryByOeEl.innerHTML = '';
+  if (!showTotalSummary && !showByOeSummary) return;
+
+  let total = 0;
+  const byTyp = new Map();
+  const byOe = new Map();
+  for (const e of visibleEinsaetze) {
+    for (const grp of e.kraefte) {
+      const d = dienststelle(grp.orgEh) || '(ohne Dienststelle)';
+      for (const t of grp.typen) {
+        const n = t.anzahl || 0;
+        total += n;
+        byTyp.set(t.typ || '?', (byTyp.get(t.typ || '?') || 0) + n);
+        byOe.set(d, (byOe.get(d) || 0) + n);
+      }
+    }
+  }
+
+  if (showTotalSummary) {
+    const h3 = document.createElement('h3');
+    h3.textContent = `Kräfte gesamt (sichtbare Einsätze): ${total}`;
+    summaryTotalEl.appendChild(h3);
+    const chips = document.createElement('div');
+    chips.className = 'chips';
+    for (const [typ, n] of [...byTyp.entries()].sort((a, b) => b[1] - a[1])) {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.innerHTML = `<b>${n}</b>&nbsp;× ${typ}`;
+      chips.appendChild(chip);
+    }
+    summaryTotalEl.appendChild(chips);
+  }
+
+  if (showByOeSummary) {
+    const h3 = document.createElement('h3');
+    h3.textContent = 'Kräfte nach Dienststelle (sichtbare Einsätze)';
+    summaryByOeEl.appendChild(h3);
+    const chips = document.createElement('div');
+    chips.className = 'chips';
+    for (const [oe, n] of [...byOe.entries()].sort((a, b) => b[1] - a[1])) {
+      const chip = document.createElement('span');
+      chip.className = 'chip ' + orgColorClass(oe);
+      chip.innerHTML = `<b>${n}</b>&nbsp;× ${oe}`;
+      chips.appendChild(chip);
+    }
+    summaryByOeEl.appendChild(chips);
+  }
+}
+
+function renderEinsatzCard(e, effHidden) {
   const card = document.createElement('div');
-  card.className = 'einsatz' + (e.hidden ? ' hidden' : '');
+  card.className = 'einsatz' + (effHidden ? ' hidden' : '') + (highlightCentral && isZentraleFuehrung(e.fuehrung) ? ' central' : '');
 
   const head = document.createElement('div');
   head.className = 'einsatzHead';
@@ -689,8 +925,8 @@ function renderEinsatzCard(e) {
   const metaRow = document.createElement('div');
   metaRow.className = 'metaRow';
   metaRow.appendChild(makeMetaField('Revierbereich', e, 'revierbereich', false));
+  metaRow.appendChild(makeMetaField('Einsatzort', e, 'einsatzort', false));
   metaRow.appendChild(makeMetaField('Führung (Org-Einheit)', e, 'fuehrung', false));
-  metaRow.appendChild(makeMetaField('Einsatzzeitraum', e, 'zeitraum', true));
   body.appendChild(metaRow);
 
   const kraefteWrap = document.createElement('div');
@@ -713,18 +949,42 @@ function renderEinsatzCard(e) {
   kraefteWrap.appendChild(addOrgBtn);
   body.appendChild(kraefteWrap);
 
+  const zeitenLine = document.createElement('div');
+  zeitenLine.className = 'zeitenLine';
+  zeitenLine.innerHTML = '<b>Zeiten:</b> ';
+  const zeitenVal = document.createElement('span');
+  zeitenVal.className = 'val';
+  zeitenVal.contentEditable = 'true';
+  zeitenVal.textContent = e.zeitraum || '';
+  zeitenVal.addEventListener('input', () => { e.zeitraum = zeitenVal.textContent; });
+  zeitenLine.appendChild(zeitenVal);
+  body.appendChild(zeitenLine);
+
+  const bemerkungWrap = document.createElement('div');
+  bemerkungWrap.className = 'bemerkungWrap';
+  const bemLabel = document.createElement('label');
+  bemLabel.textContent = 'Bemerkungen';
+  bemerkungWrap.appendChild(bemLabel);
+  const bemVal = document.createElement('div');
+  bemVal.className = 'val multiline';
+  bemVal.contentEditable = 'true';
+  bemVal.textContent = e.bemerkung || '';
+  bemVal.addEventListener('input', () => { e.bemerkung = bemVal.textContent; });
+  bemerkungWrap.appendChild(bemVal);
+  body.appendChild(bemerkungWrap);
+
   card.appendChild(body);
   return card;
 }
 
-function makeMetaField(labelText, e, key, isZeitraum) {
+function makeMetaField(labelText, e, key, isMultiline) {
   const field = document.createElement('div');
   field.className = 'metaField';
   const label = document.createElement('label');
   label.textContent = labelText;
   field.appendChild(label);
   const val = document.createElement('div');
-  val.className = 'val' + (isZeitraum ? ' zeitraum' : '') + (!e[key] ? ' missing' : '');
+  val.className = 'val' + (isMultiline ? ' multiline' : '') + (!e[key] ? ' missing' : '');
   val.contentEditable = 'true';
   val.textContent = e[key] || '';
   val.addEventListener('input', () => {
@@ -737,7 +997,7 @@ function makeMetaField(labelText, e, key, isZeitraum) {
 
 function renderOrgGroup(e, grp) {
   const row = document.createElement('div');
-  row.className = 'orgGroup';
+  row.className = 'orgGroup ' + orgColorClass(grp.orgEh);
 
   const orgName = document.createElement('span');
   orgName.className = 'orgName';
