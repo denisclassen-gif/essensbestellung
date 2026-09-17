@@ -118,7 +118,11 @@
     font-size: .9rem;
   }
 
-  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  /* Genug Abstand unter der letzten Tabellenzeile zur horizontalen
+     Scrollleiste lassen — sonst lässt sich die unterste Zeile (Dropdowns,
+     Kopier-Buttons) kaum noch anklicken, ohne versehentlich die
+     Scrollleiste zu treffen. */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; padding-bottom: .6rem; }
   table { border-collapse: collapse; width: 100%; font-size: .82rem; }
   thead th {
     position: sticky; top: 0; background: var(--card); z-index: 1;
@@ -129,8 +133,10 @@
     border-bottom: 1px solid var(--line); border-right: 1px solid var(--line);
     padding: 0; min-width: 7rem; position: relative;
   }
+  .cellinner { display: flex; align-items: stretch; }
+  .cellinner > .cellval, .cellinner > select.cellselect { flex: 1 1 auto; min-width: 0; }
   .cellval {
-    padding: .4rem 1.6rem .4rem .5rem; outline: none; white-space: nowrap; min-height: 1.6em;
+    padding: .4rem .5rem; outline: none; white-space: nowrap; min-height: 1.6em;
   }
   .cellval:focus { background: var(--extracted); white-space: normal; }
   td.extracted { background: var(--extracted); }
@@ -143,14 +149,18 @@
 
   select.cellselect {
     width: 100%; border: none; background: var(--card); color: var(--text);
-    font-size: .82rem; padding: .4rem 1.6rem .4rem .5rem;
+    font-size: .82rem; padding: .4rem .3rem .4rem .5rem;
   }
   /* Fixe helle Popup-Farben, unabhängig vom Theme: verhindert helle Schrift auf hellem
      Grund (oder umgekehrt) in der vom Betriebssystem gezeichneten Optionsliste. */
   select.cellselect option { background: #ffffff; color: #1c1c1a; }
 
+  /* Der Kopier-Button ist ein eigenes Flex-Element neben dem Feld (nicht
+     mehr absolut darüber positioniert) — so kann er das Dropdown-Feld
+     nie mehr verdecken oder dessen Klicks abfangen. */
   .cellcopy {
-    position: absolute; top: 2px; right: 2px;
+    flex: 0 0 auto; align-self: center;
+    margin: 0 .3rem 0 0;
     font-size: .75rem; line-height: 1; padding: .15rem .3rem;
     border: 1px solid var(--line); border-radius: 4px;
     background: var(--card); color: var(--muted); cursor: pointer;
@@ -365,8 +375,10 @@ function fuzzy(phrase) {
 /* ---------------------------------------------------------------------- */
 /* PDF-Text extrahieren (pdf.js)                                           */
 /* ---------------------------------------------------------------------- */
-async function extractFlatText(arrayBuffer) {
-  const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+async function loadPdfDoc(arrayBuffer) {
+  return pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+}
+async function extractFlatTextFromDoc(doc) {
   let full = '';
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
@@ -374,6 +386,229 @@ async function extractFlatText(arrayBuffer) {
     full += content.items.map(it => it.str).join(' ') + '\n';
   }
   return full.replace(/\s+/g, ' ').trim();
+}
+async function extractFlatText(arrayBuffer) {
+  const doc = await loadPdfDoc(arrayBuffer);
+  return extractFlatTextFromDoc(doc);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Checkbox-Erkennung (Sicherheitsbegleitung, Geschlecht, Familientrennung,*/
+/* Arztbegleitung) im Polizeiauftrag                                       */
+/* ---------------------------------------------------------------------- */
+/* Die Checkboxen im LDS-Formular sind reine Vektorgrafik ohne eigene
+   Text-/Formularfeld-Repräsentation — im Textlayer taucht nur das Label
+   auf, nie der Ankreuz-Status. Erkennung daher über: Seite auf ein Canvas
+   rendern, Position der Text-Labels ermitteln, und die Pixel-"Tintendichte"
+   in einem kalibrierten Bereich neben/vor dem Label auswerten. Kalibriert
+   und validiert gegen mehrere reale Polizeiaufträge (unterschiedliche
+   Geschlechter, an-/abgewählte Sicherheitsbegleitung, Familientrennung). */
+const CHECKBOX_SCALE = 2;
+const CHECKBOX_INK_THRESHOLD = 210; // Helligkeit (0-255) unterhalb dieser Schwelle zählt als "Tinte"
+
+function buildPositionedText(items) {
+  let text = '';
+  const map = [];
+  items.forEach((it, idx) => {
+    for (let i = 0; i < it.str.length; i++) map.push(idx);
+    text += it.str;
+  });
+  return { text, map, items };
+}
+
+// fuzzy() hängt hinter jedes Zeichen ein \s* an — ein Treffer kann daher
+// über die eigentliche Phrase hinaus Leerzeichen/Füll-Items "mitfressen"
+// und so die rechte Kante der letzten Text-Box künstlich weit nach rechts
+// verschieben (bis in die Checkbox-Suchzone der NÄCHSTEN Option hinein).
+// Deshalb Leerzeichen am Match-Ende vor der Positionsauflösung abschneiden.
+function fuzzyFind(pt, phrase, fromIdx) {
+  const re = new RegExp(fuzzy(phrase), 'i');
+  const searchText = fromIdx ? pt.text.slice(fromIdx) : pt.text;
+  const m = searchText.match(re);
+  if (!m) return null;
+  const trimmed = m[0].replace(/\s+$/, '');
+  if (!trimmed) return null;
+  const startIdx = (fromIdx || 0) + m.index;
+  const endIdx = startIdx + trimmed.length - 1;
+  const startItem = pt.items[pt.map[startIdx]];
+  const endItem = pt.items[pt.map[endIdx]];
+  return {
+    startIdx, nextIdx: endIdx + 1,
+    x0: startItem.x, x1: endItem.x + endItem.width,
+    y: startItem.y, h: startItem.height || 18,
+  };
+}
+
+function sampleInkRatio(ctx, x0, y0, x1, y1) {
+  x0 = Math.max(0, Math.round(x0));
+  y0 = Math.max(0, Math.round(y0));
+  const w = Math.max(1, Math.round(x1) - x0);
+  const h = Math.max(1, Math.round(y1) - y0);
+  const { data } = ctx.getImageData(x0, y0, w, h);
+  let dark = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    if (lum < CHECKBOX_INK_THRESHOLD) dark++;
+  }
+  return dark / (w * h);
+}
+
+// Höchste Tintendichte in einem gleitenden Fenster fester Breite innerhalb
+// eines Suchbereichs — statt den ganzen (oft ungleich breiten) Bereich
+// zwischen zwei Labels auf einmal zu messen. Der Abstand zwischen Label und
+// eigener Checkbox ist im Formular NICHT konstant (bei "männl./weibl." eng,
+// bei "mit/ohne" deutlich weiter) — ein einzelnes, den ganzen Bereich
+// abdeckendes Fenster verwässert die Messung in den weiteren Fällen mit zu
+// viel Leerraum. Das gleitende Fenster findet die Checkbox unabhängig vom
+// tatsächlichen Versatz.
+function maxInkInWindow(ctx, x0, x1, y0, y1, probeWidth) {
+  let best = 0;
+  for (let x = x0; x + probeWidth <= x1 + 0.01; x += 2) {
+    const r = sampleInkRatio(ctx, x, y0, x + probeWidth, y1);
+    if (r > best) best = r;
+  }
+  return best;
+}
+
+// Pattern A: zwei Optionen in derselben Zeile, jede mit eigener Checkbox
+// dahinter (z.B. "männl.[x] weibl.[ ]" oder "mit[ ] / ohne[x]"). Für beide
+// Optionen wird derselbe, auf ein sinnvolles Maximum gedeckelte Suchbereich
+// (Kalibrierung: bis 50px bei Skalierung 2) mit gleitendem Fenster
+// abgesucht — robust sowohl bei engem als auch bei weiterem Label-Checkbox-
+// Abstand.
+function detectPairedCheckbox(ctx, boxA, boxB, decisionMargin) {
+  const gap = 2, cap = 50;
+  const naturalGap = boxB.x0 - boxA.x1 - 2 * gap;
+  if (naturalGap < 4) return null;
+  const windowWidth = Math.max(4, Math.min(naturalGap, cap));
+  const probeWidth = Math.min(boxA.h * 1.3, windowWidth);
+  const y0 = boxA.y - boxA.h * 1.1, y1 = boxA.y + boxA.h * 0.3;
+  const ratioA = maxInkInWindow(ctx, boxA.x1 + gap, boxA.x1 + gap + windowWidth, y0, y1, probeWidth);
+  const ratioB = maxInkInWindow(ctx, boxB.x1 + gap, boxB.x1 + gap + windowWidth, y0, y1, probeWidth);
+  if (Math.abs(ratioA - ratioB) < decisionMargin) return null; // nicht eindeutig -> unbestimmt, lieber leer lassen
+  return ratioA > ratioB ? 'A' : 'B';
+}
+
+// Pattern B: eine einzelne Checkbox VOR einem ganzen Listen-/Absatz-Item
+// (z.B. "[x] Es ist möglich, 20 kg Freigepäck ..."). Box-Größe wird aus der
+// Zeilenhöhe des Text-Items abgeleitet.
+function detectLeadingCheckbox(ctx, item, cutoff, decisionMargin) {
+  const gap = 6;
+  const boxWidth = item.height * 1.3;
+  const x1 = item.x - gap;
+  const x0 = x1 - boxWidth;
+  const y0 = item.y - item.height * 0.55;
+  const y1 = item.y + item.height * 0.55;
+  const ratio = sampleInkRatio(ctx, x0, y0, x1, y1);
+  if (Math.abs(ratio - cutoff) < decisionMargin) return null; // unbestimmt
+  return ratio > cutoff;
+}
+
+async function renderPageToCanvas(doc, pageNum, scale) {
+  const page = await doc.getPage(pageNum);
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  const content = await page.getTextContent();
+  const items = content.items.map(it => ({
+    str: it.str,
+    x: it.transform[4] * scale,
+    y: viewport.height - it.transform[5] * scale,
+    width: it.width * scale,
+    height: it.height * scale,
+  }));
+  return { ctx, items };
+}
+
+function findGeschlechtPair(pt, fromIdx) {
+  const m = fuzzyFind(pt, 'männl.', fromIdx);
+  if (!m) return null;
+  const w = fuzzyFind(pt, 'weibl.', m.nextIdx);
+  if (!w) return null;
+  return { boxM: m, boxW: w };
+}
+
+async function detectCheckboxesFromDoc(doc) {
+  const result = {};
+  try {
+    if (doc.numPages >= 1) {
+      const { ctx, items } = await renderPageToCanvas(doc, 1, CHECKBOX_SCALE);
+      const pt = buildPositionedText(items);
+
+      // "Die Abschiebung ist mit / ohne Sicherheitsbegleitung angeordnet."
+      // (nicht die Checkliste "Notwendigkeit einer Sicherheitsbegleitung"
+      // weiter unten im Dokument — das sind nur Begründungs-Freitextfelder).
+      const sb = fuzzyFind(pt, 'Sicherheitsb', 0);
+      if (sb) {
+        const windowStart = Math.max(0, sb.startIdx - 200);
+        const sub = pt.text.slice(windowStart, sb.startIdx);
+        const mitRe = /\bmit\b/gi;
+        let lastMit = null, mm;
+        while ((mm = mitRe.exec(sub)) !== null) lastMit = mm;
+        if (lastMit) {
+          const mitStartIdx = windowStart + lastMit.index;
+          const mitEndIdx = mitStartIdx + lastMit[0].length - 1;
+          const mitStartItem = pt.items[pt.map[mitStartIdx]];
+          const mitEndItem = pt.items[pt.map[mitEndIdx]];
+          const boxMit = { x0: mitStartItem.x, x1: mitEndItem.x + mitEndItem.width, y: mitStartItem.y, h: mitStartItem.height || 18 };
+          const ohne = fuzzyFind(pt, '/ ohne', mitEndIdx + 1);
+          if (ohne && ohne.startIdx < sb.startIdx) {
+            const decision = detectPairedCheckbox(ctx, boxMit, ohne, 0.04);
+            if (decision === 'A') result.sicherheitsbegleitung = 'ja';
+            else if (decision === 'B') result.sicherheitsbegleitung = 'nein';
+          }
+        }
+      }
+
+      // Geschlecht Hauptperson: erstes "männl. weibl."-Paar auf der Seite.
+      const mainPair = findGeschlechtPair(pt, 0);
+      if (mainPair) {
+        const decision = detectPairedCheckbox(ctx, mainPair.boxM, mainPair.boxW, 0.04);
+        if (decision === 'A') result.hauptGeschlecht = 'männlich';
+        else if (decision === 'B') result.hauptGeschlecht = 'weiblich';
+      }
+
+      // Geschlecht Ehepartner: nächstes "männl. weibl."-Paar NACH dem
+      // "Ehepartner"-Label (sonst würde wieder das der Hauptperson treffen).
+      const eheIdx = pt.text.search(new RegExp(fuzzy('Ehepartner'), 'i'));
+      if (eheIdx >= 0) {
+        const ehePair = findGeschlechtPair(pt, eheIdx);
+        if (ehePair) {
+          const decision = detectPairedCheckbox(ctx, ehePair.boxM, ehePair.boxW, 0.04);
+          if (decision === 'A') result.eheGeschlecht = 'männlich';
+          else if (decision === 'B') result.eheGeschlecht = 'weiblich';
+        }
+      }
+    }
+
+    if (doc.numPages >= 4) {
+      const { ctx, items } = await renderPageToCanvas(doc, 4, CHECKBOX_SCALE);
+
+      const familienRe = new RegExp(fuzzy('Sollten nicht alle Familienangehörigen'), 'i');
+      const familienItem = items.find(it => familienRe.test(it.str));
+      if (familienItem) {
+        const checked = detectLeadingCheckbox(ctx, familienItem, 0.195, 0.02);
+        if (checked === true) result.familientrennung = 'ja';
+        else if (checked === false) result.familientrennung = 'keine';
+      }
+
+      const arztRe = new RegExp(fuzzy('ärztliche Flugbegleitung'), 'i');
+      const arztItem = items.find(it => arztRe.test(it.str));
+      if (arztItem) {
+        const checked = detectLeadingCheckbox(ctx, arztItem, 0.195, 0.02);
+        if (checked === true) result.arztbegleitung = 'ja';
+        else if (checked === false) result.arztbegleitung = 'nein';
+      }
+    }
+  } catch (e) {
+    // Checkbox-Erkennung ist best-effort — bei Problemen (z.B. abweichendes
+    // Formularlayout in einer Formularversion) bleiben die betroffenen
+    // Felder einfach leer, statt den gesamten Datei-Import abzubrechen.
+  }
+  return result;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -394,6 +629,15 @@ function detectDocType(text) {
   const isSteuerung = new RegExp(fuzzy('Steuerungsschreiben'), 'i').test(text) &&
     (new RegExp(fuzzy('Chartermaßnahme'), 'i').test(text) || new RegExp(fuzzy('Bundespolizeipräsidium'), 'i').test(text));
   if (isSteuerung) return 'steuerung';
+
+  // BAMF-Bescheid (Ablehnungsbescheid im Asylverfahren) — eigenständiges
+  // Dokument, kein AM/Abschlussmitteilung. Liefert oft die AZR-Nummer und
+  // das Aktenzeichen, wenn kein AM hochgeladen wurde. "Asylverfehren" ist
+  // ein in älteren, eingescannten Bescheiden verbreiteter OCR-Tippfehler.
+  const isBescheid = new RegExp(fuzzy('Bundesamt für Migration und Flüchtlinge'), 'i').test(text) &&
+    /\bB\s*E\s*S\s*C\s*H\s*E\s*I\s*D\b/i.test(text) &&
+    new RegExp(fuzzy('Asylverf') + '[ae]hren', 'i').test(text);
+  if (isBescheid) return 'bescheid';
 
   return 'unknown';
 }
@@ -425,6 +669,85 @@ function parseAM(text) {
   if (m) result.bescheiddatum = m[1];
   m = text.match(/Abschiebungsandrohung\s+Vollziehbarkeitsdatum:\s*(\d{2}\.\d{2}\.\d{4})/i);
   if (m) result.rechtskraftdatum = m[1];
+
+  // Manche AM-Dokumente liegen nicht als kompakte Tabellenzeile vor, sondern
+  // als beschriftete Einzelfelder ("Angaben zur Person 01 Familienname: X
+  // Vorname: Y ... Geschlecht: m, männlich AZR-Nummer: ...") — z.B. wenn das
+  // AM zusammen mit einem Gerichtsbeschluss/Urteil als ein PDF verschickt
+  // wurde. Die Tabellen-Regex findet hier keine Treffer und würde sonst
+  // eine leere Personenliste liefern ("nicht vollständig erkannt"). Fallback:
+  if (!result.persons.length) {
+    const labeledRe = new RegExp(
+      fuzzy('Familienname') + ':\\s*([A-ZÄÖÜa-zäöüß\\-\\.\\x27]+)\\s+' +
+      fuzzy('Vorname') + ':\\s*([A-ZÄÖÜa-zäöüß\\-\\.\\x27 ]+?)\\s+' +
+      '(?:' + fuzzy('Angaben zur Geburt') + '\\s+)?' + fuzzy('Geburtsort') + ':\\s*([A-ZÄÖÜa-zäöüß\\-\\.\\x27 ]*?)\\s+' +
+      fuzzy('Geburtsland') + ':\\s*[\\d,\\s]*?([A-ZÄÖÜa-zäöüß\\-\\.\\x27 ]+?)\\s+' +
+      fuzzy('Geburtsdatum') + ':\\s*(\\d{2}\\.\\d{2}\\.\\d{4})\\s+' +
+      fuzzy('Staatsangehörigkeit') + ':\\s*[\\d,\\s]*?([A-ZÄÖÜa-zäöüß\\-\\.\\x27 ]+?)\\s+' +
+      fuzzy('Familienstand') + ':.*?' +
+      fuzzy('Geschlecht') + ':\\s*[mwd]\\s*,\\s*(m[äa]nnlich|weiblich|divers)\\s+' +
+      fuzzy('AZR') + '-?\\s*' + fuzzy('Nummer') + ':\\s*(\\d{6,15})',
+      'gi'
+    );
+    let lm;
+    while ((lm = labeledRe.exec(text)) !== null) {
+      result.persons.push({
+        familienname: cleanVal(lm[1]),
+        vorname: cleanVal(lm[2]),
+        geburtsort: cleanVal(lm[3]),
+        geburtsdatum: lm[5],
+        staatsangehoerigkeit: cleanVal(lm[6]),
+        geschlecht: lm[7].toLowerCase(),
+        azr: lm[8],
+      });
+    }
+  }
+
+  if (!result.aktenzeichen) {
+    m = text.match(new RegExp(fuzzy('BAMF') + '-?\\s*' + fuzzy('Aktenzeichen') + ':\\s*(\\d[\\d\\s\\-]*\\d)', 'i'));
+    if (m) result.aktenzeichen = m[1].replace(/\s+/g, '');
+  }
+  if (!result.bescheiddatum) {
+    m = text.match(new RegExp(fuzzy('Bescheiddatum') + ':\\s*(\\d{2}\\.\\d{2}\\.\\d{4})', 'i'));
+    if (m) result.bescheiddatum = m[1];
+  }
+  if (!result.rechtskraftdatum) {
+    m = text.match(new RegExp(fuzzy('Vollziehbarkeitsdatum') + '\\s+der\\s+' + fuzzy('Abschiebungsandrohung') + ':\\s*(\\d{2}\\.\\d{2}\\.\\d{4})', 'i'));
+    if (m) result.rechtskraftdatum = m[1];
+  }
+
+  return result;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Parser: Bescheid (BAMF-Ablehnungsbescheid im Asylverfahren)             */
+/* ---------------------------------------------------------------------- */
+/* Eigenständiges Dokument (kein AM) — liefert v.a. AZR-Nummer, Aktenzeichen
+   und Bescheiddatum als Fallback, wenn kein AM hochgeladen wurde. Ältere,
+   eingescannte Bescheide (OCR) haben teils gar keine AZR-Nummer vermerkt —
+   das ist dann korrekt leer, kein Erkennungsfehler. */
+function parseBescheid(text) {
+  const result = {};
+  let m;
+
+  m = text.match(new RegExp(fuzzy('Aktenzeichen') + '\\s*:\\s*(\\d+\\s*-\\s*\\d+)', 'i'));
+  if (!m) m = text.match(new RegExp(fuzzy('Gesch') + '\\.?\\s*-?\\s*' + fuzzy('Z') + '\\.?\\s*[:;]\\s*(\\d+\\s*-\\s*\\d+)', 'i'));
+  if (m) result.aktenzeichen = m[1].replace(/\s+/g, '');
+
+  m = text.match(new RegExp(fuzzy('AZR') + '-?\\s*' + fuzzy('Nummer') + '\\(?n?\\)?:?\\s*(\\d{6,15})', 'i'));
+  if (m) result.azrNummer = m[1];
+
+  m = text.match(new RegExp(fuzzy('Datum') + ':\\s*(\\d{2}\\.\\d{2}\\.\\d{4})', 'i'));
+  if (m) result.bescheiddatum = m[1];
+
+  m = text.match(/Asylverf[ae]hren\s+des\s+([A-ZÄÖÜ][\wÀ-ÿ'’\-]*)\s*[,;]\s*([A-ZÄÖÜ][\wÀ-ÿ'’\- ]*?)\s*[,;]?\s*geb\.?\s*am\s+(\d{2}\.\d{2}\.\d{4})\s+in\s+([^\/\n]*?)\s*\/\s*([^\n]*?)(?=\s+AZR-?\s*Nummer|\s+alias:|\s+wohnhaft:|\s+ergeht|$)/i);
+  if (m) {
+    result.familienname = cleanVal(m[1]);
+    result.vorname = cleanVal(m[2]);
+    result.geburtsdatum = m[3];
+    result.geburtsort = cleanVal(m[4]);
+    result.staatsangehoerigkeit = cleanVal(m[5]);
+  }
 
   return result;
 }
@@ -517,7 +840,7 @@ function parsePolizeiauftrag(text) {
   m = text.match(new RegExp(fuzzy('Fluggesellschaft') + '\\s+([A-ZÄÖÜ][^\\n]*?)\\s+' + fuzzy('Flug') + '-?\\s*' + fuzzy('Nr'), 'i'));
   if (m) result.fluggesellschaft = cleanVal(m[1]);
 
-  m = text.match(new RegExp(fuzzy('Flug') + '\\s*-?\\s*' + fuzzy('Nr') + '\\.?\\s+([A-Z]{1,3}\\s?\\d{2,5})', 'i'));
+  m = text.match(new RegExp(fuzzy('Flug') + '\\s*-?\\s*' + fuzzy('Nr') + '\\.?\\s+([A-Z]{1,3}\\s?\\d{2,5}(?:\\s*\\/\\s*[A-Z]{1,3}\\s?\\d{2,5})*)', 'i'));
   if (m) result.flugnummer = cleanVal(m[1]).replace(/\s+/g, '');
 
   // Adresse (derzeitiger Aufenthalt)
@@ -932,9 +1255,10 @@ function findAmMatch(amPersons, vorname) {
   return amPersons.find(p => norm(p.vorname) === norm(vorname)) || null;
 }
 
-function buildRows(polizei, am, own, visSax) {
+function buildRows(polizei, am, bescheid, own, visSax) {
   const rows = [];
   const amPersons = am ? am.persons : [];
+  const checkboxes = (polizei && polizei.checkboxes) || {};
 
   const aktenzeichenDienststelle = polizei && polizei.zabNummer ? `ZAB-${polizei.zabNummer}` : '';
 
@@ -954,7 +1278,13 @@ function buildRows(polizei, am, own, visSax) {
         const flugInfo = polizei.flugnummer ? `${abbr} / ${polizei.flugnummer}` : abbr;
         set(row, 'flughafen', flugInfo);
         set(row, 'abschiebeart', hatFlugdaten ? 'Luftabschiebung' : 'Landabschiebung', 'inferred');
-        if (hatFlugdaten) set(row, 'uebergabean', 'BPol', 'inferred');
+        // Nur bei Zuführung zum Flughafen Leipzig übernimmt die Bundespolizei
+        // (BPol) die Übergabe; bei allen anderen Flughäfen/Fällen ist die
+        // Bundespolizeiakademie/-präsidium (BPP) zuständig.
+        if (hatFlugdaten) {
+          const istLeipzig = /leipzig|\bLEJ\b/i.test(polizei.flughafen);
+          set(row, 'uebergabean', istLeipzig ? 'BPol' : 'BPP', 'inferred');
+        }
       } else if (polizei.grenzuebergang) {
         set(row, 'flughafen', polizei.grenzuebergang);
         set(row, 'abschiebeart', 'Landabschiebung', 'inferred');
@@ -963,6 +1293,12 @@ function buildRows(polizei, am, own, visSax) {
       // Übergabezeit bewusst nicht automatisch befüllen — manuell eintragen.
       set(row, 'anordnendeDienststelle', 'LDS');
       set(row, 'aktenzeichenDienststelle', aktenzeichenDienststelle);
+      // Aus den Checkboxen im Polizeiauftrag erkannt (gilt für den gesamten
+      // Fall, nicht pro Person) — bei Unklarheit bleiben die Felder leer,
+      // statt einen unsicheren Wert zu raten.
+      set(row, 'sicherheitsbegleitung', checkboxes.sicherheitsbegleitung);
+      set(row, 'familientrennung', checkboxes.familientrennung);
+      set(row, 'arztbegleitung', checkboxes.arztbegleitung);
     }
     // Sachbearbeiter/Telefon kommen nicht aus dem PDF (dort steht der LDS-Ansprechpartner),
     // sondern aus den "Eigenen Angaben" — gelten für jede Zeile gleich.
@@ -982,6 +1318,18 @@ function buildRows(polizei, am, own, visSax) {
     return match;
   }
 
+  // Bescheid ist ein Einzelpersonen-Dokument (ein Bescheid pro Antragsteller)
+  // — nur übernehmen, wenn Familien-/Vorname zur Zeile passen, sonst nichts
+  // eintragen statt zu raten.
+  function enrichFromBescheid(row, familienname, vorname) {
+    if (!bescheid || !bescheid.familienname) return;
+    const norm = s => (s || '').trim().toUpperCase();
+    if (norm(bescheid.familienname) !== norm(familienname)) return;
+    if (bescheid.vorname && vorname && norm(bescheid.vorname) !== norm(vorname)) return;
+    if (!row.azrNummer.value) set(row, 'azrNummer', bescheid.azrNummer);
+    if (!row.geburtsdatum.value) set(row, 'geburtsdatum', bescheid.geburtsdatum);
+  }
+
   // --- Hauptperson ---
   if (polizei && polizei.hauptFamilienname) {
     const row = makeRow();
@@ -989,8 +1337,10 @@ function buildRows(polizei, am, own, visSax) {
     set(row, 'vorname', polizei.hauptVorname);
     set(row, 'geburtsdatum', polizei.hauptGeburtsdatum);
     set(row, 'staatsangehoerigkeit', polizei.staatsangehoerigkeit);
+    set(row, 'geschlecht', checkboxes.hauptGeschlecht);
     row.familie = { value: 'entfällt', state: 'extracted' };
     const match = enrichFromAM(row, polizei.hauptVorname);
+    enrichFromBescheid(row, polizei.hauptFamilienname, polizei.hauptVorname);
     if (match) set(row, 'staatsangehoerigkeit', row.staatsangehoerigkeit.value || polizei.staatsangehoerigkeit);
     commonFields(row);
     rows.push(row);
@@ -1015,9 +1365,11 @@ function buildRows(polizei, am, own, visSax) {
     set(row, 'vorname', polizei.eheVorname);
     set(row, 'geburtsdatum', polizei.eheGeburtsdatum);
     set(row, 'staatsangehoerigkeit', polizei.staatsangehoerigkeit);
+    set(row, 'geschlecht', checkboxes.eheGeschlecht);
     const match = enrichFromAM(row, polizei.eheVorname);
-    const geschl = match ? match.geschlecht : '';
-    row.familie = { value: geschl === 'männlich' ? 'Mann' : geschl === 'weiblich' ? 'Frau' : '', state: match ? 'extracted' : 'missing' };
+    enrichFromBescheid(row, polizei.eheFamilienname || polizei.hauptFamilienname, polizei.eheVorname);
+    const geschl = match ? match.geschlecht : row.geschlecht.value;
+    row.familie = { value: geschl === 'männlich' ? 'Mann' : geschl === 'weiblich' ? 'Frau' : '', state: geschl ? 'extracted' : 'missing' };
     commonFields(row);
     rows.push(row);
   }
@@ -1032,6 +1384,7 @@ function buildRows(polizei, am, own, visSax) {
       set(row, 'geschlecht', kind.geschlecht);
       set(row, 'staatsangehoerigkeit', polizei.staatsangehoerigkeit);
       enrichFromAM(row, kind.vorname);
+      enrichFromBescheid(row, kind.familienname || polizei.hauptFamilienname, kind.vorname);
       row.familie = { value: kind.geschlecht === 'männlich' ? 'Sohn' : 'Tochter', state: 'extracted' };
       commonFields(row);
       rows.push(row);
@@ -1209,7 +1562,7 @@ async function handleFiles(fileList) {
 }
 
 async function processFile(file, kind) {
-  const entry = { name: file.name, type: 'unknown', polizei: null, am: null, charter: null, charterHeader: null, steuerung: null, statistikRows: null, statistikHeader: null, url: URL.createObjectURL(file), error: null };
+  const entry = { name: file.name, type: 'unknown', polizei: null, am: null, bescheid: null, charter: null, charterHeader: null, steuerung: null, statistikRows: null, statistikHeader: null, url: URL.createObjectURL(file), error: null };
   uploadedFiles.push(entry);
   try {
     if (kind === 'xlsx') {
@@ -1234,12 +1587,16 @@ async function processFile(file, kind) {
       }
     } else {
       const buf = await file.arrayBuffer();
-      const text = await extractFlatText(buf.slice(0));
+      const doc = await loadPdfDoc(buf.slice(0));
+      const text = await extractFlatTextFromDoc(doc);
       const docType = detectDocType(text);
       entry.type = docType;
-      if (docType === 'polizeiauftrag') entry.polizei = parsePolizeiauftrag(text);
-      else if (docType === 'am') entry.am = parseAM(text);
+      if (docType === 'polizeiauftrag') {
+        entry.polizei = parsePolizeiauftrag(text);
+        entry.polizei.checkboxes = await detectCheckboxesFromDoc(doc);
+      } else if (docType === 'am') entry.am = parseAM(text);
       else if (docType === 'steuerung') entry.steuerung = parseSteuerungsschreiben(text);
+      else if (docType === 'bescheid') entry.bescheid = parseBescheid(text);
       else entry.rawText = text;
     }
   } catch (err) {
@@ -1250,6 +1607,7 @@ async function processFile(file, kind) {
 function docTypeLabel(f) {
   if (f.type === 'polizeiauftrag') return 'Polizeiauftrag erkannt';
   if (f.type === 'am') return 'AM / BAMF-Mitteilung erkannt';
+  if (f.type === 'bescheid') return 'BAMF-Bescheid erkannt';
   if (f.type === 'charterliste') return `Charter-Sammelliste erkannt (${f.charter.length} Personen)`;
   if (f.type === 'steuerung') return 'Steuerungsschreiben erkannt';
   if (f.type === 'statistik') return 'Ausländerstatistik erkannt — Ordner-Generator verfügbar';
@@ -1303,11 +1661,50 @@ function togglePreview(f, idx) {
   previewArea.appendChild(iframe);
 }
 
+// Alle Familiennamen, die zu einem Polizeiauftrag gehören (Hauptperson,
+// Ehepartner, Kinder) — zum Zuordnen des passenden AM/Bescheids, wenn
+// mehrere Polizeiaufträge gleichzeitig hochgeladen wurden.
+function familyNamesOf(polizei) {
+  const names = new Set();
+  const add = n => { if (n) names.add(String(n).trim().toUpperCase()); };
+  add(polizei.hauptFamilienname);
+  add(polizei.eheFamilienname);
+  if (polizei.kinder) for (const k of polizei.kinder) add(k.familienname);
+  return names;
+}
+
+// Bei nur einer hochgeladenen AM/Bescheid-Datei UND nur einem Polizeiauftrag
+// diese wie bisher immer verwenden (Rückwärtskompatibilität für den
+// häufigsten Fall: ein Polizeiauftrag + ein AM/Bescheid — dort ist eine
+// Zuordnung per Name nicht nötig, da es nur einen Kandidaten gibt). Sobald
+// mehrere Polizeiaufträge gleichzeitig hochgeladen wurden, IMMER per Name
+// zuordnen (sonst würde bei nur einem AM/Bescheid dieses fälschlich jedem
+// Polizeiauftrag zugeordnet). Bei Uneindeutigkeit lieber keinen zuordnen
+// als einen falschen (operationell heikle Fehlzuordnung vermeiden).
+function findBestAmMatch(amEntries, polizei, singlePolizeiCase) {
+  if (!amEntries.length) return null;
+  if (amEntries.length === 1 && singlePolizeiCase) return amEntries[0];
+  const names = familyNamesOf(polizei);
+  let best = null, bestScore = 0;
+  for (const entry of amEntries) {
+    const score = (entry.am.persons || []).filter(p => names.has((p.familienname || '').trim().toUpperCase())).length;
+    if (score > bestScore) { bestScore = score; best = entry; }
+  }
+  return best;
+}
+function findBestBescheidMatch(bescheidEntries, polizei, singlePolizeiCase) {
+  if (!bescheidEntries.length) return null;
+  if (bescheidEntries.length === 1 && singlePolizeiCase) return bescheidEntries[0];
+  const names = familyNamesOf(polizei);
+  return bescheidEntries.find(entry => names.has((entry.bescheid.familienname || '').trim().toUpperCase())) || null;
+}
+
 function render() {
   renderFileList();
 
-  const polizeiEntry = uploadedFiles.find(f => f.type === 'polizeiauftrag' && !f.error);
-  const amEntry = uploadedFiles.find(f => f.type === 'am' && !f.error);
+  const polizeiEntries = uploadedFiles.filter(f => f.type === 'polizeiauftrag' && !f.error);
+  const amEntries = uploadedFiles.filter(f => f.type === 'am' && !f.error);
+  const bescheidEntries = uploadedFiles.filter(f => f.type === 'bescheid' && !f.error);
   const charterEntries = uploadedFiles.filter(f => f.type === 'charterliste' && !f.error);
   const steuerungEntry = uploadedFiles.find(f => f.type === 'steuerung' && !f.error);
   const statistikEntry = uploadedFiles.find(f => f.type === 'statistik' && !f.error);
@@ -1315,8 +1712,22 @@ function render() {
   renderFolderSection(statistikEntry);
 
   let rows = [];
-  if (polizeiEntry || amEntry) {
-    rows = rows.concat(buildRows(polizeiEntry ? polizeiEntry.polizei : null, amEntry ? amEntry.am : null, ownSettings, currentVisSax));
+  if (polizeiEntries.length) {
+    // Mehrere Polizeiaufträge gleichzeitig hochgeladen -> für jeden einzeln
+    // Zeilen erzeugen und untereinander anhängen, statt nur den ersten zu
+    // verarbeiten.
+    const singlePolizeiCase = polizeiEntries.length === 1;
+    for (const pe of polizeiEntries) {
+      const amEntry = findBestAmMatch(amEntries, pe.polizei, singlePolizeiCase);
+      const bescheidEntry = findBestBescheidMatch(bescheidEntries, pe.polizei, singlePolizeiCase);
+      rows = rows.concat(buildRows(pe.polizei, amEntry ? amEntry.am : null, bescheidEntry ? bescheidEntry.bescheid : null, ownSettings, currentVisSax));
+    }
+  } else if (amEntries.length) {
+    // Kein Polizeiauftrag vorhanden, nur AM(s) -> jede AM-Datei einzeln als
+    // Personenliste übernehmen.
+    for (const amEntry of amEntries) {
+      rows = rows.concat(buildRows(null, amEntry.am, null, ownSettings, currentVisSax));
+    }
   }
   for (const entry of charterEntries) {
     const meta = buildCharterMeta(entry.charterHeader, steuerungEntry ? steuerungEntry.steuerung : null);
@@ -1469,6 +1880,9 @@ function renderTable(rows) {
       copyBtn.title = 'Nur diesen Wert kopieren';
       copyBtn.addEventListener('mousedown', e => e.preventDefault()); // Fokus/Caret nicht stehlen
 
+      const inner = document.createElement('div');
+      inner.className = 'cellinner';
+
       if (col.type === 'select') {
         const select = document.createElement('select');
         select.className = 'cellselect';
@@ -1487,7 +1901,7 @@ function renderTable(rows) {
           select.appendChild(o);
         }
         select.addEventListener('change', () => { row[col.key].value = select.value; });
-        td.appendChild(select);
+        inner.appendChild(select);
         copyBtn.addEventListener('click', async e => {
           e.stopPropagation();
           const ok = await copyText(select.value);
@@ -1499,14 +1913,15 @@ function renderTable(rows) {
         val.contentEditable = 'true';
         val.textContent = cellData.value;
         val.addEventListener('input', () => { row[col.key].value = val.textContent; });
-        td.appendChild(val);
+        inner.appendChild(val);
         copyBtn.addEventListener('click', async e => {
           e.stopPropagation();
           const ok = await copyText(val.textContent);
           copyStatus.textContent = ok ? `„${val.textContent || '(leer)'}“ kopiert` : 'Kopieren fehlgeschlagen';
         });
       }
-      td.appendChild(copyBtn);
+      inner.appendChild(copyBtn);
+      td.appendChild(inner);
       tr.appendChild(td);
     }
     bodyRows.appendChild(tr);
