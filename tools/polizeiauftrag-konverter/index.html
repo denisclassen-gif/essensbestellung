@@ -247,6 +247,27 @@
     <button id="resetBtn">Zurücksetzen</button>
     <span class="status" id="copyStatus"></span>
   </div>
+  <div id="caseFolderBox" style="display:none;">
+    <p class="hint" id="caseFolderIntro">Erkannt: Polizeiauftrag. Pro Fall wird ein leerer Ordner nach dem Muster <code>Abschiebedatum_FAMILIENNAME_ZAB_Nummer</code> vorgeschlagen (Abschiebedatum als <code>JJMMTT</code>).</p>
+    <div class="tablewrap">
+      <table id="caseFolderTable">
+        <thead><tr><th>Datei</th><th>Ordnername</th></tr></thead>
+        <tbody id="caseFolderRows"></tbody>
+      </table>
+    </div>
+    <div class="toolbar" style="margin-top:.75rem;">
+      <button class="primary" id="createCaseFoldersBtn">Ordner jetzt direkt hier erstellen</button>
+      <span class="status" id="caseFolderStatus"></span>
+    </div>
+    <p class="hint" id="createCaseFoldersHint">Öffnet einen normalen Ordner-Auswahl-Dialog des Browsers — nach Bestätigung legt der Browser die Ordner direkt dort an. Es wird dabei <strong>nichts heruntergeladen oder ausgeführt</strong>. Bereits vorhandene Ordner werden übersprungen, es wird nichts überschrieben oder gelöscht. Funktioniert in aktuellem Chrome/Edge; falls der Button ausgegraut ist, bitte stattdessen eines der Skripte unten verwenden. Der Ordnername lässt sich vor dem Erstellen direkt in der Tabelle korrigieren.</p>
+    <details>
+      <summary class="hint" style="cursor:pointer;">Alternative: Skript zum Ausführen herunterladen (falls die direkte Erstellung oben nicht funktioniert)</summary>
+      <div class="toolbar" style="margin-top:.75rem;">
+        <button id="downloadCaseBatBtn">Windows-Skript (.bat) herunterladen</button>
+        <button id="downloadCaseShBtn">macOS/Linux-Skript (.sh) herunterladen</button>
+      </div>
+    </details>
+  </div>
   <p class="hint">Mit der Checkbox links in jeder Zeile lassen sich einzelne Zeilen auswählen — darüber gezielt nur diese kopieren oder löschen (z.&nbsp;B. wenn eine Person doppelt oder fälschlich erkannt wurde).</p>
   <p class="hint">Zellen sind editierbar — direkt in der Tabelle korrigieren, dann kopieren. Beim Einfügen in Excel: Zielzelle in Spalte <code>B</code> der nächsten freien Zeile wählen (Spalte <code>A</code> = ID, bitte manuell fortlaufend vergeben) und mit <code>Strg/Cmd+V</code> einfügen — die Werte landen automatisch in den richtigen Spalten. Über das <code>⧉</code>-Symbol, das beim Überfahren einer Zelle erscheint, lässt sich auch nur ein einzelner Wert kopieren.</p>
   <p class="hint"><strong>Gegen Formatverlust:</strong> Excel wandelt beim Einfügen reine Ziffernfolgen mit führenden Nullen (z.&nbsp;B. PLZ <code>04315</code>, Telefonnummern, AZR-/ZAB-Nummer) gerne automatisch in Zahlen um und entfernt dabei die führende Null. Am sichersten: Zielspalten vorher in Excel als <em>Text</em> formatieren (Zellen markieren → Rechtsklick → Zellen formatieren → Text), bevor eingefügt wird.</p>
@@ -1219,27 +1240,49 @@ function extractFolderRows(sheetRows, headerInfo, excelRowFrom, excelRowTo) {
   }
   return results;
 }
-function generateBatScript(rows, targetPath) {
+function generateBatScript(rows, targetPath, nameFn) {
+  nameFn = nameFn || buildFolderName;
   const lines = ['@echo off', 'setlocal', ''];
   if (targetPath) lines.push(`set "ZIEL=${targetPath.replace(/"/g, '')}"`);
   else lines.push('set "ZIEL=%~dp0"');
   lines.push('');
   for (const row of rows) {
-    lines.push(`if not exist "%ZIEL%\\${buildFolderName(row)}" mkdir "%ZIEL%\\${buildFolderName(row)}"`);
+    lines.push(`if not exist "%ZIEL%\\${nameFn(row)}" mkdir "%ZIEL%\\${nameFn(row)}"`);
   }
   lines.push('', 'echo Fertig.', 'pause');
   return lines.join('\r\n');
 }
-function generateShScript(rows, targetPath) {
+function generateShScript(rows, targetPath, nameFn) {
+  nameFn = nameFn || buildFolderName;
   const lines = ['#!/bin/sh', 'set -e', ''];
   if (targetPath) lines.push(`ZIEL="${targetPath.replace(/"/g, '\\"')}"`);
   else lines.push('ZIEL="$(cd "$(dirname "$0")" && pwd)"');
   lines.push('');
   for (const row of rows) {
-    lines.push(`mkdir -p "$ZIEL/${buildFolderName(row).replace(/"/g, '\\"')}"`);
+    lines.push(`mkdir -p "$ZIEL/${nameFn(row).replace(/"/g, '\\"')}"`);
   }
   lines.push('', 'echo "Fertig."');
   return lines.join('\n');
+}
+
+/* ---------------------------------------------------------------------- */
+/* Ordner direkt pro Polizeiauftrag-Fall (Abschnitt 2, direkt unter der    */
+/* Excel-Kopie-Zeile) — ein Ordner pro hochgeladenem Polizeiauftrag, nicht */
+/* pro Person, benannt nach Abschiebedatum/Familienname/ZAB-Nummer der    */
+/* Hauptperson. Anders als der Ordner-Generator in Abschnitt 3 (der auf    */
+/* die Ausländerstatistik bzw. Charter-Liste zielt) braucht es hier keine  */
+/* Bereichsauswahl — jeder hochgeladene Polizeiauftrag ergibt direkt eine  */
+/* Zeile.                                                                  */
+/* ---------------------------------------------------------------------- */
+function formatDateYYMMDD(ddmmyyyy) {
+  const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec((ddmmyyyy || '').trim());
+  if (!m) return '';
+  const [, dd, mm, yyyy] = m;
+  return yyyy.slice(2) + mm + dd;
+}
+function buildCaseFolderName(c) {
+  if (c.overrideName != null) return c.overrideName;
+  return `${sanitizeFolderPart(c.datum)}_${sanitizeFolderPart(c.familienname)}_ZAB_${sanitizeFolderPart(c.zab)}`;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1722,6 +1765,7 @@ function render() {
   const statistikEntry = uploadedFiles.find(f => f.type === 'statistik' && !f.error);
 
   renderFolderSection(statistikEntry, charterEntries[0] || null);
+  renderCaseFolderSection(polizeiEntries);
 
   let rows = [];
   if (polizeiEntries.length) {
@@ -1934,6 +1978,100 @@ createFoldersBtn.addEventListener('click', async () => {
     }
   }
   folderStatus.textContent = `${created} Ordner neu angelegt, ${existed} bereits vorhanden übersprungen` + (failed ? `, ${failed} fehlgeschlagen` : '') + '.';
+});
+
+/* ---------------------------------------------------------------------- */
+/* Ordner direkt pro Polizeiauftrag-Fall — Abschnitt 2 (siehe Kommentar    */
+/* bei buildCaseFolderName weiter oben)                                    */
+/* ---------------------------------------------------------------------- */
+const caseFolderBox = document.getElementById('caseFolderBox');
+const caseFolderRowsEl = document.getElementById('caseFolderRows');
+const caseFolderStatus = document.getElementById('caseFolderStatus');
+const createCaseFoldersBtn = document.getElementById('createCaseFoldersBtn');
+const createCaseFoldersHint = document.getElementById('createCaseFoldersHint');
+let currentCaseFolders = [];
+
+function renderCaseFolderSection(polizeiEntries) {
+  currentCaseFolders = polizeiEntries
+    .filter(pe => pe.polizei && pe.polizei.hauptFamilienname)
+    .map(pe => ({
+      fileName: pe.name,
+      familienname: (pe.polizei.hauptFamilienname || '').toUpperCase(),
+      datum: formatDateYYMMDD(pe.polizei.abschiebedatum),
+      zab: pe.polizei.zabNummer || '',
+      overrideName: null,
+    }));
+
+  if (!currentCaseFolders.length) {
+    caseFolderBox.style.display = 'none';
+    return;
+  }
+  caseFolderBox.style.display = '';
+
+  caseFolderRowsEl.innerHTML = '';
+  for (const c of currentCaseFolders) {
+    const tr = document.createElement('tr');
+    const tdFile = document.createElement('td');
+    tdFile.textContent = c.fileName;
+    tdFile.style.padding = '.4rem .5rem';
+    tr.appendChild(tdFile);
+
+    const tdName = document.createElement('td');
+    const missing = !c.datum || !c.familienname || !c.zab;
+    if (missing) { tdName.className = 'missing'; tdName.title = 'Mindestens ein Wert (Abschiebedatum/Familienname/ZAB-Nummer) fehlt oder konnte nicht erkannt werden — bitte hier direkt korrigieren.'; }
+    const val = document.createElement('div');
+    val.className = 'cellval';
+    val.contentEditable = 'true';
+    val.textContent = buildCaseFolderName(c);
+    val.addEventListener('input', () => { c.overrideName = val.textContent; });
+    tdName.appendChild(val);
+    tr.appendChild(tdName);
+
+    caseFolderRowsEl.appendChild(tr);
+  }
+  caseFolderStatus.textContent = `${currentCaseFolders.length} Ordner werden vorgeschlagen`;
+}
+
+if (!window.showDirectoryPicker) {
+  createCaseFoldersBtn.disabled = true;
+  createCaseFoldersBtn.title = 'Dieser Browser unterstützt die direkte Ordner-Erstellung nicht (benötigt aktuelles Chrome/Edge). Bitte eines der Skripte unten verwenden.';
+  createCaseFoldersHint.innerHTML = '<strong>Dieser Browser unterstützt die direkte Ordner-Erstellung nicht</strong> (benötigt aktuelles Chrome/Edge). Bitte stattdessen eines der Skripte unten verwenden.';
+}
+createCaseFoldersBtn.addEventListener('click', async () => {
+  if (!currentCaseFolders.length) { caseFolderStatus.textContent = 'Kein Polizeiauftrag erkannt'; return; }
+  let dirHandle;
+  try {
+    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+  } catch (e) {
+    if (e.name === 'AbortError') return; // Nutzer hat den Dialog abgebrochen
+    caseFolderStatus.textContent = 'Zugriff auf den Ordner wurde verweigert oder ist nicht möglich: ' + (e.message || e.name);
+    return;
+  }
+  caseFolderStatus.textContent = 'Ordner werden angelegt …';
+  let created = 0, existed = 0, failed = 0;
+  for (const c of currentCaseFolders) {
+    const name = buildCaseFolderName(c);
+    try {
+      let alreadyThere = true;
+      try { await dirHandle.getDirectoryHandle(name, { create: false }); }
+      catch (e) { alreadyThere = false; }
+      await dirHandle.getDirectoryHandle(name, { create: true });
+      if (alreadyThere) existed++; else created++;
+    } catch (e) {
+      failed++;
+    }
+  }
+  caseFolderStatus.textContent = `${created} Ordner neu angelegt, ${existed} bereits vorhanden übersprungen` + (failed ? `, ${failed} fehlgeschlagen` : '') + '.';
+});
+document.getElementById('downloadCaseBatBtn').addEventListener('click', () => {
+  if (!currentCaseFolders.length) { caseFolderStatus.textContent = 'Kein Polizeiauftrag erkannt'; return; }
+  downloadTextFile('ordner_erstellen.bat', generateBatScript(currentCaseFolders, '', buildCaseFolderName));
+  caseFolderStatus.textContent = `${currentCaseFolders.length} Ordner im .bat-Skript vorbereitet`;
+});
+document.getElementById('downloadCaseShBtn').addEventListener('click', () => {
+  if (!currentCaseFolders.length) { caseFolderStatus.textContent = 'Kein Polizeiauftrag erkannt'; return; }
+  downloadTextFile('ordner_erstellen.sh', generateShScript(currentCaseFolders, '', buildCaseFolderName));
+  caseFolderStatus.textContent = `${currentCaseFolders.length} Ordner im .sh-Skript vorbereitet`;
 });
 
 function renderTable(rows) {
