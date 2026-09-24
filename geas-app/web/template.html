@@ -150,6 +150,49 @@
   .modal .sheet { background: var(--bg); width: 100%; max-width: 760px; border-radius: 16px 16px 0 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); max-height: 92vh; overflow: auto; }
   .modal .sheet label { display: block; font-size: 13px; color: var(--muted); margin: 12px 4px 4px; }
   a { color: var(--accent); }
+  .hero { background: var(--card); border-radius: 16px; padding: 18px 16px; }
+  .hero h2 { margin: 0 0 6px; font-size: 21px; color: var(--accent); }
+  .btn.big { font-size: 19px; padding: 18px; }
+  .num { width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; display: grid; place-items: center; flex: none; font-size: 14px; }
+  .steprow { display: flex; gap: 12px; align-items: flex-start; padding: 11px 14px; border-bottom: 0.5px solid var(--line); }
+  .steprow:last-child { border-bottom: 0; }
+  .qstep { color: var(--accent); font-weight: 700; font-size: 15px; margin: 6px 0 4px; }
+  .qbig { font-size: 23px; font-weight: 700; line-height: 1.3; margin: 0 0 14px; }
+  .help { background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; font-size: 15px; margin-bottom: 12px; }
+  .examples { font-size: 14px; color: var(--muted); margin: 0 4px 14px; }
+  .examples ul { margin: 4px 0 0; padding-left: 18px; }
+  .answer {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 64px; text-align: left;
+    padding: 16px; margin: 0 0 12px; border-radius: 14px; border: 1.5px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    background: var(--accent-soft); color: var(--text); font: inherit; font-weight: 600; cursor: pointer;
+  }
+  .answer::after { content: "›"; font-size: 26px; color: var(--accent); }
+  .wizbar { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
+  .wizbar button { background: none; border: 0; font: inherit; color: var(--accent); cursor: pointer; padding: 8px 0; }
+  .wizbar button.red { color: var(--bad); }
+  .result { border-radius: 16px; padding: 16px; border: 2px solid; margin-bottom: 18px; }
+  .result h2 { margin: 0 0 8px; font-size: 24px; }
+  .result.screening { background: var(--warn-soft); border-color: var(--warn); }
+  .result.screening h2 { color: var(--warn); }
+  .result.kein { background: var(--ok-soft); border-color: var(--ok); }
+  .result.kein h2 { color: var(--ok); }
+  .result.sonder { background: var(--accent-soft); border-color: var(--accent); }
+  .result.sonder h2 { color: var(--accent); }
+  .frist { background: var(--card); border-radius: 14px; padding: 14px 16px; }
+  .frist .d { font-size: 19px; font-weight: 700; }
+  .frist .rot { color: var(--bad); }
+  .frist .orange { color: var(--warn); }
+  input[type=datetime-local] { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; }
+  pre.proto { white-space: pre-wrap; background: var(--card); border-radius: 12px; padding: 14px; font-size: 13px; margin: 8px 0; }
+  .onb { text-align: left; }
+  .onb .icon { font-size: 52px; text-align: center; margin: 8px 0; }
+  .onb h2 { font-size: 26px; margin: 4px 0 10px; }
+  .dots { display: flex; justify-content: center; gap: 7px; margin: 14px 0 6px; }
+  .dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+  .dots span.on { background: var(--accent); }
+  .confirm { display: flex; gap: 12px; align-items: center; font-weight: 600; background: var(--card); border-radius: 12px; padding: 14px; cursor: pointer; }
+  .confirm input { width: 24px; height: 24px; accent-color: var(--accent); flex: none; }
+  .modal .sheet label.confirm { display: flex; font-size: 17px; color: var(--text); margin: 0 0 4px; }
 </style>
 </head>
 <body>
@@ -202,6 +245,7 @@ const ring = v => {
     <text x="38" y="43" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor">${p} %</text></svg>`;
 };
 const ICON = {
+  screening: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 8v5M12 16v.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
   wissen: '<path d="M4 5h5v14H4zM10 5h5v14h-5zM16 6l4 1-3 13-4-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
   einsatz: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.8"/>',
   lernen: '<path d="M2 9l10-5 10 5-10 5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6" fill="none" stroke="currentColor" stroke-width="1.8"/>',
@@ -213,16 +257,16 @@ const glyph = n => ({
   "globe.europe.africa": "🌍", "person.text.rectangle": "🪪", "touchid": "☝", "doc.text.magnifyingglass": "📄",
   "arrow.left.arrow.right.circle": "⇄", "airplane.departure": "✈", "lock.shield": "🔒", "figure.and.child.holdinghands": "👪",
   "scalemass": "⚖", "building.columns": "🏛", "shield.lefthalf.filled": "🛡", "person.crop.circle.badge.questionmark": "❓",
-  "hand.raised": "✋", "list.clipboard": "📋", "checklist": "☑", "lock.doc": "🔐", "figure.child": "🧒"
+  "hand.raised": "✋", "list.clipboard": "📋", "checklist": "☑", "lock.doc": "🔐", "figure.child": "🧒", "checkmark.shield": "🛡"
 }[n] || "•");
 
 // ---------- Router ----------
 const app = document.getElementById("app");
 const titleEl = document.getElementById("title");
 const backBtn = document.getElementById("back");
-const TABS = [["wissen", "Wissen"], ["einsatz", "Einsatz"], ["lernen", "Lernen"], ["suche", "Suche"], ["mehr", "Mehr"]];
+const TABS = [["screening", "Screening"], ["wissen", "Wissen"], ["einsatz", "Einsatz"], ["lernen", "Lernen"], ["mehr", "Mehr"]];
 let stack = [];
-let tab = "wissen";
+let tab = "screening";
 
 function go(view, push = true) {
   if (push) stack.push(view); else stack = [view];
@@ -261,8 +305,12 @@ function Wissen() {
     html: `<div class="info"><div><div class="small">${esc(C.meta.untertitel)}</div>
       <div class="progress"><div style="width:${(n / t) * 100}%"></div></div>
       <div class="small">${n} von ${t} Kapiteln gelesen · Stand ${esc(C.meta.stand)}</div></div></div>
+      <div class="card" style="margin-top:14px"><button class="row" id="ws"><span class="ico">🔍</span><span class="txt"><span class="t">Suche & Glossar</span></span><span class="chev"></span></button></div>
       <h2 class="sec">Kapitel</h2><div class="card">${C.kapitel.map(kapitelRow).join("")}</div>`,
-    bind: () => on("[data-k]", el => go(() => KapitelDetail(el.dataset.k)))
+    bind: () => {
+      on("[data-k]", el => go(() => KapitelDetail(el.dataset.k)));
+      document.getElementById("ws").onclick = () => go(Suche);
+    }
   };
 }
 function KapitelDetail(id) {
@@ -465,6 +513,161 @@ function Karten() {
   return self;
 }
 
+// ---------- Screening-Prüfung ----------
+const SP = C.screening;
+const fmtDatum = d => d.toLocaleString("de-DE", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " Uhr";
+const lokalISO = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+function fristenHTML() {
+  return `<div class="frist"><label for="fa"><b>Aufgriff (Datum und Uhrzeit)</b></label>
+    <input type="datetime-local" id="fa" value="${lokalISO(new Date())}" style="margin:8px 0 14px">
+    <div class="small"><b>Richterliche Entscheidung spätestens</b></div><div class="d rot" id="f1"></div>
+    <div class="small" style="margin-bottom:12px">Nur wenn die Person festgehalten wird. Ohne Entscheidung bis dahin: freilassen.</div>
+    <div class="small"><b>Screening abgeschlossen spätestens</b></div><div class="d orange" id="f2"></div>
+    <div class="small" style="margin-bottom:12px">Höchstdauer des Screenings im Inland: 3 Tage.</div>
+    <div class="small">Hilfsrechnung ohne Gewähr. Im Zweifel gilt die frühere Frist; mit der Dienstgruppenleitung abstimmen.</div></div>`;
+}
+function fristenBind() {
+  const inp = document.getElementById("fa");
+  if (!inp) return;
+  const upd = () => {
+    const a = new Date(inp.value);
+    if (isNaN(a)) return;
+    const richter = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1, 23, 59);
+    const ende = new Date(a.getTime()); ende.setDate(ende.getDate() + 3);
+    document.getElementById("f1").textContent = fmtDatum(richter);
+    document.getElementById("f2").textContent = fmtDatum(ende);
+  };
+  inp.oninput = upd; upd();
+}
+
+function ScreeningStart() {
+  const faelle = C.quiz.filter(q => q.kapitel === "screening");
+  return {
+    title: "Screening",
+    html: `<div class="hero"><h2>🛡 Ist ein Screening durchzuführen?</h2>
+        <p style="margin:0 0 6px">Beantworte einfach eine Frage nach der anderen. Am Ende steht eindeutig, ob du ein Screening durchführen musst – und was du jetzt tun musst.</p>
+        <button class="btn big" id="ss">▶ Prüfung starten</button></div>
+      <h2 class="sec">So gehst du vor</h2><div class="card">${SP.kurzanleitung.map((t, i) => `<div class="steprow"><span class="num">${i + 1}</span><span>${esc(t)}</span></div>`).join("")}</div>
+      <h2 class="sec">Werkzeuge</h2><div class="card">
+        <button class="row" id="sf"><span class="ico">⏱</span><span class="txt"><span class="t">Fristenrechner</span><br><span class="s">Aufgriffszeit eingeben</span></span><span class="chev"></span></button>
+        <button class="row" id="sc"><span class="ico">☑</span><span class="txt"><span class="t">Checkliste: Screening durchführen</span></span><span class="chev"></span></button>
+        <button class="row" id="sq2"><span class="ico">?</span><span class="txt"><span class="t">${faelle.length} Fallbeispiele üben</span></span><span class="chev"></span></button>
+        <button class="row" id="sk"><span class="ico">📖</span><span class="txt"><span class="t">Hintergrund: Kapitel Screening</span></span><span class="chev"></span></button></div>
+      <h2 class="sec">Grundsätze</h2><div class="card">${SP.grundsaetze.map(t => `<div class="steprow"><span style="color:var(--warn)">⚠</span><span>${esc(t)}</span></div>`).join("")}</div>`,
+    bind: () => {
+      document.getElementById("ss").onclick = () => go(ScreeningWizard());
+      document.getElementById("sf").onclick = () => go(() => ({ title: "Fristenrechner", html: fristenHTML(), bind: fristenBind }));
+      document.getElementById("sc").onclick = () => go(() => Checkliste("screening-inland"));
+      document.getElementById("sq2").onclick = () => go(Quiz(faelle, "Fallbeispiele Screening"));
+      document.getElementById("sk").onclick = () => go(() => KapitelDetail("screening"));
+    }
+  };
+}
+
+function ScreeningWizard() {
+  let verlauf = [];          // [{id, antwort}]
+  let aktuell = SP.start;
+  let erledigt = new Set();
+  const protokoll = k => {
+    const z = ["Screening-Prüfung – Prüfprotokoll", "Erstellt: " + fmtDatum(new Date()), ""];
+    verlauf.forEach((v, i) => { const q = SP.knoten[v.id]; z.push(`${i + 1}. ${q.frage}`, `   Antwort: ${q.antworten[v.antwort].text}`); });
+    z.push("", "Ergebnis: " + k.titel);
+    if (k.rechtsgrundlage) z.push("Rechtsgrundlage: " + k.rechtsgrundlage);
+    z.push("", "Erstellt mit GEAS Hilfe (inoffizielle Arbeitshilfe). Enthält keine personenbezogenen Daten.");
+    return z.join("\n");
+  };
+  const leiste = () => verlauf.length ? `<div class="wizbar"><button id="wb">‹ Vorherige Frage</button><button class="red" id="wr">↺ Neu starten</button></div>` : "";
+  const view = () => {
+    const k = SP.knoten[aktuell];
+    if (k.typ === "frage") {
+      return {
+        title: "Screening-Prüfung",
+        html: `<div class="qstep">Frage ${verlauf.length + 1}${k.schritt ? " · " + esc(k.schritt) : ""}</div>
+          <div class="qbig">${esc(k.frage)}</div>
+          ${k.hilfe ? `<div class="help">ℹ️ ${inline(k.hilfe)}</div>` : ""}
+          ${k.beispiele && k.beispiele.length ? `<div class="examples"><b>Beispiele</b><ul>${k.beispiele.map(b => `<li>${esc(b)}</li>`).join("")}</ul></div>` : ""}
+          ${k.antworten.map((a, i) => `<button class="answer" data-w="${i}">${esc(a.text)}</button>`).join("")}
+          ${leiste()}`,
+        bind
+      };
+    }
+    const text = protokoll(k);
+    return {
+      title: "Ergebnis",
+      html: `<div class="result ${k.ergebnis}"><h2>${k.ergebnis === "screening" ? "⚠️" : k.ergebnis === "kein" ? "✅" : "ℹ️"} ${esc(k.titel)}</h2><div>${esc(k.kurz)}</div></div>
+        ${k.schritte && k.schritte.length ? `<h2 style="margin:0 0 2px">Das musst du jetzt tun</h2><p class="small" style="margin:0 0 8px">Punkt für Punkt abhaken.</p>
+        <div class="card">${k.schritte.map((st, i) => `<button class="row check" data-st="${i}" role="checkbox" aria-checked="${erledigt.has(i)}">
+          <span class="box ${erledigt.has(i) ? "on" : ""}" style="${erledigt.has(i) ? "" : "border-color:var(--accent);color:var(--accent)"}">${erledigt.has(i) ? "✓" : i + 1}</span>
+          <span class="txt"><span class="${erledigt.has(i) ? "strike" : ""}">${esc(st.text)}</span>${st.hinweis ? `<br><span class="s">${esc(st.hinweis)}</span>` : ""}</span></button>`).join("")}</div>` : ""}
+        ${k.fristen ? `<h2 style="margin:22px 0 8px">Fristen</h2>${fristenHTML()}` : ""}
+        ${k.rechtsgrundlage ? `<p class="small" style="margin:14px 4px"><b>Rechtsgrundlage:</b> ${esc(k.rechtsgrundlage)}</p>` : ""}
+        <h2 style="margin:22px 0 2px">Prüfprotokoll</h2><p class="small" style="margin:0">Für die Vorgangsdokumentation kopieren.</p>
+        <pre class="proto">${esc(text)}</pre>
+        <button class="btn sec" id="wc">📋 Protokoll kopieren</button>
+        ${k.ergebnis === "screening" ? '<button class="btn sec" id="wl">☑ Zur Checkliste „Screening durchführen“</button>' : ""}
+        <button class="btn" id="wn">↺ Neue Prüfung starten</button>
+        ${leiste()}`,
+      bind: () => {
+        bind();
+        on("[data-st]", el => { const i = +el.dataset.st; erledigt.has(i) ? erledigt.delete(i) : erledigt.add(i); const y = window.scrollY; render(); window.scrollTo(0, y); });
+        fristenBind();
+        document.getElementById("wc").onclick = e => {
+          const ok = () => { e.target.textContent = "✔ Kopiert"; };
+          if (navigator.clipboard) navigator.clipboard.writeText(text).then(ok, () => alert(text)); else alert(text);
+        };
+        const wl = document.getElementById("wl"); if (wl) wl.onclick = () => go(() => Checkliste("screening-inland"));
+        document.getElementById("wn").onclick = neu;
+      }
+    };
+  };
+  const neu = () => { verlauf = []; aktuell = SP.start; erledigt = new Set(); render(); };
+  function bind() {
+    on("[data-w]", el => {
+      const i = +el.dataset.w;
+      verlauf.push({ id: aktuell, antwort: i });
+      aktuell = SP.knoten[aktuell].antworten[i].ziel;
+      erledigt = new Set();
+      render();
+    });
+    const wb = document.getElementById("wb");
+    if (wb) wb.onclick = () => { const l = verlauf.pop(); aktuell = l.id; erledigt = new Set(); render(); };
+    const wr = document.getElementById("wr");
+    if (wr) wr.onclick = neu;
+  }
+  return view;
+}
+
+// ---------- Einführung ----------
+function onboarding(erneut = false) {
+  if (!erneut) { try { if (localStorage.getItem("geas.onboarding.v1") === "1") return; } catch (e) {} }
+  const seiten = C.onboarding;
+  let i = 0;
+  const m = document.createElement("div");
+  m.className = "modal";
+  const draw = () => {
+    const last = i === seiten.length - 1, p = seiten[i];
+    const icons = { "hand.wave": "👋", "checkmark.shield": "🛡", "exclamationmark.triangle": "⚠️", "square.grid.2x2": "🧭", "lock.shield": "🔒" };
+    m.innerHTML = `<div class="sheet onb" role="dialog" aria-label="Einführung">
+      <div class="small" style="display:flex;justify-content:space-between"><span>Einführung ${i + 1} von ${seiten.length}</span>${last ? "" : '<a href="#" id="oj">Zum letzten Schritt</a>'}</div>
+      <div class="icon">${icons[p.icon] || "ℹ️"}</div><h2>${esc(p.titel)}</h2><div class="prose" style="padding:0;background:none;font-size:18px">${rich(p.text)}</div>
+      <div class="dots">${seiten.map((_, j) => `<span class="${j === i ? "on" : ""}"></span>`).join("")}</div>
+      ${last ? `<label class="confirm"><input type="checkbox" id="oc"> Ich habe den Hinweis gelesen und verstanden.</label>
+        <button class="btn big" id="og" disabled>Los geht's</button>` :
+        `<div class="hstack">${i > 0 ? '<button class="btn sec" id="op">Zurück</button>' : ""}<button class="btn" id="on">Weiter</button></div>`}
+    </div>`;
+    const q = s => m.querySelector(s);
+    if (q("#oj")) q("#oj").onclick = e => { e.preventDefault(); i = seiten.length - 1; draw(); };
+    if (q("#op")) q("#op").onclick = () => { i--; draw(); };
+    if (q("#on")) q("#on").onclick = () => { i++; draw(); };
+    if (q("#oc")) q("#oc").onchange = e => { q("#og").disabled = !e.target.checked; };
+    if (q("#og")) q("#og").onclick = () => { try { localStorage.setItem("geas.onboarding.v1", "1"); } catch (e) {} m.remove(); };
+    m.querySelector(".sheet").scrollTop = 0;
+  };
+  draw();
+  document.body.appendChild(m);
+}
+
 // ---------- Suche ----------
 function Suche() {
   return {
@@ -501,12 +704,16 @@ function Mehr() {
   return {
     title: "Mehr",
     html: `<h2 class="sec">Einsatz</h2><div class="card"><button class="row" id="kt"><span class="ico">📞</span><span class="txt"><span class="t">Wichtige Erreichbarkeiten</span></span><span class="chev"></span></button></div>
+      <h2 class="sec">Hilfe</h2><div class="card"><button class="row" id="ob"><span class="ico">▶</span><span class="txt"><span class="t">Einführung erneut ansehen</span></span><span class="chev"></span></button></div>
       <h2 class="sec">Über diese App</h2>
       <section class="prose"><h3>Wichtiger Hinweis</h3><p>${esc(C.meta.hinweis)}</p></section>
       <section class="prose"><h3>Quellen & Rechtsstand</h3><ul>${C.quellen.map(q => `<li>${esc(q)}</li>`).join("")}</ul>
       <p class="small">Version ${esc(C.meta.version)} · Inhaltsstand ${esc(C.meta.stand)}</p></section>
       <section class="prose"><h3>Auf dem iPhone installieren</h3><p>In Safari öffnen → Teilen-Symbol → „Zum Home-Bildschirm“. Die App funktioniert danach wie eine normale App – auch offline.</p></section>`,
-    bind: () => document.getElementById("kt").onclick = () => go(Kontakte)
+    bind: () => {
+      document.getElementById("kt").onclick = () => go(Kontakte);
+      document.getElementById("ob").onclick = () => onboarding(true);
+    }
   };
 }
 function Kontakte() {
@@ -555,20 +762,10 @@ function editKontakt(i) {
 }
 
 // ---------- Start ----------
-const ROOT = { wissen: Wissen, einsatz: Einsatz, lernen: Lernen, suche: Suche, mehr: Mehr };
-function hinweis() {
-  try { if (localStorage.getItem("geas.hinweis") === "1") return; } catch (e) {}
-  const m = document.createElement("div");
-  m.className = "modal";
-  m.innerHTML = `<div class="sheet" role="dialog" aria-label="Hinweis"><div style="font-size:40px">🛡</div>
-    <h2 style="margin:6px 0">${esc(C.meta.titel)}</h2><p class="small"><b>${esc(C.meta.untertitel)}</b></p>
-    <p>${esc(C.meta.hinweis)}</p><p class="small">Stand: ${esc(C.meta.stand)}</p><button class="btn" id="ok">Verstanden</button></div>`;
-  document.body.appendChild(m);
-  m.querySelector("#ok").onclick = () => { try { localStorage.setItem("geas.hinweis", "1"); } catch (e) {} m.remove(); };
-}
+const ROOT = { screening: ScreeningStart, wissen: Wissen, einsatz: Einsatz, lernen: Lernen, mehr: Mehr };
 renderTabs();
-go(ROOT.wissen, false);
-hinweis();
+go(ROOT.screening, false);
+onboarding();
 if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 </body>

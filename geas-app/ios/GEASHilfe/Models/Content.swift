@@ -10,10 +10,14 @@ struct AppContent: Decodable {
     let quiz: [QuizFrage]
     let kontakte: [Kontakt]
     let quellen: [String]
+    let onboarding: [OnboardingSeite]
+    let screening: ScreeningPruefung
 
     static let empty = AppContent(
         meta: Meta(titel: "GEAS & Rückführung", untertitel: "", version: "", stand: "", hinweis: ""),
-        kapitel: [], checklisten: [], fristen: [], normen: [], glossar: [], quiz: [], kontakte: [], quellen: []
+        kapitel: [], checklisten: [], fristen: [], normen: [], glossar: [], quiz: [], kontakte: [], quellen: [],
+        onboarding: [],
+        screening: ScreeningPruefung(start: "", kurzanleitung: [], grundsaetze: [], knoten: [:])
     )
 
     static func loadFromBundle() -> AppContent {
@@ -100,4 +104,46 @@ struct Kontakt: Decodable, Hashable {
     let name: String
     let rolle: String
     let telefon: String
+}
+
+struct OnboardingSeite: Decodable, Hashable {
+    let icon: String
+    let titel: String
+    let text: String
+}
+
+/// Entscheidungsbaum „Ist ein Screening durchzuführen?“ – Fragen führen über `antworten[].ziel` zu Ergebnissen.
+struct ScreeningPruefung: Decodable {
+    let start: String
+    let kurzanleitung: [String]
+    let grundsaetze: [String]
+    let knoten: [String: ScreeningKnoten]
+}
+
+struct ScreeningKnoten: Decodable, Hashable {
+    enum Ergebnis: String, Decodable {
+        case screening, kein, sonder
+    }
+
+    struct Antwort: Decodable, Hashable {
+        let text: String
+        let ziel: String
+    }
+
+    let typ: String
+    // Frage
+    let schritt: String?
+    let frage: String?
+    let hilfe: String?
+    let beispiele: [String]?
+    let antworten: [Antwort]?
+    // Ergebnis
+    let ergebnis: Ergebnis?
+    let titel: String?
+    let kurz: String?
+    let fristen: Bool?
+    let schritte: [ChecklistPunkt]?
+    let rechtsgrundlage: String?
+
+    var istFrage: Bool { typ == "frage" }
 }

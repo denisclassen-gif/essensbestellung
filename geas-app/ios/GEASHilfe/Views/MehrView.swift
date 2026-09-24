@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MehrView: View {
     @Environment(\.appContent) private var content
+    @State private var einfuehrung = false
 
     var body: some View {
         NavigationStack {
@@ -11,6 +12,13 @@ struct MehrView: View {
                         KontakteView()
                     } label: {
                         Label("Wichtige Erreichbarkeiten", systemImage: "phone")
+                    }
+                }
+                Section("Hilfe") {
+                    Button {
+                        einfuehrung = true
+                    } label: {
+                        Label("Einführung erneut ansehen", systemImage: "play.rectangle")
                     }
                 }
                 Section("Über diese App") {
@@ -29,6 +37,9 @@ struct MehrView: View {
                 }
             }
             .navigationTitle("Mehr")
+            .fullScreenCover(isPresented: $einfuehrung) {
+                OnboardingView(seiten: content.onboarding) { einfuehrung = false }
+            }
         }
     }
 }

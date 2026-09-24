@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Volltextsuche über Kapitel, Paragraphen und Glossar.
+/// Volltextsuche über Kapitel, Paragraphen und Glossar. Wird aus dem Reiter „Wissen“ geöffnet.
 struct SucheView: View {
     @Environment(\.appContent) private var content
     @EnvironmentObject private var progress: ProgressStore
@@ -23,40 +23,37 @@ struct SucheView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                if !suche.isEmpty {
-                    if !kapitelTreffer.isEmpty {
-                        Section("Kapitel") {
-                            ForEach(kapitelTreffer) { k in
-                                NavigationLink(value: k) {
-                                    KapitelZeile(kapitel: k, gelesen: progress.istGelesen(k))
-                                }
+        List {
+            if !suche.isEmpty {
+                if !kapitelTreffer.isEmpty {
+                    Section("Kapitel") {
+                        ForEach(kapitelTreffer) { k in
+                            NavigationLink(value: k) {
+                                KapitelZeile(kapitel: k, gelesen: progress.istGelesen(k))
                             }
                         }
                     }
-                    if !normTreffer.isEmpty {
-                        Section("Paragraphen") {
-                            ForEach(normTreffer) { NormZeile(norm: $0) }
-                        }
-                    }
                 }
-                Section(suche.isEmpty ? "Glossar A–Z" : "Glossar") {
-                    ForEach(glossarTreffer) { eintrag in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(eintrag.begriff).font(.headline)
-                            Text(eintrag.erklaerung).font(.callout).foregroundStyle(.secondary)
-                        }
-                        .padding(.vertical, 2)
+                if !normTreffer.isEmpty {
+                    Section("Paragraphen") {
+                        ForEach(normTreffer) { NormZeile(norm: $0) }
                     }
-                }
-                if !suche.isEmpty && kapitelTreffer.isEmpty && normTreffer.isEmpty && glossarTreffer.isEmpty {
-                    Text("Keine Treffer für „\(suche)“.").foregroundStyle(.secondary)
                 }
             }
-            .searchable(text: $suche, placement: .navigationBarDrawer(displayMode: .always), prompt: "Begriff, Paragraph, Thema …")
-            .navigationTitle("Suche & Glossar")
-            .navigationDestination(for: Kapitel.self) { KapitelDetailView(kapitel: $0) }
+            Section(suche.isEmpty ? "Glossar A–Z" : "Glossar") {
+                ForEach(glossarTreffer) { eintrag in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(eintrag.begriff).font(.headline)
+                        Text(eintrag.erklaerung).font(.callout).foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+            if !suche.isEmpty && kapitelTreffer.isEmpty && normTreffer.isEmpty && glossarTreffer.isEmpty {
+                Text("Keine Treffer für „\(suche)“.").foregroundStyle(.secondary)
+            }
         }
+        .searchable(text: $suche, placement: .navigationBarDrawer(displayMode: .always), prompt: "Begriff, Paragraph, Thema …")
+        .navigationTitle("Suche & Glossar")
     }
 }

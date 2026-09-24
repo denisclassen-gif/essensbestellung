@@ -20,6 +20,14 @@ struct WissenView: View {
                     .padding(.vertical, 4)
                 }
 
+                Section {
+                    NavigationLink {
+                        SucheView()
+                    } label: {
+                        Label("Suche & Glossar", systemImage: "magnifyingglass")
+                    }
+                }
+
                 Section("Kapitel") {
                     ForEach(content.kapitel) { kapitel in
                         NavigationLink(value: kapitel) {

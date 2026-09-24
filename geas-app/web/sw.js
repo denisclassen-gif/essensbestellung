@@ -1,5 +1,5 @@
 // Offline-Cache für die Web-App. Version wird von tools/build_web.py eingesetzt.
-const CACHE = "geas-hilfe-1.0.0";
+const CACHE = "geas-hilfe-1.1.0";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-512.png"];
 
 self.addEventListener("install", e => {

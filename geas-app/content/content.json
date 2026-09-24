@@ -2,7 +2,7 @@
   "meta": {
     "titel": "GEAS & Rückführung",
     "untertitel": "Einsatz- und Lernhilfe für den Polizeivollzugsdienst – Zuschnitt Polizei Sachsen / PD Leipzig",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "stand": "September 2026",
     "hinweis": "Diese App ist eine inoffizielle Arbeits- und Lernhilfe. Sie ersetzt weder Gesetzestext, Erlasse, Dienstanweisungen der Polizei Sachsen noch die Weisung der zuständigen Ausländerbehörde oder der Führung im Einsatz. Rechtsstand: GEAS-Reform (EU) und GEAS-Anpassungsgesetz, in Kraft seit 12.06.2026. Paragraphenangaben zum neuen nationalen Recht vor dienstlicher Verwendung stets gegen die aktuelle Gesetzesfassung und die Erlasslage des SMI prüfen. Keine personenbezogenen Daten in dieser App speichern."
   },
@@ -343,21 +343,95 @@
   ],
   "checklisten": [
     {
+      "id": "screening-inland",
+      "titel": "Screening im Inland durchführen",
+      "icon": "checkmark.shield",
+      "kontext": "Die Screening-Prüfung hat ergeben: Screening durchführen",
+      "punkte": [
+        {
+          "text": "Aufgriffszeit notiert",
+          "hinweis": "Fristenrechner im Reiter Screening"
+        },
+        {
+          "text": "Belehrung in verständlicher Sprache (Dolmetscher)"
+        },
+        {
+          "text": "Minderjährigkeit/Vulnerabilität geprüft, ggf. Jugendamt informiert"
+        },
+        {
+          "text": "Festhalten erforderlich? Wenn ja: richterliche Entscheidung beantragt",
+          "hinweis": "Bis Ende des Folgetages"
+        },
+        {
+          "text": "Identität geprüft, Dokumente gesichert"
+        },
+        {
+          "text": "Sicherheitsabfragen durchgeführt (SIS, INPOL, weitere)"
+        },
+        {
+          "text": "ED-Behandlung / Eurodac (Fingerabdrücke + Gesichtsbild)"
+        },
+        {
+          "text": "Gesundheitskontrolle durch die Gesundheitsbehörde veranlasst"
+        },
+        {
+          "text": "Vulnerabilität dokumentiert"
+        },
+        {
+          "text": "Screening-Formular vollständig ausgefüllt"
+        },
+        {
+          "text": "Asylgesuch? Wörtlich dokumentiert"
+        },
+        {
+          "text": "Übergabe an die zuständige Stelle erfolgt"
+        },
+        {
+          "text": "Abschluss innerhalb von 3 Tagen, Vorgang dokumentiert"
+        }
+      ]
+    },
+    {
       "id": "aufgriff",
       "titel": "Aufgriff: unerlaubter Aufenthalt",
       "icon": "person.crop.circle.badge.questionmark",
       "kontext": "Kontrolle einer Person ohne Aufenthaltsnachweis im Bereich der PD Leipzig",
       "punkte": [
-        { "text": "Eigensicherung, Personalien erheben, Dokumente sichten", "hinweis": "Ausweispflicht § 48 AufenthG" },
-        { "text": "Abfragen: INPOL, AZR, SIS, Eurodac/ED-Bestand", "hinweis": "Bereits erfasst/überprüft? Ausschreibungen? Duldung/Gestattung?" },
-        { "text": "Aufenthaltsstatus klären (Titel, Duldung, Gestattung, Ankunftsnachweis)" },
-        { "text": "Asylgesuch geäußert? → wörtlich dokumentieren, Weiterleitung einleiten", "hinweis": "Polizei prüft keine Asylgründe" },
-        { "text": "Minderjährigkeit/Vulnerabilität erkennbar? → Jugendamt/Fachstellen" },
-        { "text": "Screening im Inland erforderlich? (§ 15b AufenthG, max. 3 Tage)", "hinweis": "Nicht, wenn bereits an Außengrenze überprüft" },
-        { "text": "Festhalten erforderlich? Richterliche Entscheidung bis Ende des Folgetages herbeiführen" },
-        { "text": "Strafanzeige prüfen (§ 95 AufenthG / § 85 AsylG)", "hinweis": "Art. 31 GFK, § 95 Abs. 5" },
-        { "text": "Zuständige Ausländerbehörde / ZAB informieren" },
-        { "text": "Dokumentation vollständig (Aliaspersonalien, Äußerungen, Maßnahmen)" }
+        {
+          "text": "Eigensicherung, Personalien erheben, Dokumente sichten",
+          "hinweis": "Ausweispflicht § 48 AufenthG"
+        },
+        {
+          "text": "Abfragen: INPOL, AZR, SIS, Eurodac/ED-Bestand",
+          "hinweis": "Bereits erfasst/überprüft? Ausschreibungen? Duldung/Gestattung?"
+        },
+        {
+          "text": "Aufenthaltsstatus klären (Titel, Duldung, Gestattung, Ankunftsnachweis)"
+        },
+        {
+          "text": "Asylgesuch geäußert? → wörtlich dokumentieren, Weiterleitung einleiten",
+          "hinweis": "Polizei prüft keine Asylgründe"
+        },
+        {
+          "text": "Minderjährigkeit/Vulnerabilität erkennbar? → Jugendamt/Fachstellen"
+        },
+        {
+          "text": "Screening im Inland erforderlich? (§ 15b AufenthG, max. 3 Tage)",
+          "hinweis": "Nicht, wenn bereits an Außengrenze überprüft"
+        },
+        {
+          "text": "Festhalten erforderlich? Richterliche Entscheidung bis Ende des Folgetages herbeiführen"
+        },
+        {
+          "text": "Strafanzeige prüfen (§ 95 AufenthG / § 85 AsylG)",
+          "hinweis": "Art. 31 GFK, § 95 Abs. 5"
+        },
+        {
+          "text": "Zuständige Ausländerbehörde / ZAB informieren"
+        },
+        {
+          "text": "Dokumentation vollständig (Aliaspersonalien, Äußerungen, Maßnahmen)"
+        }
       ]
     },
     {
@@ -366,13 +440,27 @@
       "icon": "hand.raised",
       "kontext": "Eine Person äußert gegenüber Polizeibeamten einen Schutzwunsch",
       "punkte": [
-        { "text": "Schutzwunsch wörtlich dokumentieren (Zeit, Sprache, Dolmetscher)" },
-        { "text": "Personalien und Dokumente sichern" },
-        { "text": "ED-Behandlung (§ 16 AsylG) / Eurodac, falls nicht erfolgt" },
-        { "text": "Information der Person über das weitere Verfahren (Merkblatt in Landessprache)" },
-        { "text": "Weiterleitung an die zuständige Aufnahmeeinrichtung (vgl. § 19 AsylG)" },
-        { "text": "Bei laufender Abschiebung: sofort ZAB/LDS informieren und Weisung abwarten" },
-        { "text": "Vulnerabilität (Minderjährige, Kranke, Schwangere) vermerken" }
+        {
+          "text": "Schutzwunsch wörtlich dokumentieren (Zeit, Sprache, Dolmetscher)"
+        },
+        {
+          "text": "Personalien und Dokumente sichern"
+        },
+        {
+          "text": "ED-Behandlung (§ 16 AsylG) / Eurodac, falls nicht erfolgt"
+        },
+        {
+          "text": "Information der Person über das weitere Verfahren (Merkblatt in Landessprache)"
+        },
+        {
+          "text": "Weiterleitung an die zuständige Aufnahmeeinrichtung (vgl. § 19 AsylG)"
+        },
+        {
+          "text": "Bei laufender Abschiebung: sofort ZAB/LDS informieren und Weisung abwarten"
+        },
+        {
+          "text": "Vulnerabilität (Minderjährige, Kranke, Schwangere) vermerken"
+        }
       ]
     },
     {
@@ -381,18 +469,42 @@
       "icon": "list.clipboard",
       "kontext": "Vollzugshilfeersuchen der ZAB/LDS liegt vor",
       "punkte": [
-        { "text": "Ersuchen vollständig? (Personen, Adresse, Flug, Termin, Rechtsgrundlage)" },
-        { "text": "Vollziehbarkeit bestätigt? Keine Duldung, kein Eilverfahren anhängig (Rückfrage ZAB)" },
-        { "text": "Gefährdungslage: Waffen, Gewalt, psychische Erkrankung, Suizidgefahr, Tiere" },
-        { "text": "Kinder beteiligt? Jugendamt, Kinderbetreuung, Kindersitze" },
-        { "text": "Weibliche Einsatzkräfte für Durchsuchung eingeplant" },
-        { "text": "Sprachmittler organisiert" },
-        { "text": "Arzt/Rettungsdienst bei Bedarf in Bereitschaft" },
-        { "text": "Durchsuchungsanordnung (Richter) für Wohnung vorhanden, falls erforderlich" },
-        { "text": "Nachtzeit? Nur bei Tatsachen für Vereitelungsgefahr (§ 58 Abs. 7)" },
-        { "text": "Transport, Zeitpuffer bis Übergabe Flughafen Leipzig/Halle / Bundespolizei" },
-        { "text": "Erreichbarkeit Bereitschaft ZAB/LDS für Rückfragen während des Einsatzes" },
-        { "text": "Mögliche Proteste/Unterstützerkreise berücksichtigt" }
+        {
+          "text": "Ersuchen vollständig? (Personen, Adresse, Flug, Termin, Rechtsgrundlage)"
+        },
+        {
+          "text": "Vollziehbarkeit bestätigt? Keine Duldung, kein Eilverfahren anhängig (Rückfrage ZAB)"
+        },
+        {
+          "text": "Gefährdungslage: Waffen, Gewalt, psychische Erkrankung, Suizidgefahr, Tiere"
+        },
+        {
+          "text": "Kinder beteiligt? Jugendamt, Kinderbetreuung, Kindersitze"
+        },
+        {
+          "text": "Weibliche Einsatzkräfte für Durchsuchung eingeplant"
+        },
+        {
+          "text": "Sprachmittler organisiert"
+        },
+        {
+          "text": "Arzt/Rettungsdienst bei Bedarf in Bereitschaft"
+        },
+        {
+          "text": "Durchsuchungsanordnung (Richter) für Wohnung vorhanden, falls erforderlich"
+        },
+        {
+          "text": "Nachtzeit? Nur bei Tatsachen für Vereitelungsgefahr (§ 58 Abs. 7)"
+        },
+        {
+          "text": "Transport, Zeitpuffer bis Übergabe Flughafen Leipzig/Halle / Bundespolizei"
+        },
+        {
+          "text": "Erreichbarkeit Bereitschaft ZAB/LDS für Rückfragen während des Einsatzes"
+        },
+        {
+          "text": "Mögliche Proteste/Unterstützerkreise berücksichtigt"
+        }
       ]
     },
     {
@@ -401,17 +513,39 @@
       "icon": "checklist",
       "kontext": "Am Einsatzort",
       "punkte": [
-        { "text": "Identität der angetroffenen Person(en) feststellen" },
-        { "text": "Maßnahme eröffnen und begründen (Dolmetscher)" },
-        { "text": "Durchsuchung der Person zur Eigensicherung" },
-        { "text": "Zeit zum Packen geben; Gepäck, Dokumente, Medikamente, Bargeld" },
-        { "text": "Handy: Kontakt zu Angehörigen/Rechtsbeistand ermöglichen, sofern Sicherheit es zulässt" },
-        { "text": "Gesundheitszustand erfragen; neue Beschwerden → Arzt + ZAB" },
-        { "text": "Asylgesuch/Folgeantrag? → dokumentieren + ZAB, Weisung abwarten" },
-        { "text": "Fesselung nur bei konkreter Gefahr, dokumentieren" },
-        { "text": "Wohnung verschlossen hinterlassen, Tiere/Wertgegenstände geregelt" },
-        { "text": "Transport und Übergabe (Uhrzeit, Übernehmender)" },
-        { "text": "Einsatzbericht und Rückmeldung an die LDS" }
+        {
+          "text": "Identität der angetroffenen Person(en) feststellen"
+        },
+        {
+          "text": "Maßnahme eröffnen und begründen (Dolmetscher)"
+        },
+        {
+          "text": "Durchsuchung der Person zur Eigensicherung"
+        },
+        {
+          "text": "Zeit zum Packen geben; Gepäck, Dokumente, Medikamente, Bargeld"
+        },
+        {
+          "text": "Handy: Kontakt zu Angehörigen/Rechtsbeistand ermöglichen, sofern Sicherheit es zulässt"
+        },
+        {
+          "text": "Gesundheitszustand erfragen; neue Beschwerden → Arzt + ZAB"
+        },
+        {
+          "text": "Asylgesuch/Folgeantrag? → dokumentieren + ZAB, Weisung abwarten"
+        },
+        {
+          "text": "Fesselung nur bei konkreter Gefahr, dokumentieren"
+        },
+        {
+          "text": "Wohnung verschlossen hinterlassen, Tiere/Wertgegenstände geregelt"
+        },
+        {
+          "text": "Transport und Übergabe (Uhrzeit, Übernehmender)"
+        },
+        {
+          "text": "Einsatzbericht und Rückmeldung an die LDS"
+        }
       ]
     },
     {
@@ -420,15 +554,33 @@
       "icon": "lock.doc",
       "kontext": "Vorläufige Ingewahrsamnahme zur Sicherung der Abschiebung",
       "punkte": [
-        { "text": "Vollziehbare Ausreisepflicht festgestellt (Rücksprache Ausländerbehörde)" },
-        { "text": "Haftgrund: dringender Verdacht Sicherungshaft (§ 62 Abs. 3)" },
-        { "text": "Richterliche Entscheidung vorher nicht einholbar" },
-        { "text": "Begründeter Verdacht des Entziehens (§ 62 Abs. 5)" },
-        { "text": "Mildere Mittel geprüft und dokumentiert" },
-        { "text": "Belehrung (Gründe, Rechte, Konsulat, Rechtsbeistand) in verständlicher Sprache" },
-        { "text": "Unverzügliche Vorführung beim Amtsgericht / Haftantrag über zuständige Behörde" },
-        { "text": "Minderjährige/Familien: nur in besonderen Ausnahmefällen" },
-        { "text": "Unterbringung: Einrichtung Dresden (nicht mit Strafgefangenen)" }
+        {
+          "text": "Vollziehbare Ausreisepflicht festgestellt (Rücksprache Ausländerbehörde)"
+        },
+        {
+          "text": "Haftgrund: dringender Verdacht Sicherungshaft (§ 62 Abs. 3)"
+        },
+        {
+          "text": "Richterliche Entscheidung vorher nicht einholbar"
+        },
+        {
+          "text": "Begründeter Verdacht des Entziehens (§ 62 Abs. 5)"
+        },
+        {
+          "text": "Mildere Mittel geprüft und dokumentiert"
+        },
+        {
+          "text": "Belehrung (Gründe, Rechte, Konsulat, Rechtsbeistand) in verständlicher Sprache"
+        },
+        {
+          "text": "Unverzügliche Vorführung beim Amtsgericht / Haftantrag über zuständige Behörde"
+        },
+        {
+          "text": "Minderjährige/Familien: nur in besonderen Ausnahmefällen"
+        },
+        {
+          "text": "Unterbringung: Einrichtung Dresden (nicht mit Strafgefangenen)"
+        }
       ]
     },
     {
@@ -437,151 +589,1110 @@
       "icon": "figure.child",
       "kontext": "Aufgriff einer mutmaßlich minderjährigen Person ohne Sorgeberechtigte",
       "punkte": [
-        { "text": "Im Zweifel als minderjährig behandeln" },
-        { "text": "Jugendamt sofort informieren (vorläufige Inobhutnahme § 42a SGB VIII)" },
-        { "text": "Kindgerechte Kommunikation, Dolmetscher" },
-        { "text": "ED/Eurodac nur kindgerecht und mit Vertreter" },
-        { "text": "Hinweise auf Menschenhandel/Ausbeutung prüfen" },
-        { "text": "Keine Unterbringung im Polizeigewahrsam, soweit vermeidbar" }
+        {
+          "text": "Im Zweifel als minderjährig behandeln"
+        },
+        {
+          "text": "Jugendamt sofort informieren (vorläufige Inobhutnahme § 42a SGB VIII)"
+        },
+        {
+          "text": "Kindgerechte Kommunikation, Dolmetscher"
+        },
+        {
+          "text": "ED/Eurodac nur kindgerecht und mit Vertreter"
+        },
+        {
+          "text": "Hinweise auf Menschenhandel/Ausbeutung prüfen"
+        },
+        {
+          "text": "Keine Unterbringung im Polizeigewahrsam, soweit vermeidbar"
+        }
       ]
     }
   ],
   "fristen": [
-    { "was": "Screening an der Außengrenze", "frist": "max. 7 Tage", "grundlage": "Screening-VO, § 14a AufenthG" },
-    { "was": "Screening im Inland", "frist": "max. 3 Tage", "grundlage": "Art. 7 Screening-VO, § 15b AufenthG" },
-    { "was": "Festhalten ohne Richter (Screening)", "frist": "bis Ende des Tages nach dem Ergreifen", "grundlage": "§§ 14a, 15b AufenthG, Art. 104 GG" },
-    { "was": "Registrierung eines Asylantrags", "frist": "5 Tage (Ausnahme 15)", "grundlage": "AVVO" },
-    { "was": "Förmliche Antragstellung", "frist": "21 Tage nach Registrierung", "grundlage": "AVVO" },
-    { "was": "Grenzverfahren (Asyl)", "frist": "max. 12 Wochen", "grundlage": "AVVO" },
-    { "was": "Rückkehr-Grenzverfahren", "frist": "max. 12 Wochen", "grundlage": "VO 2024/1349" },
-    { "was": "Beschleunigtes Verfahren", "frist": "3 Monate", "grundlage": "AVVO" },
-    { "was": "Reguläres Asylverfahren", "frist": "6 Monate", "grundlage": "AVVO" },
-    { "was": "Überstellungsfrist (Regel)", "frist": "6 Monate", "grundlage": "Art. 46 AMM-VO" },
-    { "was": "Überstellungsfrist bei Haft", "frist": "bis 1 Jahr", "grundlage": "AMM-VO" },
-    { "was": "Überstellungsfrist bei Flucht", "frist": "bis 3 Jahre", "grundlage": "AMM-VO" },
-    { "was": "Zuständigkeit Ersteinreisestaat", "frist": "20 Monate", "grundlage": "AMM-VO" },
-    { "was": "Eurodac: Mindestalter", "frist": "6 Jahre", "grundlage": "Eurodac-VO" },
-    { "was": "Ausreisefrist (Regel)", "frist": "7–30 Tage", "grundlage": "§ 59 Abs. 1 AufenthG" },
-    { "was": "Vorbereitungshaft", "frist": "max. 6 Wochen", "grundlage": "§ 62 Abs. 2 AufenthG" },
-    { "was": "Sicherungshaft", "frist": "6 Monate, max. 18 Monate", "grundlage": "§ 62 Abs. 3, 4 AufenthG" },
-    { "was": "Ausreisegewahrsam", "frist": "max. 28 Tage", "grundlage": "§ 62b AufenthG" },
-    { "was": "Mitwirkungshaft", "frist": "max. 14 Tage", "grundlage": "§ 62 Abs. 6 AufenthG" },
-    { "was": "Sekundärmigrationszentrum Sachsen", "frist": "max. 24 Monate (Familien 12)", "grundlage": "LDS" }
+    {
+      "was": "Screening an der Außengrenze",
+      "frist": "max. 7 Tage",
+      "grundlage": "Screening-VO, § 14a AufenthG"
+    },
+    {
+      "was": "Screening im Inland",
+      "frist": "max. 3 Tage",
+      "grundlage": "Art. 7 Screening-VO, § 15b AufenthG"
+    },
+    {
+      "was": "Festhalten ohne Richter (Screening)",
+      "frist": "bis Ende des Tages nach dem Ergreifen",
+      "grundlage": "§§ 14a, 15b AufenthG, Art. 104 GG"
+    },
+    {
+      "was": "Registrierung eines Asylantrags",
+      "frist": "5 Tage (Ausnahme 15)",
+      "grundlage": "AVVO"
+    },
+    {
+      "was": "Förmliche Antragstellung",
+      "frist": "21 Tage nach Registrierung",
+      "grundlage": "AVVO"
+    },
+    {
+      "was": "Grenzverfahren (Asyl)",
+      "frist": "max. 12 Wochen",
+      "grundlage": "AVVO"
+    },
+    {
+      "was": "Rückkehr-Grenzverfahren",
+      "frist": "max. 12 Wochen",
+      "grundlage": "VO 2024/1349"
+    },
+    {
+      "was": "Beschleunigtes Verfahren",
+      "frist": "3 Monate",
+      "grundlage": "AVVO"
+    },
+    {
+      "was": "Reguläres Asylverfahren",
+      "frist": "6 Monate",
+      "grundlage": "AVVO"
+    },
+    {
+      "was": "Überstellungsfrist (Regel)",
+      "frist": "6 Monate",
+      "grundlage": "Art. 46 AMM-VO"
+    },
+    {
+      "was": "Überstellungsfrist bei Haft",
+      "frist": "bis 1 Jahr",
+      "grundlage": "AMM-VO"
+    },
+    {
+      "was": "Überstellungsfrist bei Flucht",
+      "frist": "bis 3 Jahre",
+      "grundlage": "AMM-VO"
+    },
+    {
+      "was": "Zuständigkeit Ersteinreisestaat",
+      "frist": "20 Monate",
+      "grundlage": "AMM-VO"
+    },
+    {
+      "was": "Eurodac: Mindestalter",
+      "frist": "6 Jahre",
+      "grundlage": "Eurodac-VO"
+    },
+    {
+      "was": "Ausreisefrist (Regel)",
+      "frist": "7–30 Tage",
+      "grundlage": "§ 59 Abs. 1 AufenthG"
+    },
+    {
+      "was": "Vorbereitungshaft",
+      "frist": "max. 6 Wochen",
+      "grundlage": "§ 62 Abs. 2 AufenthG"
+    },
+    {
+      "was": "Sicherungshaft",
+      "frist": "6 Monate, max. 18 Monate",
+      "grundlage": "§ 62 Abs. 3, 4 AufenthG"
+    },
+    {
+      "was": "Ausreisegewahrsam",
+      "frist": "max. 28 Tage",
+      "grundlage": "§ 62b AufenthG"
+    },
+    {
+      "was": "Mitwirkungshaft",
+      "frist": "max. 14 Tage",
+      "grundlage": "§ 62 Abs. 6 AufenthG"
+    },
+    {
+      "was": "Sekundärmigrationszentrum Sachsen",
+      "frist": "max. 24 Monate (Familien 12)",
+      "grundlage": "LDS"
+    }
   ],
   "normen": [
-    { "norm": "§ 11 AufenthG", "titel": "Einreise- und Aufenthaltsverbot", "inhalt": "Nach Ausweisung, Zurückschiebung oder Abschiebung wird ein befristetes Einreise- und Aufenthaltsverbot erlassen.", "praxis": "Verstoß: Straftat nach § 95 Abs. 2 Nr. 1 AufenthG." },
-    { "norm": "§ 14a AufenthG", "titel": "Screening an der Außengrenze", "inhalt": "Überprüfung nach der Screening-VO an der Außengrenze; Verbringen und Überprüfungshaft.", "praxis": "Flughäfen/Seehäfen – regelmäßig Bundespolizei." },
-    { "norm": "§ 15b AufenthG", "titel": "Überprüfung im Bundesgebiet", "inhalt": "Festhalten und Verbringen zur Überprüfung nach Art. 7 Screening-VO; Freilassung, wenn nicht bis Ende des Folgetages richterlich angeordnet.", "praxis": "Kernnorm für das Screening im Inland durch die Landespolizei." },
-    { "norm": "§ 48 AufenthG", "titel": "Ausweisrechtliche Pflichten", "inhalt": "Pass vorlegen und überlassen; Mitwirkung bei Passbeschaffung; Durchsuchung nach Dokumenten; Datenträgerauswertung (Abs. 3a).", "praxis": "Pässe sicherstellen und Ausländerbehörde zuleiten." },
-    { "norm": "§ 49 AufenthG", "titel": "Identitätsfeststellung", "inhalt": "Überprüfung, Feststellung und Sicherung der Identität; ED-Maßnahmen.", "praxis": "Falsche Angaben: § 95 Abs. 1 Nr. 5." },
-    { "norm": "§ 50 AufenthG", "titel": "Ausreisepflicht", "inhalt": "Ausreisepflichtig ist, wer einen erforderlichen Aufenthaltstitel nicht oder nicht mehr besitzt.", "praxis": "Ausreisepflicht ≠ vollziehbare Ausreisepflicht." },
-    { "norm": "§ 58 AufenthG", "titel": "Abschiebung", "inhalt": "Voraussetzungen der Abschiebung; Abs. 1a UMA; Abs. 5–10 Betreten und Durchsuchen von Wohnungen, Nachtzeit, Richtervorbehalt.", "praxis": "Durchsuchung: Richter, bei Gefahr im Verzug durchführende Behörde." },
-    { "norm": "§ 59 AufenthG", "titel": "Androhung der Abschiebung", "inhalt": "Androhung mit Ausreisefrist (7–30 Tage); Termin der Abschiebung darf nicht angekündigt werden.", "praxis": "Termine nicht an Betroffene oder Unterstützer weitergeben." },
-    { "norm": "§ 60 AufenthG", "titel": "Verbot der Abschiebung", "inhalt": "Abschiebungsverbote u. a. bei Flüchtlingseigenschaft, EMRK-Verletzung, erheblicher konkreter Gefahr.", "praxis": "Prüfung durch BAMF/Ausländerbehörde, nicht durch die Einsatzkraft." },
-    { "norm": "§ 60a AufenthG", "titel": "Duldung", "inhalt": "Vorübergehende Aussetzung der Abschiebung; Abs. 2c Vermutung der Reisefähigkeit, qualifizierte ärztliche Bescheinigung.", "praxis": "Gültige Duldung = keine Abschiebung ohne Widerruf." },
-    { "norm": "§ 62 AufenthG", "titel": "Abschiebungshaft", "inhalt": "Vorbereitungs-, Sicherungs-, Mitwirkungshaft; Abs. 5 vorläufige Ingewahrsamnahme ohne vorherige richterliche Anordnung.", "praxis": "Unverzüglich Richter; mildere Mittel prüfen." },
-    { "norm": "§ 62a AufenthG", "titel": "Vollzug der Abschiebungshaft", "inhalt": "Vollzug grundsätzlich in speziellen Hafteinrichtungen, getrennt von Strafgefangenen.", "praxis": "Sachsen: Einrichtung in Dresden." },
-    { "norm": "§ 62b AufenthG", "titel": "Ausreisegewahrsam", "inhalt": "Bis zu 28 Tage zur Sicherung der Durchführbarkeit der Abschiebung.", "praxis": "Vollzug im Transitbereich/Unterkunft mit Ausreisemöglichkeit." },
-    { "norm": "§ 71 AufenthG", "titel": "Zuständigkeit", "inhalt": "Abs. 4a: Zuständigkeit für Screening-Fälle (u. a. Polizeien der Länder). Abs. 5: Landespolizei auch zuständig für Zurückschiebung, Abschiebung, Festnahme, Haftantrag.", "praxis": "Rechtsgrundlage für das eigene Tätigwerden." },
-    { "norm": "§ 72 Abs. 4 AufenthG", "titel": "Beteiligung der StA", "inhalt": "Abschiebung bei laufendem Ermittlungsverfahren nur im Einvernehmen mit der Staatsanwaltschaft.", "praxis": "Vor Rückführung Verfahrensstand prüfen." },
-    { "norm": "§ 95 AufenthG", "titel": "Strafvorschriften", "inhalt": "Unerlaubter Aufenthalt, unerlaubte Einreise, Verstoß gegen Einreiseverbot, falsche Angaben.", "praxis": "Abs. 5: Art. 31 GFK." },
-    { "norm": "§§ 96, 97 AufenthG", "titel": "Einschleusen", "inhalt": "Einschleusen von Ausländern; mit Todesfolge; gewerbs- und bandenmäßig.", "praxis": "Geschleuste = Zeugen, Beweise sichern." },
-    { "norm": "§ 16 AsylG", "titel": "Sicherung der Identität", "inhalt": "ED-Behandlung von Asylsuchenden.", "praxis": "Auch durch die Polizei bei Asylgesuch." },
-    { "norm": "§ 19 AsylG", "titel": "Aufgaben der Ausländerbehörde und der Polizei", "inhalt": "Weiterleitung von Asylsuchenden an die zuständige Aufnahmeeinrichtung; ED-Behandlung.", "praxis": "Fassung nach GEAS-Anpassungsgesetz prüfen." },
-    { "norm": "§ 55 AsylG", "titel": "Aufenthaltsgestattung", "inhalt": "Aufenthalt zur Durchführung des Asylverfahrens ist gestattet.", "praxis": "Gestattete sind nicht vollziehbar ausreisepflichtig." },
-    { "norm": "§ 56 AsylG", "titel": "Räumliche Beschränkung", "inhalt": "Aufenthaltsgestattung ist räumlich beschränkt.", "praxis": "Erstverstoß § 86 (OWi), wiederholt § 85 (Straftat)." },
-    { "norm": "§§ 69–70a AsylG", "titel": "Asylverfahrenshaft", "inhalt": "Neue Haftform seit GEAS; nur durch richterliche Anordnung; Verhältnismäßigkeit, mildere Mittel.", "praxis": "Umsetzung von Art. 10 Aufnahme-RL." },
-    { "norm": "Art. 7 Screening-VO", "titel": "Screening im Hoheitsgebiet", "inhalt": "Überprüfung unerlaubt aufhältiger Drittstaatsangehöriger, die nicht an der Außengrenze überprüft wurden.", "praxis": "Max. 3 Tage." },
-    { "norm": "Art. 44 AMM-VO", "titel": "Haft zur Überstellung", "inhalt": "Inhaftnahme zur Sicherung der Überstellung bei erheblicher Fluchtgefahr bzw. Sicherheitsgefahr.", "praxis": "Ersetzt Art. 28 Dublin III." },
-    { "norm": "Art. 46 AMM-VO", "titel": "Überstellungsfristen", "inhalt": "6 Monate; bis 1 Jahr bei Haft; bis 3 Jahre bei Flucht.", "praxis": "Flucht/Untertauchen dokumentieren und melden." }
+    {
+      "norm": "§ 11 AufenthG",
+      "titel": "Einreise- und Aufenthaltsverbot",
+      "inhalt": "Nach Ausweisung, Zurückschiebung oder Abschiebung wird ein befristetes Einreise- und Aufenthaltsverbot erlassen.",
+      "praxis": "Verstoß: Straftat nach § 95 Abs. 2 Nr. 1 AufenthG."
+    },
+    {
+      "norm": "§ 14a AufenthG",
+      "titel": "Screening an der Außengrenze",
+      "inhalt": "Überprüfung nach der Screening-VO an der Außengrenze; Verbringen und Überprüfungshaft.",
+      "praxis": "Flughäfen/Seehäfen – regelmäßig Bundespolizei."
+    },
+    {
+      "norm": "§ 15b AufenthG",
+      "titel": "Überprüfung im Bundesgebiet",
+      "inhalt": "Festhalten und Verbringen zur Überprüfung nach Art. 7 Screening-VO; Freilassung, wenn nicht bis Ende des Folgetages richterlich angeordnet.",
+      "praxis": "Kernnorm für das Screening im Inland durch die Landespolizei."
+    },
+    {
+      "norm": "§ 48 AufenthG",
+      "titel": "Ausweisrechtliche Pflichten",
+      "inhalt": "Pass vorlegen und überlassen; Mitwirkung bei Passbeschaffung; Durchsuchung nach Dokumenten; Datenträgerauswertung (Abs. 3a).",
+      "praxis": "Pässe sicherstellen und Ausländerbehörde zuleiten."
+    },
+    {
+      "norm": "§ 49 AufenthG",
+      "titel": "Identitätsfeststellung",
+      "inhalt": "Überprüfung, Feststellung und Sicherung der Identität; ED-Maßnahmen.",
+      "praxis": "Falsche Angaben: § 95 Abs. 1 Nr. 5."
+    },
+    {
+      "norm": "§ 50 AufenthG",
+      "titel": "Ausreisepflicht",
+      "inhalt": "Ausreisepflichtig ist, wer einen erforderlichen Aufenthaltstitel nicht oder nicht mehr besitzt.",
+      "praxis": "Ausreisepflicht ≠ vollziehbare Ausreisepflicht."
+    },
+    {
+      "norm": "§ 58 AufenthG",
+      "titel": "Abschiebung",
+      "inhalt": "Voraussetzungen der Abschiebung; Abs. 1a UMA; Abs. 5–10 Betreten und Durchsuchen von Wohnungen, Nachtzeit, Richtervorbehalt.",
+      "praxis": "Durchsuchung: Richter, bei Gefahr im Verzug durchführende Behörde."
+    },
+    {
+      "norm": "§ 59 AufenthG",
+      "titel": "Androhung der Abschiebung",
+      "inhalt": "Androhung mit Ausreisefrist (7–30 Tage); Termin der Abschiebung darf nicht angekündigt werden.",
+      "praxis": "Termine nicht an Betroffene oder Unterstützer weitergeben."
+    },
+    {
+      "norm": "§ 60 AufenthG",
+      "titel": "Verbot der Abschiebung",
+      "inhalt": "Abschiebungsverbote u. a. bei Flüchtlingseigenschaft, EMRK-Verletzung, erheblicher konkreter Gefahr.",
+      "praxis": "Prüfung durch BAMF/Ausländerbehörde, nicht durch die Einsatzkraft."
+    },
+    {
+      "norm": "§ 60a AufenthG",
+      "titel": "Duldung",
+      "inhalt": "Vorübergehende Aussetzung der Abschiebung; Abs. 2c Vermutung der Reisefähigkeit, qualifizierte ärztliche Bescheinigung.",
+      "praxis": "Gültige Duldung = keine Abschiebung ohne Widerruf."
+    },
+    {
+      "norm": "§ 62 AufenthG",
+      "titel": "Abschiebungshaft",
+      "inhalt": "Vorbereitungs-, Sicherungs-, Mitwirkungshaft; Abs. 5 vorläufige Ingewahrsamnahme ohne vorherige richterliche Anordnung.",
+      "praxis": "Unverzüglich Richter; mildere Mittel prüfen."
+    },
+    {
+      "norm": "§ 62a AufenthG",
+      "titel": "Vollzug der Abschiebungshaft",
+      "inhalt": "Vollzug grundsätzlich in speziellen Hafteinrichtungen, getrennt von Strafgefangenen.",
+      "praxis": "Sachsen: Einrichtung in Dresden."
+    },
+    {
+      "norm": "§ 62b AufenthG",
+      "titel": "Ausreisegewahrsam",
+      "inhalt": "Bis zu 28 Tage zur Sicherung der Durchführbarkeit der Abschiebung.",
+      "praxis": "Vollzug im Transitbereich/Unterkunft mit Ausreisemöglichkeit."
+    },
+    {
+      "norm": "§ 71 AufenthG",
+      "titel": "Zuständigkeit",
+      "inhalt": "Abs. 4a: Zuständigkeit für Screening-Fälle (u. a. Polizeien der Länder). Abs. 5: Landespolizei auch zuständig für Zurückschiebung, Abschiebung, Festnahme, Haftantrag.",
+      "praxis": "Rechtsgrundlage für das eigene Tätigwerden."
+    },
+    {
+      "norm": "§ 72 Abs. 4 AufenthG",
+      "titel": "Beteiligung der StA",
+      "inhalt": "Abschiebung bei laufendem Ermittlungsverfahren nur im Einvernehmen mit der Staatsanwaltschaft.",
+      "praxis": "Vor Rückführung Verfahrensstand prüfen."
+    },
+    {
+      "norm": "§ 95 AufenthG",
+      "titel": "Strafvorschriften",
+      "inhalt": "Unerlaubter Aufenthalt, unerlaubte Einreise, Verstoß gegen Einreiseverbot, falsche Angaben.",
+      "praxis": "Abs. 5: Art. 31 GFK."
+    },
+    {
+      "norm": "§§ 96, 97 AufenthG",
+      "titel": "Einschleusen",
+      "inhalt": "Einschleusen von Ausländern; mit Todesfolge; gewerbs- und bandenmäßig.",
+      "praxis": "Geschleuste = Zeugen, Beweise sichern."
+    },
+    {
+      "norm": "§ 16 AsylG",
+      "titel": "Sicherung der Identität",
+      "inhalt": "ED-Behandlung von Asylsuchenden.",
+      "praxis": "Auch durch die Polizei bei Asylgesuch."
+    },
+    {
+      "norm": "§ 19 AsylG",
+      "titel": "Aufgaben der Ausländerbehörde und der Polizei",
+      "inhalt": "Weiterleitung von Asylsuchenden an die zuständige Aufnahmeeinrichtung; ED-Behandlung.",
+      "praxis": "Fassung nach GEAS-Anpassungsgesetz prüfen."
+    },
+    {
+      "norm": "§ 55 AsylG",
+      "titel": "Aufenthaltsgestattung",
+      "inhalt": "Aufenthalt zur Durchführung des Asylverfahrens ist gestattet.",
+      "praxis": "Gestattete sind nicht vollziehbar ausreisepflichtig."
+    },
+    {
+      "norm": "§ 56 AsylG",
+      "titel": "Räumliche Beschränkung",
+      "inhalt": "Aufenthaltsgestattung ist räumlich beschränkt.",
+      "praxis": "Erstverstoß § 86 (OWi), wiederholt § 85 (Straftat)."
+    },
+    {
+      "norm": "§§ 69–70a AsylG",
+      "titel": "Asylverfahrenshaft",
+      "inhalt": "Neue Haftform seit GEAS; nur durch richterliche Anordnung; Verhältnismäßigkeit, mildere Mittel.",
+      "praxis": "Umsetzung von Art. 10 Aufnahme-RL."
+    },
+    {
+      "norm": "Art. 7 Screening-VO",
+      "titel": "Screening im Hoheitsgebiet",
+      "inhalt": "Überprüfung unerlaubt aufhältiger Drittstaatsangehöriger, die nicht an der Außengrenze überprüft wurden.",
+      "praxis": "Max. 3 Tage."
+    },
+    {
+      "norm": "Art. 44 AMM-VO",
+      "titel": "Haft zur Überstellung",
+      "inhalt": "Inhaftnahme zur Sicherung der Überstellung bei erheblicher Fluchtgefahr bzw. Sicherheitsgefahr.",
+      "praxis": "Ersetzt Art. 28 Dublin III."
+    },
+    {
+      "norm": "Art. 46 AMM-VO",
+      "titel": "Überstellungsfristen",
+      "inhalt": "6 Monate; bis 1 Jahr bei Haft; bis 3 Jahre bei Flucht.",
+      "praxis": "Flucht/Untertauchen dokumentieren und melden."
+    }
   ],
   "glossar": [
-    { "begriff": "AMM-VO", "erklaerung": "Asyl- und Migrationsmanagement-Verordnung (EU) 2024/1351 – regelt u. a. die Zuständigkeit für Asylverfahren (Nachfolger Dublin III) und den Solidaritätsmechanismus." },
-    { "begriff": "Ankunftsnachweis", "erklaerung": "Bescheinigung über die Meldung als Asylsuchender; dokumentiert den Status vor förmlicher Antragstellung." },
-    { "begriff": "Aufenthaltsgestattung", "erklaerung": "Aufenthaltsrecht während des Asylverfahrens (§ 55 AsylG)." },
-    { "begriff": "Ausreisegewahrsam", "erklaerung": "Kurzfristige Freiheitsentziehung bis 28 Tage zur Sicherung der Abschiebung (§ 62b AufenthG)." },
-    { "begriff": "AVVO", "erklaerung": "Asylverfahrensverordnung (EU) 2024/1348 – einheitliches Verfahren für internationalen Schutz inkl. Grenzverfahren." },
-    { "begriff": "AZR", "erklaerung": "Ausländerzentralregister beim BVA." },
-    { "begriff": "BAMF", "erklaerung": "Bundesamt für Migration und Flüchtlinge – entscheidet über Asylanträge und Zuständigkeit nach AMM-VO." },
-    { "begriff": "Duldung", "erklaerung": "Vorübergehende Aussetzung der Abschiebung (§ 60a AufenthG). Kein Aufenthaltstitel, Ausreisepflicht bleibt bestehen." },
-    { "begriff": "Eurodac", "erklaerung": "EU-Datenbank für biometrische Daten (Fingerabdrücke, Gesichtsbild) von Schutzsuchenden und irregulär Einreisenden/Aufhältigen; ab 6 Jahren." },
-    { "begriff": "Folgeantrag", "erklaerung": "Erneuter Asylantrag nach bestandskräftiger Ablehnung; Recht auf Verbleib kann eingeschränkt sein." },
-    { "begriff": "GEAS", "erklaerung": "Gemeinsames Europäisches Asylsystem; reformiert 2024, anwendbar seit 12.06.2026." },
-    { "begriff": "GEAS-Anpassungsgesetz", "erklaerung": "Bundesgesetz zur Anpassung von AsylG, AufenthG u. a. an die GEAS-Reform; in Kraft seit 12.06.2026." },
-    { "begriff": "Grenzverfahren", "erklaerung": "Asylverfahren an der Außengrenze (in DE v. a. Flughäfen), max. 12 Wochen; Personen gelten als nicht eingereist." },
-    { "begriff": "LDS", "erklaerung": "Landesdirektion Sachsen – obere Ausländerbehörde, u. a. mit der Zentralen Ausländerbehörde (ZAB)." },
-    { "begriff": "Rückkehrentscheidung", "erklaerung": "Behördliche Entscheidung, die den Aufenthalt als illegal feststellt und eine Rückkehrverpflichtung auferlegt; in DE i. d. R. Abschiebungsandrohung." },
-    { "begriff": "Screening", "erklaerung": "Überprüfung nach der Screening-VO: Identität, Gesundheit, Vulnerabilität, Sicherheit, Eurodac – Außengrenze 7 Tage, Inland 3 Tage." },
-    { "begriff": "Sekundärmigration", "erklaerung": "Weiterwanderung von Schutzsuchenden aus dem zuständigen in einen anderen EU-Staat." },
-    { "begriff": "Sekundärmigrationszentrum", "erklaerung": "Einrichtung für Personen, für die ein anderer Mitgliedstaat zuständig ist; Sachsen: Dresden seit 01.07.2026." },
-    { "begriff": "Sicherer Herkunftsstaat", "erklaerung": "Staat, bei dem vermutet wird, dass keine Verfolgung stattfindet; führt zu beschleunigtem Verfahren. Listen auf EU- und nationaler Ebene." },
-    { "begriff": "Solidaritätsmechanismus", "erklaerung": "Verpflichtende, aber flexible Solidarität nach AMM-VO: Umsiedlung, finanzielle Beiträge oder andere Unterstützung; jährlicher Pool mind. 30.000 Umsiedlungen." },
-    { "begriff": "Überprüfungshaft", "erklaerung": "Haft zur Durchführung des Screenings (§§ 14a, 15b AufenthG)." },
-    { "begriff": "Überstellung", "erklaerung": "Verbringung einer Person in den nach AMM-VO zuständigen Mitgliedstaat (früher: Dublin-Überstellung)." },
-    { "begriff": "UMA", "erklaerung": "Unbegleitete minderjährige Ausländer/innen." },
-    { "begriff": "Vollzugshilfe", "erklaerung": "Unterstützung einer anderen Behörde durch die Polizei bei der Anwendung unmittelbaren Zwangs; Verantwortung für die Rechtmäßigkeit der Maßnahme bei der ersuchenden Behörde." },
-    { "begriff": "Vulnerabilität", "erklaerung": "Besondere Schutzbedürftigkeit, z. B. Minderjährige, Schwangere, Menschen mit Behinderung, Opfer von Folter oder Menschenhandel." },
-    { "begriff": "ZAB", "erklaerung": "Zentrale Ausländerbehörde der Landesdirektion Sachsen (Chemnitz) – u. a. zuständig für aufenthaltsbeendende Maßnahmen." },
-    { "begriff": "Zurückschiebung", "erklaerung": "Aufenthaltsbeendigung kurz nach unerlaubter Einreise (§ 57 AufenthG)." },
-    { "begriff": "Zurückweisung", "erklaerung": "Verweigerung der Einreise an der Grenze (§ 15 AufenthG)." }
+    {
+      "begriff": "AMM-VO",
+      "erklaerung": "Asyl- und Migrationsmanagement-Verordnung (EU) 2024/1351 – regelt u. a. die Zuständigkeit für Asylverfahren (Nachfolger Dublin III) und den Solidaritätsmechanismus."
+    },
+    {
+      "begriff": "Ankunftsnachweis",
+      "erklaerung": "Bescheinigung über die Meldung als Asylsuchender; dokumentiert den Status vor förmlicher Antragstellung."
+    },
+    {
+      "begriff": "Aufenthaltsgestattung",
+      "erklaerung": "Aufenthaltsrecht während des Asylverfahrens (§ 55 AsylG)."
+    },
+    {
+      "begriff": "Ausreisegewahrsam",
+      "erklaerung": "Kurzfristige Freiheitsentziehung bis 28 Tage zur Sicherung der Abschiebung (§ 62b AufenthG)."
+    },
+    {
+      "begriff": "AVVO",
+      "erklaerung": "Asylverfahrensverordnung (EU) 2024/1348 – einheitliches Verfahren für internationalen Schutz inkl. Grenzverfahren."
+    },
+    {
+      "begriff": "AZR",
+      "erklaerung": "Ausländerzentralregister beim BVA."
+    },
+    {
+      "begriff": "BAMF",
+      "erklaerung": "Bundesamt für Migration und Flüchtlinge – entscheidet über Asylanträge und Zuständigkeit nach AMM-VO."
+    },
+    {
+      "begriff": "Duldung",
+      "erklaerung": "Vorübergehende Aussetzung der Abschiebung (§ 60a AufenthG). Kein Aufenthaltstitel, Ausreisepflicht bleibt bestehen."
+    },
+    {
+      "begriff": "Eurodac",
+      "erklaerung": "EU-Datenbank für biometrische Daten (Fingerabdrücke, Gesichtsbild) von Schutzsuchenden und irregulär Einreisenden/Aufhältigen; ab 6 Jahren."
+    },
+    {
+      "begriff": "Folgeantrag",
+      "erklaerung": "Erneuter Asylantrag nach bestandskräftiger Ablehnung; Recht auf Verbleib kann eingeschränkt sein."
+    },
+    {
+      "begriff": "GEAS",
+      "erklaerung": "Gemeinsames Europäisches Asylsystem; reformiert 2024, anwendbar seit 12.06.2026."
+    },
+    {
+      "begriff": "GEAS-Anpassungsgesetz",
+      "erklaerung": "Bundesgesetz zur Anpassung von AsylG, AufenthG u. a. an die GEAS-Reform; in Kraft seit 12.06.2026."
+    },
+    {
+      "begriff": "Grenzverfahren",
+      "erklaerung": "Asylverfahren an der Außengrenze (in DE v. a. Flughäfen), max. 12 Wochen; Personen gelten als nicht eingereist."
+    },
+    {
+      "begriff": "LDS",
+      "erklaerung": "Landesdirektion Sachsen – obere Ausländerbehörde, u. a. mit der Zentralen Ausländerbehörde (ZAB)."
+    },
+    {
+      "begriff": "Rückkehrentscheidung",
+      "erklaerung": "Behördliche Entscheidung, die den Aufenthalt als illegal feststellt und eine Rückkehrverpflichtung auferlegt; in DE i. d. R. Abschiebungsandrohung."
+    },
+    {
+      "begriff": "Screening",
+      "erklaerung": "Überprüfung nach der Screening-VO: Identität, Gesundheit, Vulnerabilität, Sicherheit, Eurodac – Außengrenze 7 Tage, Inland 3 Tage."
+    },
+    {
+      "begriff": "Sekundärmigration",
+      "erklaerung": "Weiterwanderung von Schutzsuchenden aus dem zuständigen in einen anderen EU-Staat."
+    },
+    {
+      "begriff": "Sekundärmigrationszentrum",
+      "erklaerung": "Einrichtung für Personen, für die ein anderer Mitgliedstaat zuständig ist; Sachsen: Dresden seit 01.07.2026."
+    },
+    {
+      "begriff": "Sicherer Herkunftsstaat",
+      "erklaerung": "Staat, bei dem vermutet wird, dass keine Verfolgung stattfindet; führt zu beschleunigtem Verfahren. Listen auf EU- und nationaler Ebene."
+    },
+    {
+      "begriff": "Solidaritätsmechanismus",
+      "erklaerung": "Verpflichtende, aber flexible Solidarität nach AMM-VO: Umsiedlung, finanzielle Beiträge oder andere Unterstützung; jährlicher Pool mind. 30.000 Umsiedlungen."
+    },
+    {
+      "begriff": "Überprüfungshaft",
+      "erklaerung": "Haft zur Durchführung des Screenings (§§ 14a, 15b AufenthG)."
+    },
+    {
+      "begriff": "Überstellung",
+      "erklaerung": "Verbringung einer Person in den nach AMM-VO zuständigen Mitgliedstaat (früher: Dublin-Überstellung)."
+    },
+    {
+      "begriff": "UMA",
+      "erklaerung": "Unbegleitete minderjährige Ausländer/innen."
+    },
+    {
+      "begriff": "Vollzugshilfe",
+      "erklaerung": "Unterstützung einer anderen Behörde durch die Polizei bei der Anwendung unmittelbaren Zwangs; Verantwortung für die Rechtmäßigkeit der Maßnahme bei der ersuchenden Behörde."
+    },
+    {
+      "begriff": "Vulnerabilität",
+      "erklaerung": "Besondere Schutzbedürftigkeit, z. B. Minderjährige, Schwangere, Menschen mit Behinderung, Opfer von Folter oder Menschenhandel."
+    },
+    {
+      "begriff": "ZAB",
+      "erklaerung": "Zentrale Ausländerbehörde der Landesdirektion Sachsen (Chemnitz) – u. a. zuständig für aufenthaltsbeendende Maßnahmen."
+    },
+    {
+      "begriff": "Zurückschiebung",
+      "erklaerung": "Aufenthaltsbeendigung kurz nach unerlaubter Einreise (§ 57 AufenthG)."
+    },
+    {
+      "begriff": "Zurückweisung",
+      "erklaerung": "Verweigerung der Einreise an der Grenze (§ 15 AufenthG)."
+    }
   ],
   "quiz": [
-    { "kapitel": "grundlagen", "frage": "Seit wann gelten die Regeln der GEAS-Reform in Deutschland?", "antworten": ["01.01.2025", "12.06.2026", "01.07.2026", "01.01.2027"], "richtig": 1, "erklaerung": "Die GEAS-Verordnungen gelten seit dem 12.06.2026; gleichzeitig trat das GEAS-Anpassungsgesetz in Kraft." },
-    { "kapitel": "grundlagen", "frage": "Welche Rechtsnatur haben die meisten GEAS-Rechtsakte?", "antworten": ["Richtlinien, die umgesetzt werden müssen", "Empfehlungen", "Unmittelbar geltende Verordnungen", "Völkerrechtliche Verträge"], "richtig": 2, "erklaerung": "Bis auf die Aufnahmerichtlinie sind die Kernrechtsakte Verordnungen und gelten unmittelbar." },
-    { "kapitel": "grundlagen", "frage": "Welche Verordnung ersetzt die Dublin-III-Verordnung?", "antworten": ["Screening-VO", "Eurodac-VO", "AMM-VO (2024/1351)", "Krisen-VO"], "richtig": 2, "erklaerung": "Die Asyl- und Migrationsmanagement-Verordnung regelt nun die Zuständigkeit." },
-    { "kapitel": "screening", "frage": "Wie lange darf das Screening im Inland höchstens dauern?", "antworten": ["24 Stunden", "3 Tage", "7 Tage", "12 Wochen"], "richtig": 1, "erklaerung": "Im Hoheitsgebiet max. 3 Tage, an der Außengrenze max. 7 Tage." },
-    { "kapitel": "screening", "frage": "Bis wann muss beim Festhalten zur Überprüfung (§ 15b AufenthG) eine richterliche Entscheidung vorliegen?", "antworten": ["Innerhalb von 3 Tagen", "Bis zum Ende des Tages nach dem Ergreifen", "Innerhalb von 48 Stunden nach Ankunft in der Dienststelle", "Gar nicht, Screening ist keine Freiheitsentziehung"], "richtig": 1, "erklaerung": "Wie bei Art. 104 GG: Freilassung, wenn nicht bis zum Ende des Folgetages richterlich angeordnet." },
-    { "kapitel": "screening", "frage": "Was gehört NICHT zum Screening?", "antworten": ["Vorläufige Gesundheitskontrolle", "Sicherheitsprüfung", "Inhaltliche Prüfung der Asylgründe", "Eurodac-Erfassung"], "richtig": 2, "erklaerung": "Die Asylgründe prüft ausschließlich das BAMF im Asylverfahren." },
-    { "kapitel": "screening", "frage": "Wer wird im Inland dem Screening unterzogen?", "antworten": ["Alle kontrollierten Ausländer", "Unerlaubt Aufhältige, die noch nicht an der Außengrenze überprüft wurden", "Nur Asylantragsteller", "Nur Personen mit Einreiseverbot"], "richtig": 1, "erklaerung": "Art. 7 Screening-VO – wer schon überprüft wurde, wird nicht erneut gescreent." },
-    { "kapitel": "screening", "frage": "Welche Norm regelt die Zuständigkeit der Landespolizei für Screening-Fälle?", "antworten": ["§ 71 Abs. 4a AufenthG", "§ 19 AsylG", "§ 62 AufenthG", "§ 95 AufenthG"], "richtig": 0, "erklaerung": "§ 71 Abs. 4a AufenthG nennt u. a. die Polizeien der Länder; das Landesrecht konkretisiert." },
-    { "kapitel": "eurodac", "frage": "Ab welchem Alter werden Personen in Eurodac erfasst?", "antworten": ["14 Jahre", "12 Jahre", "6 Jahre", "18 Jahre"], "richtig": 2, "erklaerung": "Neu: bereits ab 6 Jahren – Fingerabdrücke und Gesichtsbild." },
-    { "kapitel": "eurodac", "frage": "Welche biometrischen Daten erfasst das neue Eurodac?", "antworten": ["Nur Fingerabdrücke", "Fingerabdrücke und Gesichtsbild", "DNA", "Iris-Scan und Stimme"], "richtig": 1, "erklaerung": "Fingerabdrücke und Gesichtsbild." },
-    { "kapitel": "eurodac", "frage": "Wie sind widersprüchliche Personalien zu behandeln?", "antworten": ["Nur die zuletzt genannten erfassen", "Als Aliaspersonalien vollständig dokumentieren", "Ignorieren", "Die Person selbst entscheiden lassen"], "richtig": 1, "erklaerung": "Alle Personalien als Alias dokumentieren – wichtig für Eurodac/AZR-Abgleich." },
-    { "kapitel": "asylverfahren", "frage": "Eine kontrollierte Person sagt auf Englisch: „I need protection, I cannot go back.“ Was liegt vor?", "antworten": ["Nichts Relevantes", "Ein Asylgesuch – aufnehmen, dokumentieren, weiterleiten", "Eine Straftat", "Ein Antrag auf Duldung"], "richtig": 1, "erklaerung": "Jede erkennbare Bitte um Schutz ist ein Antrag auf internationalen Schutz (Stufe „Stellen“)." },
-    { "kapitel": "asylverfahren", "frage": "Wie lange darf das Asyl-Grenzverfahren höchstens dauern?", "antworten": ["7 Tage", "4 Wochen", "12 Wochen", "6 Monate"], "richtig": 2, "erklaerung": "Max. 12 Wochen einschließlich Rechtsbehelf." },
-    { "kapitel": "asylverfahren", "frage": "Ab welcher EU-weiten Anerkennungsquote des Herkunftslandes ist ein beschleunigtes Verfahren/Grenzverfahren vorgesehen?", "antworten": ["≤ 5 %", "≤ 20 %", "≤ 50 %", "Gar nicht relevant"], "richtig": 1, "erklaerung": "Anerkennungsquote von 20 % oder weniger." },
-    { "kapitel": "asylverfahren", "frage": "Was ergeht bei Ablehnung eines Asylantrags nach der AVVO zugleich?", "antworten": ["Eine Duldung", "Eine Rückkehrentscheidung", "Ein Aufenthaltstitel", "Nichts"], "richtig": 1, "erklaerung": "Ablehnung und Rückkehrentscheidung werden verbunden." },
-    { "kapitel": "asylverfahren", "frage": "Ein Asylbewerber verstößt erstmals gegen die räumliche Beschränkung. Was liegt vor?", "antworten": ["Straftat nach § 85 AsylG", "Ordnungswidrigkeit nach § 86 AsylG", "Straftat nach § 95 AufenthG", "Keine Sanktion"], "richtig": 1, "erklaerung": "Erstverstoß = OWi (§ 86 AsylG), Wiederholung = Straftat (§ 85 AsylG)." },
-    { "kapitel": "asylverfahren", "frage": "Wer darf Asylverfahrenshaft anordnen?", "antworten": ["Die Polizei", "Das BAMF", "Nur ein Richter", "Die Ausländerbehörde"], "richtig": 2, "erklaerung": "§ 69 AsylG: nur durch richterliche Anordnung." },
-    { "kapitel": "zustaendigkeit", "frage": "Wie lange beträgt die reguläre Überstellungsfrist nach der AMM-VO?", "antworten": ["3 Monate", "6 Monate", "12 Monate", "18 Monate"], "richtig": 1, "erklaerung": "6 Monate; bei Haft bis 1 Jahr, bei Flucht bis 3 Jahre." },
-    { "kapitel": "zustaendigkeit", "frage": "Auf wie lange verlängert sich die Überstellungsfrist, wenn die Person flüchtig ist?", "antworten": ["12 Monate", "18 Monate", "Bis zu 3 Jahre", "Unbegrenzt"], "richtig": 2, "erklaerung": "Bis zu 3 Jahre (unter Dublin III: 18 Monate)." },
-    { "kapitel": "zustaendigkeit", "frage": "Wie lange bleibt der Ersteinreisestaat nach irregulärer Einreise zuständig?", "antworten": ["6 Monate", "12 Monate", "20 Monate", "5 Jahre"], "richtig": 2, "erklaerung": "20 Monate (bisher 12)." },
-    { "kapitel": "zustaendigkeit", "frage": "Wo befindet sich das sächsische Sekundärmigrationszentrum?", "antworten": ["Leipzig", "Chemnitz", "Dresden", "Bautzen"], "richtig": 2, "erklaerung": "Dresden, am Standort des früheren Landesausreisezentrums, seit 01.07.2026." },
-    { "kapitel": "zustaendigkeit", "frage": "Was ist die Rechtsgrundlage für Überstellungshaft seit GEAS?", "antworten": ["Art. 28 Dublin III", "Art. 44 Abs. 2 AMM-VO", "§ 62b AufenthG", "§ 19 AsylG"], "richtig": 1, "erklaerung": "Art. 44 Abs. 2 AMM-VO ersetzt Art. 28 Dublin III." },
-    { "kapitel": "rueckfuehrung", "frage": "Darf der Termin einer Abschiebung der betroffenen Person angekündigt werden?", "antworten": ["Ja, immer", "Nur auf Nachfrage", "Nein (§ 59 Abs. 1 S. 8 AufenthG)", "Nur bei Familien"], "richtig": 2, "erklaerung": "Der Termin darf nicht angekündigt werden." },
-    { "kapitel": "rueckfuehrung", "frage": "Wer organisiert in Sachsen die Abschiebungen?", "antworten": ["Die PD Leipzig", "Die Bundespolizei", "Die Zentrale Ausländerbehörde der Landesdirektion Sachsen", "Das BAMF"], "richtig": 2, "erklaerung": "Die ZAB der LDS; die Polizei leistet Vollzugshilfe." },
-    { "kapitel": "rueckfuehrung", "frage": "Wer trägt bei der Vollzugshilfe die Verantwortung für die Rechtmäßigkeit der Abschiebung?", "antworten": ["Die Polizei", "Die ersuchende Ausländerbehörde", "Der Pilot", "Das Verwaltungsgericht"], "richtig": 1, "erklaerung": "Die ersuchende Behörde – die Polizei verantwortet die Art und Weise der Durchführung." },
-    { "kapitel": "rueckfuehrung", "frage": "Darf die Wohnung zur Nachtzeit zur Ergreifung betreten werden, weil der Flug um 6 Uhr geht?", "antworten": ["Ja, die Flugplanung genügt", "Nein, die Organisation der Abschiebung allein ist kein Grund – es braucht Tatsachen für eine drohende Vereitelung", "Ja, wenn der Richter informiert ist", "Nur mit Zustimmung des Vermieters"], "richtig": 1, "erklaerung": "§ 58 Abs. 7 AufenthG." },
-    { "kapitel": "rueckfuehrung", "frage": "Wer ordnet die Durchsuchung einer Wohnung zur Ergreifung an?", "antworten": ["Jede Einsatzkraft", "Der Richter – bei Gefahr im Verzug die durchführende Behörde", "Die ZAB immer allein", "Niemand, sie ist anordnungsfrei"], "richtig": 1, "erklaerung": "§ 58 Abs. 8 AufenthG." },
-    { "kapitel": "rueckfuehrung", "frage": "Während der Abschiebung äußert die Person erstmals, sie wolle Asyl. Was tun?", "antworten": ["Ignorieren, das Verfahren ist abgeschlossen", "Selbst entscheiden, ob das glaubhaft ist", "Wörtlich dokumentieren, sofort ZAB/LDS informieren und deren Weisung abwarten", "Abschiebung sofort endgültig abbrechen und Person freilassen"], "richtig": 2, "erklaerung": "Die Ausländerbehörde entscheidet über den Fortgang – nicht die Einsatzkraft." },
-    { "kapitel": "rueckfuehrung", "frage": "Was gilt nach § 60a Abs. 2c AufenthG zur Reisefähigkeit?", "antworten": ["Sie muss immer ärztlich bescheinigt werden", "Es wird vermutet, dass gesundheitliche Gründe der Abschiebung nicht entgegenstehen", "Sie wird nie geprüft", "Die Polizei attestiert sie"], "richtig": 1, "erklaerung": "Gesetzliche Vermutung; widerlegbar durch qualifizierte ärztliche Bescheinigung. Akute Beschwerden trotzdem ärztlich klären." },
-    { "kapitel": "rueckfuehrung", "frage": "Wer ist bei Flugabschiebungen am Flughafen Leipzig/Halle für den Luftweg zuständig?", "antworten": ["PD Leipzig", "Bundespolizei", "Flughafenbetreiber", "Stadt Leipzig"], "richtig": 1, "erklaerung": "Die Landespolizei übergibt an die Bundespolizei." },
-    { "kapitel": "haft", "frage": "Wie lange darf der Ausreisegewahrsam höchstens dauern?", "antworten": ["4 Tage", "10 Tage", "28 Tage", "6 Wochen"], "richtig": 2, "erklaerung": "§ 62b AufenthG – bis zu 28 Tage (seit Rückführungsverbesserungsgesetz)." },
-    { "kapitel": "haft", "frage": "Welche Höchstdauer hat die Sicherungshaft einschließlich Verlängerung?", "antworten": ["6 Monate", "12 Monate", "18 Monate", "24 Monate"], "richtig": 2, "erklaerung": "6 Monate + Verlängerung um bis zu 12 Monate." },
-    { "kapitel": "haft", "frage": "Welche Voraussetzung gehört NICHT zu § 62 Abs. 5 AufenthG (vorläufige Ingewahrsamnahme)?", "antworten": ["Dringender Verdacht für Sicherungshaft", "Richterliche Entscheidung vorher nicht einholbar", "Begründeter Verdacht des Entziehens", "Vorliegen eines Strafurteils"], "richtig": 3, "erklaerung": "Ein Strafurteil ist nicht erforderlich." },
-    { "kapitel": "haft", "frage": "Wo wird Abschiebungshaft in Sachsen vollzogen?", "antworten": ["JVA Leipzig", "Polizeigewahrsam PD Leipzig", "Einrichtung zum Vollzug der Abschiebungshaft in Dresden", "In Chemnitz bei der ZAB"], "richtig": 2, "erklaerung": "Getrennt von Strafgefangenen (§ 62a AufenthG) in Dresden." },
-    { "kapitel": "haft", "frage": "Wann ist Abschiebungshaft unzulässig?", "antworten": ["Wenn der Zweck durch ein milderes Mittel erreicht werden kann", "Wenn die Person keinen Pass hat", "Am Wochenende", "Nie"], "richtig": 0, "erklaerung": "§ 62 Abs. 1 AufenthG – Verhältnismäßigkeit." },
-    { "kapitel": "vulnerable", "frage": "Es bestehen Zweifel, ob eine aufgegriffene Person minderjährig ist. Wie ist sie zu behandeln?", "antworten": ["Als volljährig", "Bis zur Klärung als minderjährig", "Nach Aussehen", "Das entscheidet der Dolmetscher"], "richtig": 1, "erklaerung": "Im Zweifel minderjährig; Jugendamt informieren." },
-    { "kapitel": "vulnerable", "frage": "Wann darf ein UMA abgeschoben werden?", "antworten": ["Nie", "Wenn sichergestellt ist, dass er im Rückkehrstaat an Familie, Sorgeberechtigte oder geeignete Einrichtung übergeben wird", "Immer, wie Erwachsene", "Nur mit Einverständnis"], "richtig": 1, "erklaerung": "§ 58 Abs. 1a AufenthG." },
-    { "kapitel": "vulnerable", "frage": "Darf das 12-jährige Kind der Familie als Dolmetscher eingesetzt werden?", "antworten": ["Ja, wenn es gut Deutsch spricht", "Nein", "Nur nachts", "Nur mit Zustimmung der Eltern"], "richtig": 1, "erklaerung": "Kinder nie als Sprachmittler einsetzen." },
-    { "kapitel": "vulnerable", "frage": "Wie ist das Kirchenasyl rechtlich einzuordnen?", "antworten": ["Gesetzlich geschütztes Recht", "Kein eigenständiges Rechtsinstitut; wird in der Praxis regelmäßig respektiert", "Straftat", "EU-Recht"], "richtig": 1, "erklaerung": "Maßnahmen nur nach ausdrücklicher Weisung der Führung und Abstimmung mit der LDS." },
-    { "kapitel": "strafrecht", "frage": "Macht sich eine Person mit gültiger Duldung nach § 95 Abs. 1 Nr. 2 AufenthG strafbar?", "antworten": ["Ja", "Nein", "Nur bei Einreiseverbot", "Nur nach 6 Monaten"], "richtig": 1, "erklaerung": "Nr. 2 setzt voraus, dass die Abschiebung nicht ausgesetzt ist." },
-    { "kapitel": "strafrecht", "frage": "Gegen die Person läuft ein Ermittlungsverfahren. Was ist vor der Abschiebung erforderlich?", "antworten": ["Nichts", "Einvernehmen der Staatsanwaltschaft (§ 72 Abs. 4 AufenthG)", "Rechtskräftiges Urteil", "Zustimmung des BAMF"], "richtig": 1, "erklaerung": "Einvernehmen der StA." },
-    { "kapitel": "strafrecht", "frage": "Welche Norm stellt das Einschleusen von Ausländern unter Strafe?", "antworten": ["§ 84 AsylG", "§ 96 AufenthG", "§ 62 AufenthG", "§ 11 AufenthG"], "richtig": 1, "erklaerung": "§ 96 AufenthG, qualifiziert § 97." },
-    { "kapitel": "sachsen", "frage": "Welche Ausländerbehörden sind im Bereich der PD Leipzig zuständig?", "antworten": ["Nur die Stadt Leipzig", "Stadt Leipzig, Landkreis Leipzig, Landkreis Nordsachsen", "Nur die LDS", "Landkreis Zwickau"], "richtig": 1, "erklaerung": "Die PD Leipzig umfasst Stadt Leipzig, Landkreis Leipzig und Landkreis Nordsachsen." },
-    { "kapitel": "sachsen", "frage": "Welches Gericht entscheidet über Abschiebungshaft?", "antworten": ["Verwaltungsgericht", "Amtsgericht", "Sozialgericht", "Landgericht erstinstanzlich"], "richtig": 1, "erklaerung": "Amtsgericht nach FamFG; Rechtsschutz gegen die Abschiebung selbst: Verwaltungsgericht." },
-    { "kapitel": "einsatzpraxis", "frage": "Was ist bei der Dokumentation von Äußerungen der Person besonders wichtig?", "antworten": ["Zusammenfassen genügt", "Wörtlich festhalten – vor allem Asylgesuche, Krankheit, Suizidankündigungen", "Nur Beleidigungen notieren", "Gar nicht dokumentieren"], "richtig": 1, "erklaerung": "Wörtliche Dokumentation ist für die rechtliche Bewertung entscheidend." },
-    { "kapitel": "einsatzpraxis", "frage": "Wann ist eine Fesselung während der Rückführung zulässig?", "antworten": ["Immer, standardmäßig", "Bei konkreter Gefahr von Flucht, Widerstand oder Selbstverletzung – verhältnismäßig und dokumentiert", "Nie", "Nur bei Frauen"], "richtig": 1, "erklaerung": "Keine Routinefesselung; Einzelfallentscheidung." }
+    {
+      "kapitel": "screening",
+      "frage": "Kontrolle am Hauptbahnhof Leipzig: Ein Mann ohne Papiere gibt an, aus Afghanistan zu kommen. Die Abfragen ergeben keine Treffer, und es gibt keinen Hinweis auf eine Grenzkontrolle. Was ist zu tun?",
+      "antworten": [
+        "Kein Screening, nur Anzeige",
+        "Screening durchführen (Art. 7 Screening-VO, § 15b AufenthG)",
+        "Sofort abschieben",
+        "Person entlassen"
+      ],
+      "richtig": 1,
+      "erklaerung": "Drittstaatsangehöriger, unerlaubt aufhältig, kein Hinweis auf Kontrolle an der Außengrenze, nicht erfasst → Screening."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Eine Frau mit polnischem Personalausweis hat kein Ticket und keine Wohnadresse. Screening?",
+      "antworten": [
+        "Ja",
+        "Nein – EU-Bürgerin, Screening-VO gilt nicht",
+        "Nur bei Asylgesuch",
+        "Nur nachts"
+      ],
+      "richtig": 1,
+      "erklaerung": "Die Screening-VO gilt nur für Drittstaatsangehörige."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Ein Mann legt eine gültige Duldung des Landkreises Leipzig vor. Screening?",
+      "antworten": [
+        "Ja, immer",
+        "Nein – bekannter Aufenthaltsstatus",
+        "Ja, wenn er keine Arbeit hat",
+        "Nur mit Richter"
+      ],
+      "richtig": 1,
+      "erklaerung": "Geduldete sind bereits erfasst; ggf. Auflagen prüfen."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Eine Touristin aus Kolumbien reiste mit Einreisestempel über Madrid ein. Ihr visumfreier Aufenthalt ist seit zwei Monaten überschritten. Screening?",
+      "antworten": [
+        "Ja",
+        "Nein – kontrollierte Einreise; Rückkehrverfahren über die Ausländerbehörde",
+        "Nur, wenn sie Asyl will",
+        "Ja, aber nur 7 Tage"
+      ],
+      "richtig": 1,
+      "erklaerung": "Es gibt einen Hinweis auf eine Kontrolle an der Außengrenze → kein Screening, § 95 prüfen."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Eurodac zeigt einen Treffer aus Italien (Asylantrag 2025). Screening?",
+      "antworten": [
+        "Ja, erneut",
+        "Nein – bereits erfasst; Zuständigkeitsverfahren nach AMM-VO, ZAB informieren",
+        "Nur Anzeige",
+        "Person nach Italien fahren"
+      ],
+      "richtig": 1,
+      "erklaerung": "Kein erneutes Screening; Zuständigkeit/Überstellung prüft das BAMF."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Während des Screenings sagt die Person: „I want asylum.“ Was gilt?",
+      "antworten": [
+        "Screening sofort abbrechen",
+        "Gesuch wörtlich dokumentieren – das Screening läuft weiter",
+        "Das Gesuch ignorieren",
+        "Person entlassen"
+      ],
+      "richtig": 1,
+      "erklaerung": "Ein Asylgesuch hindert das Screening nicht; das Gesuch wird aufgenommen und weitergegeben."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Aufgriff am Montag um 22:30 Uhr, die Person wird zum Screening festgehalten. Bis wann muss spätestens eine richterliche Entscheidung vorliegen?",
+      "antworten": [
+        "Montag 24:00 Uhr",
+        "Dienstag 24:00 Uhr (Ende des Folgetages)",
+        "Donnerstag 22:30 Uhr",
+        "Innerhalb von 48 Stunden"
+      ],
+      "richtig": 1,
+      "erklaerung": "Freilassung, wenn nicht bis zum Ende des Tages nach dem Ergreifen richterlich angeordnet."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Die INPOL/AZR-Abfrage ist wegen eines Systemausfalls nicht möglich. Wie gehst du vor?",
+      "antworten": [
+        "Person ohne Weiteres entlassen",
+        "Prüfung fortsetzen, Abfrage schnellstmöglich nachholen und dokumentieren",
+        "Screening ist dann verboten",
+        "Einfach Eurodac überspringen"
+      ],
+      "richtig": 1,
+      "erklaerung": "Abfragen gehören zum Screening – sie werden nachgeholt, sobald es möglich ist."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Wer führt die vorläufige Gesundheitskontrolle im Screening durch?",
+      "antworten": [
+        "Die Streifenbesatzung",
+        "Die nach Landesrecht zuständige Gesundheitsbehörde",
+        "Das BAMF",
+        "Die Person selbst per Fragebogen"
+      ],
+      "richtig": 1,
+      "erklaerung": "Die Polizei veranlasst die Kontrolle, führt sie aber nicht selbst durch."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Ein Mann gibt an, der Ehemann einer Französin zu sein, kann das aber nicht belegen. Wie geht es in der Screening-Prüfung weiter?",
+      "antworten": [
+        "Kein Screening – EU-Familienangehöriger",
+        "Nicht nachgewiesen → weiter prüfen (Aufenthaltsnachweis, Abfrage, Einreise)",
+        "Sofort Screening ohne weitere Prüfung",
+        "Anzeige wegen Lüge"
+      ],
+      "richtig": 1,
+      "erklaerung": "Freizügigkeit muss nachgewiesen sein; eine bloße Behauptung reicht nicht."
+    },
+    {
+      "kapitel": "grundlagen",
+      "frage": "Seit wann gelten die Regeln der GEAS-Reform in Deutschland?",
+      "antworten": [
+        "01.01.2025",
+        "12.06.2026",
+        "01.07.2026",
+        "01.01.2027"
+      ],
+      "richtig": 1,
+      "erklaerung": "Die GEAS-Verordnungen gelten seit dem 12.06.2026; gleichzeitig trat das GEAS-Anpassungsgesetz in Kraft."
+    },
+    {
+      "kapitel": "grundlagen",
+      "frage": "Welche Rechtsnatur haben die meisten GEAS-Rechtsakte?",
+      "antworten": [
+        "Richtlinien, die umgesetzt werden müssen",
+        "Empfehlungen",
+        "Unmittelbar geltende Verordnungen",
+        "Völkerrechtliche Verträge"
+      ],
+      "richtig": 2,
+      "erklaerung": "Bis auf die Aufnahmerichtlinie sind die Kernrechtsakte Verordnungen und gelten unmittelbar."
+    },
+    {
+      "kapitel": "grundlagen",
+      "frage": "Welche Verordnung ersetzt die Dublin-III-Verordnung?",
+      "antworten": [
+        "Screening-VO",
+        "Eurodac-VO",
+        "AMM-VO (2024/1351)",
+        "Krisen-VO"
+      ],
+      "richtig": 2,
+      "erklaerung": "Die Asyl- und Migrationsmanagement-Verordnung regelt nun die Zuständigkeit."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Wie lange darf das Screening im Inland höchstens dauern?",
+      "antworten": [
+        "24 Stunden",
+        "3 Tage",
+        "7 Tage",
+        "12 Wochen"
+      ],
+      "richtig": 1,
+      "erklaerung": "Im Hoheitsgebiet max. 3 Tage, an der Außengrenze max. 7 Tage."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Bis wann muss beim Festhalten zur Überprüfung (§ 15b AufenthG) eine richterliche Entscheidung vorliegen?",
+      "antworten": [
+        "Innerhalb von 3 Tagen",
+        "Bis zum Ende des Tages nach dem Ergreifen",
+        "Innerhalb von 48 Stunden nach Ankunft in der Dienststelle",
+        "Gar nicht, Screening ist keine Freiheitsentziehung"
+      ],
+      "richtig": 1,
+      "erklaerung": "Wie bei Art. 104 GG: Freilassung, wenn nicht bis zum Ende des Folgetages richterlich angeordnet."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Was gehört NICHT zum Screening?",
+      "antworten": [
+        "Vorläufige Gesundheitskontrolle",
+        "Sicherheitsprüfung",
+        "Inhaltliche Prüfung der Asylgründe",
+        "Eurodac-Erfassung"
+      ],
+      "richtig": 2,
+      "erklaerung": "Die Asylgründe prüft ausschließlich das BAMF im Asylverfahren."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Wer wird im Inland dem Screening unterzogen?",
+      "antworten": [
+        "Alle kontrollierten Ausländer",
+        "Unerlaubt Aufhältige, die noch nicht an der Außengrenze überprüft wurden",
+        "Nur Asylantragsteller",
+        "Nur Personen mit Einreiseverbot"
+      ],
+      "richtig": 1,
+      "erklaerung": "Art. 7 Screening-VO – wer schon überprüft wurde, wird nicht erneut gescreent."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Welche Norm regelt die Zuständigkeit der Landespolizei für Screening-Fälle?",
+      "antworten": [
+        "§ 71 Abs. 4a AufenthG",
+        "§ 19 AsylG",
+        "§ 62 AufenthG",
+        "§ 95 AufenthG"
+      ],
+      "richtig": 0,
+      "erklaerung": "§ 71 Abs. 4a AufenthG nennt u. a. die Polizeien der Länder; das Landesrecht konkretisiert."
+    },
+    {
+      "kapitel": "eurodac",
+      "frage": "Ab welchem Alter werden Personen in Eurodac erfasst?",
+      "antworten": [
+        "14 Jahre",
+        "12 Jahre",
+        "6 Jahre",
+        "18 Jahre"
+      ],
+      "richtig": 2,
+      "erklaerung": "Neu: bereits ab 6 Jahren – Fingerabdrücke und Gesichtsbild."
+    },
+    {
+      "kapitel": "eurodac",
+      "frage": "Welche biometrischen Daten erfasst das neue Eurodac?",
+      "antworten": [
+        "Nur Fingerabdrücke",
+        "Fingerabdrücke und Gesichtsbild",
+        "DNA",
+        "Iris-Scan und Stimme"
+      ],
+      "richtig": 1,
+      "erklaerung": "Fingerabdrücke und Gesichtsbild."
+    },
+    {
+      "kapitel": "eurodac",
+      "frage": "Wie sind widersprüchliche Personalien zu behandeln?",
+      "antworten": [
+        "Nur die zuletzt genannten erfassen",
+        "Als Aliaspersonalien vollständig dokumentieren",
+        "Ignorieren",
+        "Die Person selbst entscheiden lassen"
+      ],
+      "richtig": 1,
+      "erklaerung": "Alle Personalien als Alias dokumentieren – wichtig für Eurodac/AZR-Abgleich."
+    },
+    {
+      "kapitel": "asylverfahren",
+      "frage": "Eine kontrollierte Person sagt auf Englisch: „I need protection, I cannot go back.“ Was liegt vor?",
+      "antworten": [
+        "Nichts Relevantes",
+        "Ein Asylgesuch – aufnehmen, dokumentieren, weiterleiten",
+        "Eine Straftat",
+        "Ein Antrag auf Duldung"
+      ],
+      "richtig": 1,
+      "erklaerung": "Jede erkennbare Bitte um Schutz ist ein Antrag auf internationalen Schutz (Stufe „Stellen“)."
+    },
+    {
+      "kapitel": "asylverfahren",
+      "frage": "Wie lange darf das Asyl-Grenzverfahren höchstens dauern?",
+      "antworten": [
+        "7 Tage",
+        "4 Wochen",
+        "12 Wochen",
+        "6 Monate"
+      ],
+      "richtig": 2,
+      "erklaerung": "Max. 12 Wochen einschließlich Rechtsbehelf."
+    },
+    {
+      "kapitel": "asylverfahren",
+      "frage": "Ab welcher EU-weiten Anerkennungsquote des Herkunftslandes ist ein beschleunigtes Verfahren/Grenzverfahren vorgesehen?",
+      "antworten": [
+        "≤ 5 %",
+        "≤ 20 %",
+        "≤ 50 %",
+        "Gar nicht relevant"
+      ],
+      "richtig": 1,
+      "erklaerung": "Anerkennungsquote von 20 % oder weniger."
+    },
+    {
+      "kapitel": "asylverfahren",
+      "frage": "Was ergeht bei Ablehnung eines Asylantrags nach der AVVO zugleich?",
+      "antworten": [
+        "Eine Duldung",
+        "Eine Rückkehrentscheidung",
+        "Ein Aufenthaltstitel",
+        "Nichts"
+      ],
+      "richtig": 1,
+      "erklaerung": "Ablehnung und Rückkehrentscheidung werden verbunden."
+    },
+    {
+      "kapitel": "asylverfahren",
+      "frage": "Ein Asylbewerber verstößt erstmals gegen die räumliche Beschränkung. Was liegt vor?",
+      "antworten": [
+        "Straftat nach § 85 AsylG",
+        "Ordnungswidrigkeit nach § 86 AsylG",
+        "Straftat nach § 95 AufenthG",
+        "Keine Sanktion"
+      ],
+      "richtig": 1,
+      "erklaerung": "Erstverstoß = OWi (§ 86 AsylG), Wiederholung = Straftat (§ 85 AsylG)."
+    },
+    {
+      "kapitel": "asylverfahren",
+      "frage": "Wer darf Asylverfahrenshaft anordnen?",
+      "antworten": [
+        "Die Polizei",
+        "Das BAMF",
+        "Nur ein Richter",
+        "Die Ausländerbehörde"
+      ],
+      "richtig": 2,
+      "erklaerung": "§ 69 AsylG: nur durch richterliche Anordnung."
+    },
+    {
+      "kapitel": "zustaendigkeit",
+      "frage": "Wie lange beträgt die reguläre Überstellungsfrist nach der AMM-VO?",
+      "antworten": [
+        "3 Monate",
+        "6 Monate",
+        "12 Monate",
+        "18 Monate"
+      ],
+      "richtig": 1,
+      "erklaerung": "6 Monate; bei Haft bis 1 Jahr, bei Flucht bis 3 Jahre."
+    },
+    {
+      "kapitel": "zustaendigkeit",
+      "frage": "Auf wie lange verlängert sich die Überstellungsfrist, wenn die Person flüchtig ist?",
+      "antworten": [
+        "12 Monate",
+        "18 Monate",
+        "Bis zu 3 Jahre",
+        "Unbegrenzt"
+      ],
+      "richtig": 2,
+      "erklaerung": "Bis zu 3 Jahre (unter Dublin III: 18 Monate)."
+    },
+    {
+      "kapitel": "zustaendigkeit",
+      "frage": "Wie lange bleibt der Ersteinreisestaat nach irregulärer Einreise zuständig?",
+      "antworten": [
+        "6 Monate",
+        "12 Monate",
+        "20 Monate",
+        "5 Jahre"
+      ],
+      "richtig": 2,
+      "erklaerung": "20 Monate (bisher 12)."
+    },
+    {
+      "kapitel": "zustaendigkeit",
+      "frage": "Wo befindet sich das sächsische Sekundärmigrationszentrum?",
+      "antworten": [
+        "Leipzig",
+        "Chemnitz",
+        "Dresden",
+        "Bautzen"
+      ],
+      "richtig": 2,
+      "erklaerung": "Dresden, am Standort des früheren Landesausreisezentrums, seit 01.07.2026."
+    },
+    {
+      "kapitel": "zustaendigkeit",
+      "frage": "Was ist die Rechtsgrundlage für Überstellungshaft seit GEAS?",
+      "antworten": [
+        "Art. 28 Dublin III",
+        "Art. 44 Abs. 2 AMM-VO",
+        "§ 62b AufenthG",
+        "§ 19 AsylG"
+      ],
+      "richtig": 1,
+      "erklaerung": "Art. 44 Abs. 2 AMM-VO ersetzt Art. 28 Dublin III."
+    },
+    {
+      "kapitel": "rueckfuehrung",
+      "frage": "Darf der Termin einer Abschiebung der betroffenen Person angekündigt werden?",
+      "antworten": [
+        "Ja, immer",
+        "Nur auf Nachfrage",
+        "Nein (§ 59 Abs. 1 S. 8 AufenthG)",
+        "Nur bei Familien"
+      ],
+      "richtig": 2,
+      "erklaerung": "Der Termin darf nicht angekündigt werden."
+    },
+    {
+      "kapitel": "rueckfuehrung",
+      "frage": "Wer organisiert in Sachsen die Abschiebungen?",
+      "antworten": [
+        "Die PD Leipzig",
+        "Die Bundespolizei",
+        "Die Zentrale Ausländerbehörde der Landesdirektion Sachsen",
+        "Das BAMF"
+      ],
+      "richtig": 2,
+      "erklaerung": "Die ZAB der LDS; die Polizei leistet Vollzugshilfe."
+    },
+    {
+      "kapitel": "rueckfuehrung",
+      "frage": "Wer trägt bei der Vollzugshilfe die Verantwortung für die Rechtmäßigkeit der Abschiebung?",
+      "antworten": [
+        "Die Polizei",
+        "Die ersuchende Ausländerbehörde",
+        "Der Pilot",
+        "Das Verwaltungsgericht"
+      ],
+      "richtig": 1,
+      "erklaerung": "Die ersuchende Behörde – die Polizei verantwortet die Art und Weise der Durchführung."
+    },
+    {
+      "kapitel": "rueckfuehrung",
+      "frage": "Darf die Wohnung zur Nachtzeit zur Ergreifung betreten werden, weil der Flug um 6 Uhr geht?",
+      "antworten": [
+        "Ja, die Flugplanung genügt",
+        "Nein, die Organisation der Abschiebung allein ist kein Grund – es braucht Tatsachen für eine drohende Vereitelung",
+        "Ja, wenn der Richter informiert ist",
+        "Nur mit Zustimmung des Vermieters"
+      ],
+      "richtig": 1,
+      "erklaerung": "§ 58 Abs. 7 AufenthG."
+    },
+    {
+      "kapitel": "rueckfuehrung",
+      "frage": "Wer ordnet die Durchsuchung einer Wohnung zur Ergreifung an?",
+      "antworten": [
+        "Jede Einsatzkraft",
+        "Der Richter – bei Gefahr im Verzug die durchführende Behörde",
+        "Die ZAB immer allein",
+        "Niemand, sie ist anordnungsfrei"
+      ],
+      "richtig": 1,
+      "erklaerung": "§ 58 Abs. 8 AufenthG."
+    },
+    {
+      "kapitel": "rueckfuehrung",
+      "frage": "Während der Abschiebung äußert die Person erstmals, sie wolle Asyl. Was tun?",
+      "antworten": [
+        "Ignorieren, das Verfahren ist abgeschlossen",
+        "Selbst entscheiden, ob das glaubhaft ist",
+        "Wörtlich dokumentieren, sofort ZAB/LDS informieren und deren Weisung abwarten",
+        "Abschiebung sofort endgültig abbrechen und Person freilassen"
+      ],
+      "richtig": 2,
+      "erklaerung": "Die Ausländerbehörde entscheidet über den Fortgang – nicht die Einsatzkraft."
+    },
+    {
+      "kapitel": "rueckfuehrung",
+      "frage": "Was gilt nach § 60a Abs. 2c AufenthG zur Reisefähigkeit?",
+      "antworten": [
+        "Sie muss immer ärztlich bescheinigt werden",
+        "Es wird vermutet, dass gesundheitliche Gründe der Abschiebung nicht entgegenstehen",
+        "Sie wird nie geprüft",
+        "Die Polizei attestiert sie"
+      ],
+      "richtig": 1,
+      "erklaerung": "Gesetzliche Vermutung; widerlegbar durch qualifizierte ärztliche Bescheinigung. Akute Beschwerden trotzdem ärztlich klären."
+    },
+    {
+      "kapitel": "rueckfuehrung",
+      "frage": "Wer ist bei Flugabschiebungen am Flughafen Leipzig/Halle für den Luftweg zuständig?",
+      "antworten": [
+        "PD Leipzig",
+        "Bundespolizei",
+        "Flughafenbetreiber",
+        "Stadt Leipzig"
+      ],
+      "richtig": 1,
+      "erklaerung": "Die Landespolizei übergibt an die Bundespolizei."
+    },
+    {
+      "kapitel": "haft",
+      "frage": "Wie lange darf der Ausreisegewahrsam höchstens dauern?",
+      "antworten": [
+        "4 Tage",
+        "10 Tage",
+        "28 Tage",
+        "6 Wochen"
+      ],
+      "richtig": 2,
+      "erklaerung": "§ 62b AufenthG – bis zu 28 Tage (seit Rückführungsverbesserungsgesetz)."
+    },
+    {
+      "kapitel": "haft",
+      "frage": "Welche Höchstdauer hat die Sicherungshaft einschließlich Verlängerung?",
+      "antworten": [
+        "6 Monate",
+        "12 Monate",
+        "18 Monate",
+        "24 Monate"
+      ],
+      "richtig": 2,
+      "erklaerung": "6 Monate + Verlängerung um bis zu 12 Monate."
+    },
+    {
+      "kapitel": "haft",
+      "frage": "Welche Voraussetzung gehört NICHT zu § 62 Abs. 5 AufenthG (vorläufige Ingewahrsamnahme)?",
+      "antworten": [
+        "Dringender Verdacht für Sicherungshaft",
+        "Richterliche Entscheidung vorher nicht einholbar",
+        "Begründeter Verdacht des Entziehens",
+        "Vorliegen eines Strafurteils"
+      ],
+      "richtig": 3,
+      "erklaerung": "Ein Strafurteil ist nicht erforderlich."
+    },
+    {
+      "kapitel": "haft",
+      "frage": "Wo wird Abschiebungshaft in Sachsen vollzogen?",
+      "antworten": [
+        "JVA Leipzig",
+        "Polizeigewahrsam PD Leipzig",
+        "Einrichtung zum Vollzug der Abschiebungshaft in Dresden",
+        "In Chemnitz bei der ZAB"
+      ],
+      "richtig": 2,
+      "erklaerung": "Getrennt von Strafgefangenen (§ 62a AufenthG) in Dresden."
+    },
+    {
+      "kapitel": "haft",
+      "frage": "Wann ist Abschiebungshaft unzulässig?",
+      "antworten": [
+        "Wenn der Zweck durch ein milderes Mittel erreicht werden kann",
+        "Wenn die Person keinen Pass hat",
+        "Am Wochenende",
+        "Nie"
+      ],
+      "richtig": 0,
+      "erklaerung": "§ 62 Abs. 1 AufenthG – Verhältnismäßigkeit."
+    },
+    {
+      "kapitel": "vulnerable",
+      "frage": "Es bestehen Zweifel, ob eine aufgegriffene Person minderjährig ist. Wie ist sie zu behandeln?",
+      "antworten": [
+        "Als volljährig",
+        "Bis zur Klärung als minderjährig",
+        "Nach Aussehen",
+        "Das entscheidet der Dolmetscher"
+      ],
+      "richtig": 1,
+      "erklaerung": "Im Zweifel minderjährig; Jugendamt informieren."
+    },
+    {
+      "kapitel": "vulnerable",
+      "frage": "Wann darf ein UMA abgeschoben werden?",
+      "antworten": [
+        "Nie",
+        "Wenn sichergestellt ist, dass er im Rückkehrstaat an Familie, Sorgeberechtigte oder geeignete Einrichtung übergeben wird",
+        "Immer, wie Erwachsene",
+        "Nur mit Einverständnis"
+      ],
+      "richtig": 1,
+      "erklaerung": "§ 58 Abs. 1a AufenthG."
+    },
+    {
+      "kapitel": "vulnerable",
+      "frage": "Darf das 12-jährige Kind der Familie als Dolmetscher eingesetzt werden?",
+      "antworten": [
+        "Ja, wenn es gut Deutsch spricht",
+        "Nein",
+        "Nur nachts",
+        "Nur mit Zustimmung der Eltern"
+      ],
+      "richtig": 1,
+      "erklaerung": "Kinder nie als Sprachmittler einsetzen."
+    },
+    {
+      "kapitel": "vulnerable",
+      "frage": "Wie ist das Kirchenasyl rechtlich einzuordnen?",
+      "antworten": [
+        "Gesetzlich geschütztes Recht",
+        "Kein eigenständiges Rechtsinstitut; wird in der Praxis regelmäßig respektiert",
+        "Straftat",
+        "EU-Recht"
+      ],
+      "richtig": 1,
+      "erklaerung": "Maßnahmen nur nach ausdrücklicher Weisung der Führung und Abstimmung mit der LDS."
+    },
+    {
+      "kapitel": "strafrecht",
+      "frage": "Macht sich eine Person mit gültiger Duldung nach § 95 Abs. 1 Nr. 2 AufenthG strafbar?",
+      "antworten": [
+        "Ja",
+        "Nein",
+        "Nur bei Einreiseverbot",
+        "Nur nach 6 Monaten"
+      ],
+      "richtig": 1,
+      "erklaerung": "Nr. 2 setzt voraus, dass die Abschiebung nicht ausgesetzt ist."
+    },
+    {
+      "kapitel": "strafrecht",
+      "frage": "Gegen die Person läuft ein Ermittlungsverfahren. Was ist vor der Abschiebung erforderlich?",
+      "antworten": [
+        "Nichts",
+        "Einvernehmen der Staatsanwaltschaft (§ 72 Abs. 4 AufenthG)",
+        "Rechtskräftiges Urteil",
+        "Zustimmung des BAMF"
+      ],
+      "richtig": 1,
+      "erklaerung": "Einvernehmen der StA."
+    },
+    {
+      "kapitel": "strafrecht",
+      "frage": "Welche Norm stellt das Einschleusen von Ausländern unter Strafe?",
+      "antworten": [
+        "§ 84 AsylG",
+        "§ 96 AufenthG",
+        "§ 62 AufenthG",
+        "§ 11 AufenthG"
+      ],
+      "richtig": 1,
+      "erklaerung": "§ 96 AufenthG, qualifiziert § 97."
+    },
+    {
+      "kapitel": "sachsen",
+      "frage": "Welche Ausländerbehörden sind im Bereich der PD Leipzig zuständig?",
+      "antworten": [
+        "Nur die Stadt Leipzig",
+        "Stadt Leipzig, Landkreis Leipzig, Landkreis Nordsachsen",
+        "Nur die LDS",
+        "Landkreis Zwickau"
+      ],
+      "richtig": 1,
+      "erklaerung": "Die PD Leipzig umfasst Stadt Leipzig, Landkreis Leipzig und Landkreis Nordsachsen."
+    },
+    {
+      "kapitel": "sachsen",
+      "frage": "Welches Gericht entscheidet über Abschiebungshaft?",
+      "antworten": [
+        "Verwaltungsgericht",
+        "Amtsgericht",
+        "Sozialgericht",
+        "Landgericht erstinstanzlich"
+      ],
+      "richtig": 1,
+      "erklaerung": "Amtsgericht nach FamFG; Rechtsschutz gegen die Abschiebung selbst: Verwaltungsgericht."
+    },
+    {
+      "kapitel": "einsatzpraxis",
+      "frage": "Was ist bei der Dokumentation von Äußerungen der Person besonders wichtig?",
+      "antworten": [
+        "Zusammenfassen genügt",
+        "Wörtlich festhalten – vor allem Asylgesuche, Krankheit, Suizidankündigungen",
+        "Nur Beleidigungen notieren",
+        "Gar nicht dokumentieren"
+      ],
+      "richtig": 1,
+      "erklaerung": "Wörtliche Dokumentation ist für die rechtliche Bewertung entscheidend."
+    },
+    {
+      "kapitel": "einsatzpraxis",
+      "frage": "Wann ist eine Fesselung während der Rückführung zulässig?",
+      "antworten": [
+        "Immer, standardmäßig",
+        "Bei konkreter Gefahr von Flucht, Widerstand oder Selbstverletzung – verhältnismäßig und dokumentiert",
+        "Nie",
+        "Nur bei Frauen"
+      ],
+      "richtig": 1,
+      "erklaerung": "Keine Routinefesselung; Einzelfallentscheidung."
+    }
   ],
   "kontakte": [
-    { "name": "Bereitschaft ZAB / Landesdirektion Sachsen", "rolle": "Rückfragen bei Abschiebungen (Asylgesuch, Krankheit, Eilverfahren)", "telefon": "" },
-    { "name": "Ausländerbehörde Stadt Leipzig", "rolle": "Aufenthaltsstatus, Duldungen", "telefon": "" },
-    { "name": "Ausländerbehörde Landkreis Leipzig", "rolle": "Aufenthaltsstatus, Duldungen", "telefon": "" },
-    { "name": "Ausländerbehörde Landkreis Nordsachsen", "rolle": "Aufenthaltsstatus, Duldungen", "telefon": "" },
-    { "name": "Jugendamt (Bereitschaft)", "rolle": "Unbegleitete Minderjährige, Kinderschutz", "telefon": "" },
-    { "name": "Bereitschaftsgericht Amtsgericht Leipzig", "rolle": "Haftanträge, Durchsuchungsanordnungen", "telefon": "" },
-    { "name": "Bundespolizei Flughafen Leipzig/Halle", "rolle": "Übergabe bei Flugabschiebungen", "telefon": "" },
-    { "name": "Dolmetscherdienst", "rolle": "Sprachmittlung", "telefon": "" }
+    {
+      "name": "Bereitschaft ZAB / Landesdirektion Sachsen",
+      "rolle": "Rückfragen bei Abschiebungen (Asylgesuch, Krankheit, Eilverfahren)",
+      "telefon": ""
+    },
+    {
+      "name": "Ausländerbehörde Stadt Leipzig",
+      "rolle": "Aufenthaltsstatus, Duldungen",
+      "telefon": ""
+    },
+    {
+      "name": "Ausländerbehörde Landkreis Leipzig",
+      "rolle": "Aufenthaltsstatus, Duldungen",
+      "telefon": ""
+    },
+    {
+      "name": "Ausländerbehörde Landkreis Nordsachsen",
+      "rolle": "Aufenthaltsstatus, Duldungen",
+      "telefon": ""
+    },
+    {
+      "name": "Jugendamt (Bereitschaft)",
+      "rolle": "Unbegleitete Minderjährige, Kinderschutz",
+      "telefon": ""
+    },
+    {
+      "name": "Bereitschaftsgericht Amtsgericht Leipzig",
+      "rolle": "Haftanträge, Durchsuchungsanordnungen",
+      "telefon": ""
+    },
+    {
+      "name": "Bundespolizei Flughafen Leipzig/Halle",
+      "rolle": "Übergabe bei Flugabschiebungen",
+      "telefon": ""
+    },
+    {
+      "name": "Dolmetscherdienst",
+      "rolle": "Sprachmittlung",
+      "telefon": ""
+    }
   ],
   "quellen": [
     "EU-Verordnungen 2024/1346–1359 (Amtsblatt der EU, Mai 2024)",
@@ -591,5 +1702,376 @@
     "Landesdirektion Sachsen – Einrichtung Abschiebungshaft/Ausreisegewahrsam Dresden",
     "Sächsisches Polizeivollzugsdienstgesetz (SächsPVDG), Novelle Landtagsbeschluss 24.06.2026",
     "Aufenthaltsgesetz, Asylgesetz in der jeweils aktuellen Fassung (gesetze-im-internet.de)"
-  ]
+  ],
+  "onboarding": [
+    {
+      "icon": "hand.wave",
+      "titel": "Willkommen bei GEAS Hilfe",
+      "text": "Diese App hilft dir im Einsatz und beim Lernen rund um **GEAS**, **Asyl** und **Rückführung** – zugeschnitten auf die Polizei Sachsen und die PD Leipzig.\n\nIn 1 Minute zeigen wir dir, wie sie funktioniert."
+    },
+    {
+      "icon": "checkmark.shield",
+      "titel": "Das Wichtigste: die Screening-Prüfung",
+      "text": "Du hast eine Person ohne Aufenthaltsnachweis angetroffen und weißt nicht, ob ein **Screening** nötig ist?\n\n1. Öffne den Reiter **Screening**.\n2. Tippe auf **Prüfung starten**.\n3. Beantworte **eine Frage nach der anderen**.\n4. Am Ende steht **eindeutig**, ob ein Screening durchzuführen ist – und **was du jetzt tun musst**, Schritt für Schritt.\n\nDu kannst jederzeit einen Schritt zurückgehen."
+    },
+    {
+      "icon": "exclamationmark.triangle",
+      "titel": "Drei goldene Regeln",
+      "text": "1. **Erst abfragen, dann entscheiden.** INPOL, AZR, SIS, Eurodac – immer vor der Entscheidung.\n2. **Uhrzeit des Aufgriffs sofort notieren.** Festhalten ohne Richter nur bis zum **Ende des folgenden Tages**, Screening höchstens **3 Tage**.\n3. **Asyl sticht nichts aus.** Wer um Schutz bittet, wird trotzdem überprüft – das Gesuch wird **wörtlich** notiert und weitergeleitet.\n\nIm Zweifel: **Rücksprache** mit Dienstgruppenleitung bzw. Fachdienststelle."
+    },
+    {
+      "icon": "square.grid.2x2",
+      "titel": "Was gibt es noch?",
+      "text": "• **Wissen** – 11 Kapitel zum Nachlesen, mit Suche und Glossar\n• **Einsatz** – Checklisten zum Abhaken, Fristen, Paragraphen\n• **Lernen** – Quiz, Fallbeispiele, Prüfung, Karteikarten\n• **Mehr** – eigene Telefonliste, Einführung erneut ansehen"
+    },
+    {
+      "icon": "lock.shield",
+      "titel": "Wichtiger Hinweis",
+      "text": "Die App ist eine **inoffizielle Arbeitshilfe**. Sie ersetzt weder Gesetz, Erlass oder Dienstanweisung noch die Weisung der Führung oder der Ausländerbehörde.\n\n**Keine personenbezogenen Daten** eintragen. Alles bleibt nur auf diesem Gerät gespeichert."
+    }
+  ],
+  "screening": {
+    "start": "q_eu",
+    "kurzanleitung": [
+      "Aufgriffszeit notieren – ab jetzt laufen die Fristen.",
+      "Eigensicherung und Personalien, Dokumente sichten.",
+      "Abfragen: INPOL, AZR, SIS, Eurodac/Fast-ID.",
+      "Screening-Prüfung in der App Schritt für Schritt beantworten.",
+      "Ergebnis befolgen und das Prüfprotokoll in die Vorgangsdokumentation übernehmen.",
+      "Festhalten? Richterliche Entscheidung bis Ende des Folgetages – Fristenrechner nutzen."
+    ],
+    "grundsaetze": [
+      "Screening gilt nur für Drittstaatsangehörige – nie für EU-, EWR- oder Schweizer Staatsangehörige.",
+      "Screening im Inland nur, wenn es keinen Hinweis auf eine Kontrolle an einer EU-Außengrenze gibt und die Person noch nicht überprüft oder registriert wurde.",
+      "Ein Asylgesuch verhindert das Screening nicht.",
+      "Höchstdauer im Inland: 3 Tage. Festhalten ohne Richter: bis Ende des Tages nach dem Ergreifen.",
+      "Die Polizei prüft keine Asylgründe und stellt keine Gesundheit fest – das machen BAMF bzw. Gesundheitsbehörde."
+    ],
+    "knoten": {
+      "q_eu": {
+        "typ": "frage",
+        "schritt": "Staatsangehörigkeit",
+        "frage": "Ist die Person Staatsangehörige/r eines EU-Staates, von Island, Liechtenstein, Norwegen oder der Schweiz?",
+        "hilfe": "Pass oder Personalausweis ansehen. Hat die Person keine Dokumente, gilt: „Nein / unklar“.",
+        "beispiele": [
+          "Ja: rumänischer Personalausweis, Schweizer Pass",
+          "Nein: syrischer Pass, afghanische Tazkira, keine Papiere"
+        ],
+        "antworten": [
+          {
+            "text": "Ja – nachgewiesen",
+            "ziel": "e_eu"
+          },
+          {
+            "text": "Nein / unklar / keine Papiere",
+            "ziel": "q_fam"
+          }
+        ]
+      },
+      "q_fam": {
+        "typ": "frage",
+        "schritt": "Freizügigkeit",
+        "frage": "Ist die Person nachweislich Familienangehörige/r einer Unionsbürgerin oder eines Unionsbürgers mit Freizügigkeitsrecht?",
+        "hilfe": "Nachweis ist z. B. eine „Aufenthaltskarte für Familienangehörige eines Unionsbürgers“. Eine bloße Behauptung reicht nicht.",
+        "beispiele": [
+          "Ja: Aufenthaltskarte nach § 5 FreizügG/EU",
+          "Nein: nur mündliche Angabe, kein Dokument"
+        ],
+        "antworten": [
+          {
+            "text": "Ja – mit Dokument nachgewiesen",
+            "ziel": "e_eu"
+          },
+          {
+            "text": "Nein / nicht nachgewiesen",
+            "ziel": "q_status"
+          }
+        ]
+      },
+      "q_status": {
+        "typ": "frage",
+        "schritt": "Aufenthaltsnachweis",
+        "frage": "Hat die Person ein GÜLTIGES Dokument, das ihren Aufenthalt oder ihr Verfahren in Deutschland belegt?",
+        "hilfe": "Gültigkeitsdatum und Echtheit prüfen. Abgelaufene Dokumente zählen NICHT als gültig – dafür gibt es eine eigene Antwort.",
+        "beispiele": [
+          "Aufenthaltstitel (eAT), nationales Visum, Schengen-Visum",
+          "Duldung, Aufenthaltsgestattung, Ankunftsnachweis",
+          "Fiktionsbescheinigung, Aufenthaltstitel eines anderen Schengen-Staates"
+        ],
+        "antworten": [
+          {
+            "text": "Ja – gültiges Dokument",
+            "ziel": "e_status"
+          },
+          {
+            "text": "Nur ein ABGELAUFENES Visum / abgelaufener Titel",
+            "ziel": "e_overstay"
+          },
+          {
+            "text": "Nein – gar nichts / unklar",
+            "ziel": "q_abfrage"
+          }
+        ]
+      },
+      "q_abfrage": {
+        "typ": "frage",
+        "schritt": "Datenbankabfrage",
+        "frage": "Ergebnis der Abfrage (INPOL, AZR, SIS, Eurodac/Fast-ID): Ist die Person bereits erfasst?",
+        "hilfe": "Noch nicht abgefragt? Dann JETZT abfragen – erst danach weiter. Erfasst heißt: Asylantrag, bereits überprüft (Screening), Eurodac-Treffer eines EU-Staates oder bekannter Aufenthaltsstatus.",
+        "beispiele": [
+          "Eurodac-Treffer Italien (Asylantrag oder irreguläre Einreise registriert)",
+          "AZR: Asylverfahren in Sachsen läuft",
+          "Kein Treffer in allen Systemen"
+        ],
+        "antworten": [
+          {
+            "text": "Ja – Treffer: bereits erfasst / überprüft / im Verfahren",
+            "ziel": "e_bekannt"
+          },
+          {
+            "text": "Nein – kein Treffer",
+            "ziel": "q_einreise"
+          },
+          {
+            "text": "Abfrage gerade nicht möglich (Systemausfall)",
+            "ziel": "q_einreise"
+          }
+        ]
+      },
+      "q_einreise": {
+        "typ": "frage",
+        "schritt": "Einreise",
+        "frage": "Gibt es einen konkreten Hinweis, dass die Person bei der Einreise in den Schengen-Raum an einer Grenzkontrolle (Außengrenze) kontrolliert wurde?",
+        "hilfe": "Es zählen nur belegbare Hinweise, keine bloße Behauptung. Fehlen Belege → „Nein / kein Hinweis“.",
+        "beispiele": [
+          "Einreisestempel im Pass",
+          "Eintrag im Einreise-/Ausreisesystem (EES)",
+          "Visum im Pass und Flugticket mit Ankunft an einem Schengen-Flughafen"
+        ],
+        "antworten": [
+          {
+            "text": "Ja – belegbarer Hinweis auf kontrollierte Einreise",
+            "ziel": "e_overstay"
+          },
+          {
+            "text": "Nein / kein Hinweis / unklar",
+            "ziel": "q_rueck"
+          }
+        ]
+      },
+      "q_rueck": {
+        "typ": "frage",
+        "schritt": "Rücküberstellung",
+        "frage": "Wird die Person UNMITTELBAR nach dem Aufgriff aufgrund eines bilateralen Abkommens an einen Nachbarstaat rücküberstellt?",
+        "hilfe": "Das betrifft praktisch nur Aufgriffe durch die Bundespolizei im grenznahen Raum. Im Bereich der PD Leipzig lautet die Antwort in aller Regel „Nein“.",
+        "beispiele": [],
+        "antworten": [
+          {
+            "text": "Nein (Regelfall)",
+            "ziel": "e_screening"
+          },
+          {
+            "text": "Ja – mit Bundespolizei abgestimmt",
+            "ziel": "e_rueck"
+          }
+        ]
+      },
+      "e_screening": {
+        "typ": "ergebnis",
+        "ergebnis": "screening",
+        "titel": "Screening durchführen",
+        "kurz": "Die Person ist nach Art. 7 Screening-VO und § 15b AufenthG zu überprüfen. Höchstdauer: 3 Tage.",
+        "fristen": true,
+        "schritte": [
+          {
+            "text": "Aufgriffszeit notieren und unten in den Fristenrechner eintragen.",
+            "hinweis": "Ab jetzt laufen die Fristen."
+          },
+          {
+            "text": "Person in verständlicher Sprache belehren: Überprüfung nach Screening-VO.",
+            "hinweis": "Dolmetscher, keine Kinder oder Mitbewohner"
+          },
+          {
+            "text": "Minderjährig oder besonders schutzbedürftig? → Jugendamt bzw. Fachstelle einbinden, kindgerecht vorgehen.",
+            "hinweis": "Im Zweifel als minderjährig behandeln"
+          },
+          {
+            "text": "Nur festhalten, wenn die Überprüfung sonst nicht möglich ist. Dann richterliche Entscheidung beantragen – spätestens bis Ende des Folgetages.",
+            "hinweis": "§ 15b AufenthG, Art. 104 GG"
+          },
+          {
+            "text": "Identität prüfen: Dokumente sichten und sichern.",
+            "hinweis": "Datenträger nur nach § 48 Abs. 3a AufenthG"
+          },
+          {
+            "text": "Sicherheitsabfragen vollständig durchführen (SIS, INPOL, weitere über die zuständige Stelle).",
+            "hinweis": null
+          },
+          {
+            "text": "ED-Behandlung und Eurodac: Fingerabdrücke und Gesichtsbild (ab 6 Jahren).",
+            "hinweis": null
+          },
+          {
+            "text": "Vorläufige Gesundheitskontrolle durch die zuständige Gesundheitsbehörde veranlassen – nicht selbst durchführen.",
+            "hinweis": null
+          },
+          {
+            "text": "Hinweise auf Vulnerabilität festhalten (Minderjährige, Schwangere, Kranke, Opfer von Folter oder Menschenhandel).",
+            "hinweis": null
+          },
+          {
+            "text": "Überprüfungsformular (Screening-Formular) vollständig ausfüllen.",
+            "hinweis": null
+          },
+          {
+            "text": "Bittet die Person um Schutz: wörtlich notieren. Das Screening läuft trotzdem weiter.",
+            "hinweis": null
+          },
+          {
+            "text": "Übergabe an die zuständige Stelle nach sächsischer Zuständigkeitsregelung (Asylverfahren oder Ausländerbehörde für die Rückkehr).",
+            "hinweis": "Erlasslage SMI beachten"
+          },
+          {
+            "text": "Screening spätestens nach 3 Tagen abschließen und alles dokumentieren.",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356, § 15b AufenthG, § 71 Abs. 4a AufenthG"
+      },
+      "e_eu": {
+        "typ": "ergebnis",
+        "ergebnis": "kein",
+        "titel": "Kein Screening",
+        "kurz": "Unionsbürger:innen, EWR- und Schweizer Staatsangehörige sowie ihre freizügigkeitsberechtigten Familienangehörigen fallen nicht unter die Screening-VO.",
+        "fristen": false,
+        "schritte": [
+          {
+            "text": "Weiter nach allgemeinem Polizeirecht bzw. FreizügG/EU.",
+            "hinweis": null
+          },
+          {
+            "text": "Bei Zweifeln an der Echtheit der Dokumente: Urkundenprüfung, ggf. Strafanzeige.",
+            "hinweis": null
+          },
+          {
+            "text": "Bei Verlustfeststellung des Freizügigkeitsrechts: Ausländerbehörde informieren.",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 2 VO (EU) 2024/1356, FreizügG/EU"
+      },
+      "e_status": {
+        "typ": "ergebnis",
+        "ergebnis": "kein",
+        "titel": "Kein Screening",
+        "kurz": "Die Person hat einen gültigen, bekannten Aufenthaltsstatus. Sie ist bereits im System erfasst.",
+        "fristen": false,
+        "schritte": [
+          {
+            "text": "Echtheit und Gültigkeit des Dokuments sicher prüfen.",
+            "hinweis": null
+          },
+          {
+            "text": "Auflagen prüfen, z. B. räumliche Beschränkung oder Wohnsitzauflage.",
+            "hinweis": "Erstverstoß § 86 AsylG (OWi), wiederholt § 85 AsylG"
+          },
+          {
+            "text": "Ausschreibungen beachten (INPOL, SIS).",
+            "hinweis": null
+          },
+          {
+            "text": "Bei Auffälligkeiten die zuständige Ausländerbehörde informieren.",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356 (kein Anwendungsfall)"
+      },
+      "e_bekannt": {
+        "typ": "ergebnis",
+        "ergebnis": "kein",
+        "titel": "Kein erneutes Screening",
+        "kurz": "Die Person ist bereits erfasst, überprüft oder im Verfahren. Es geht im bestehenden Verfahren weiter.",
+        "fristen": false,
+        "schritte": [
+          {
+            "text": "Treffer mit Aktenzeichen, Staat und Kategorie dokumentieren.",
+            "hinweis": null
+          },
+          {
+            "text": "Ausschreibung vorhanden? Ausschreibung befolgen (z. B. Festnahme, Aufenthaltsermittlung).",
+            "hinweis": null
+          },
+          {
+            "text": "Eurodac-Treffer eines anderen EU-Staates: ZAB bzw. Ausländerbehörde informieren – Zuständigkeitsverfahren nach AMM-VO.",
+            "hinweis": "Ggf. Überstellung"
+          },
+          {
+            "text": "Bittet die Person um Schutz: wörtlich notieren und weiterleiten.",
+            "hinweis": null
+          },
+          {
+            "text": "Festnahme nur bei Ausschreibung oder Haftgrund, z. B. § 62 Abs. 5 AufenthG – in Abstimmung mit der Ausländerbehörde.",
+            "hinweis": null
+          },
+          {
+            "text": "Unerlaubten Aufenthalt prüfen (§ 95 AufenthG).",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356, AMM-VO"
+      },
+      "e_overstay": {
+        "typ": "ergebnis",
+        "ergebnis": "kein",
+        "titel": "Kein Screening – Rückkehrverfahren",
+        "kurz": "Die Person wurde bei der Einreise kontrolliert und hält sich jetzt unerlaubt auf (z. B. Visum abgelaufen). Zuständig ist die Ausländerbehörde, nicht das Screening.",
+        "fristen": false,
+        "schritte": [
+          {
+            "text": "Nachweis der kontrollierten Einreise dokumentieren (Stempel, EES, Visum).",
+            "hinweis": null
+          },
+          {
+            "text": "Strafbarkeit prüfen: unerlaubter Aufenthalt (§ 95 Abs. 1 Nr. 2 AufenthG).",
+            "hinweis": null
+          },
+          {
+            "text": "Zuständige Ausländerbehörde informieren – sie entscheidet über die Rückkehr.",
+            "hinweis": null
+          },
+          {
+            "text": "Bittet die Person um Schutz: wörtlich notieren und weiterleiten.",
+            "hinweis": null
+          },
+          {
+            "text": "Festnahme nur bei Haftgrund (§ 62 Abs. 5 AufenthG) und in Abstimmung mit der Ausländerbehörde.",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356 (kein Anwendungsfall), §§ 50, 58, 95 AufenthG"
+      },
+      "e_rueck": {
+        "typ": "ergebnis",
+        "ergebnis": "sonder",
+        "titel": "Von einem Screening kann abgesehen werden",
+        "kurz": "Bei unmittelbarer Rücküberstellung an einen Nachbarstaat aufgrund eines bilateralen Abkommens kann vom Screening abgesehen werden.",
+        "fristen": false,
+        "schritte": [
+          {
+            "text": "Nur in Abstimmung mit der Bundespolizei.",
+            "hinweis": null
+          },
+          {
+            "text": "Findet die Rücküberstellung doch nicht unmittelbar statt: Prüfung neu starten – dann ist ein Screening durchzuführen.",
+            "hinweis": null
+          },
+          {
+            "text": "Alle Absprachen dokumentieren (wer, wann, Ergebnis).",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 Abs. 2 VO (EU) 2024/1356"
+      }
+    }
+  }
 }

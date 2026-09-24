@@ -12,10 +12,12 @@ Rechtsstand: GEAS-Reform und GEAS-Anpassungsgesetz, **in Kraft seit 12.06.2026**
 
 | Bereich | Umfang |
 |---|---|
+| **Screening** (erster Reiter) | Geführte Prüfung „Ist ein Screening durchzuführen?“: eine Frage pro Bildschirm, eindeutiges Ergebnis mit Handlungsschritten zum Abhaken, Fristenrechner (Richtervorbehalt / 3-Tage-Frist), Prüfprotokoll zum Kopieren, Kurzanleitung, Checkliste, 10 Fallbeispiele |
+| **Einführung** | Beim ersten Start geführte Einführung (5 Schritte), die bestätigt werden muss; jederzeit unter „Mehr“ erneut aufrufbar |
 | **Wissen** | 11 Kapitel: GEAS-Überblick, Screening, Eurodac, Asylverfahren, Zuständigkeit/Überstellung (AMM-VO), Ausreisepflicht & Abschiebung, Festnahme & Haft, besondere Personengruppen, Straf-/Bußgeldrecht, Zuständigkeiten in Sachsen, Einsatzpraxis |
-| **Einsatz** | 6 abhakbare Checklisten (Aufgriff, Asylgesuch, Abschiebung Vorbereitung/Durchführung, Festnahme/Haftantrag, UMA), Fristen-Übersicht, Paragraphen-Schnellzugriff |
-| **Lernen** | 46 Quizfragen mit Erklärungen, Prüfungssimulation (20 Fragen), Wiederholung falscher Antworten, 53 Karteikarten, Fortschrittsanzeige |
-| **Suche** | Volltextsuche über Kapitel, Paragraphen und Glossar (28 Begriffe) |
+| **Einsatz** | 7 abhakbare Checklisten (Screening im Inland, Aufgriff, Asylgesuch, Abschiebung Vorbereitung/Durchführung, Festnahme/Haftantrag, UMA), Fristen-Übersicht, Paragraphen-Schnellzugriff |
+| **Lernen** | 56 Quizfragen (davon 10 Screening-Fallbeispiele) mit Erklärungen, Prüfungssimulation (20 Fragen), Wiederholung falscher Antworten, 53 Karteikarten, Fortschrittsanzeige |
+| **Suche** | Im Reiter „Wissen“: Volltextsuche über Kapitel, Paragraphen und Glossar (28 Begriffe) |
 | **Mehr** | Selbst pflegbare Erreichbarkeiten (ZAB-Bereitschaft, Ausländerbehörden, Jugendamt, Bereitschaftsgericht …), Hinweise, Quellen |
 
 Alle Daten (Lernfortschritt, Haken, Telefonnummern) bleiben lokal auf dem Gerät. Es gibt keinen Server und kein Tracking.
@@ -29,6 +31,9 @@ geas-app/
 ├── web/                   ← Web-App/PWA (läuft auf jedem iPhone über Safari)
 └── tools/                 ← build_web.py, Icon
 ```
+
+**Screening-Entscheidungsbaum ändern:** in `content.json` unter `screening.knoten`. Jede Frage verweist
+mit `antworten[].ziel` auf die nächste Frage oder ein Ergebnis (`typ: "ergebnis"`).
 
 **Inhalte ändern:** nur `content/content.json` bearbeiten, danach `python3 tools/build_web.py`
 ausführen (erzeugt `web/index.html`). Die iOS-App liest `content.json` direkt.
