@@ -1,0 +1,26 @@
+name: GEAS Hilfe – iOS-Build
+
+on:
+  push:
+    paths:
+      - "geas-app/**"
+      - ".github/workflows/geas-ios.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: XcodeGen installieren
+        run: brew install xcodegen
+      - name: Xcode-Projekt erzeugen
+        working-directory: geas-app/ios
+        run: xcodegen generate
+      - name: Für den iOS-Simulator bauen (ohne Signatur)
+        working-directory: geas-app/ios
+        run: |
+          xcodebuild -project GEASHilfe.xcodeproj -scheme GEASHilfe \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug CODE_SIGNING_ALLOWED=NO build | tail -n 40
+          exit ${PIPESTATUS[0]}

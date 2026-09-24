@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GEAS Hilfe</title>
+<meta name="description" content="Einsatz- und Lernhilfe zu GEAS, Asyl und Rückführung für den Polizeivollzugsdienst">
+<meta name="theme-color" content="#00584a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GEAS Hilfe">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  :root {
+    --bg: #f2f2f7;
+    --card: #ffffff;
+    --text: #1c1c1e;
+    --muted: #6c6c70;
+    --line: #d8d8dc;
+    --accent: #00584a;
+    --accent-soft: #00584a1f;
+    --ok: #1f8a3b;
+    --ok-soft: #1f8a3b24;
+    --bad: #c4312b;
+    --bad-soft: #c4312b24;
+    --warn: #b26200;
+    --warn-soft: #f0900029;
+    --tab-h: 64px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --card: #1c1c1e;
+      --text: #f2f2f7;
+      --muted: #9a9aa0;
+      --line: #38383a;
+      --accent: #61c7b0;
+      --accent-soft: #61c7b026;
+      --ok: #4cc96b;
+      --ok-soft: #4cc96b26;
+      --bad: #ff6961;
+      --bad-soft: #ff696126;
+      --warn: #ffb340;
+      --warn-soft: #ffb34026;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body {
+    font: 17px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom) + 16px);
+  }
+  header.top {
+    position: sticky; top: 0; z-index: 5;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+    padding: calc(env(safe-area-inset-top) + 10px) 16px 8px;
+    border-bottom: 0.5px solid var(--line);
+    display: flex; align-items: center; gap: 8px; min-height: 52px;
+  }
+  header.top h1 { font-size: 20px; margin: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .back { background: none; border: 0; color: var(--accent); font: inherit; padding: 6px 4px; cursor: pointer; }
+  main { max-width: 760px; margin: 0 auto; padding: 12px 16px; }
+  h2.sec { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 500; margin: 22px 4px 6px; }
+  .card { background: var(--card); border-radius: 12px; overflow: hidden; }
+  .row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; width: 100%;
+    background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer;
+    border-bottom: 0.5px solid var(--line);
+  }
+  .row:last-child { border-bottom: 0; }
+  .row .ico { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; font-size: 16px; }
+  .row .txt { flex: 1; min-width: 0; }
+  .row .t { font-weight: 600; }
+  .row .s { font-size: 13px; color: var(--muted); }
+  .row .end { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .row .chev::after { content: "›"; color: var(--muted); font-size: 22px; line-height: 1; }
+  .done { color: var(--ok); }
+  .prose { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .prose h3 { margin: 0 0 10px; font-size: 19px; }
+  .prose p { margin: 0 0 8px; }
+  .prose ul, .prose ol { margin: 0 0 8px; padding-left: 22px; }
+  .prose li { margin-bottom: 6px; }
+  .prose li::marker { color: var(--accent); font-weight: 700; }
+  .lead { color: var(--muted); font-weight: 600; margin: 4px 4px 14px; }
+  .merke { background: var(--warn-soft); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; }
+  .merke b.h { color: var(--warn); display: block; margin-bottom: 6px; }
+  .merke ul { margin: 0; padding-left: 20px; }
+  .btn {
+    display: block; width: 100%; padding: 14px; border-radius: 12px; border: 0; cursor: pointer;
+    font: inherit; font-weight: 600; background: var(--accent); color: #fff; margin: 10px 0;
+  }
+  @media (prefers-color-scheme: dark) { .btn { color: #00231d; } }
+  .btn.sec { background: var(--accent-soft); color: var(--accent); }
+  .btn.warn { background: var(--warn-soft); color: var(--warn); }
+  .btn.danger { background: var(--bad-soft); color: var(--bad); }
+  .btn:disabled { opacity: .5; }
+  .hstack { display: flex; gap: 10px; }
+  .hstack .btn { flex: 1; }
+  .info { background: var(--card); border-radius: 12px; padding: 14px 16px; font-size: 15px; display: flex; gap: 10px; }
+  .progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 8px 0; }
+  .progress > div { height: 100%; background: var(--accent); transition: width .3s; }
+  .small { font-size: 13px; color: var(--muted); }
+  .opt {
+    display: block; width: 100%; text-align: left; padding: 14px; margin: 8px 0; border-radius: 12px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--card); color: inherit; font: inherit;
+  }
+  .opt.ok { background: var(--ok-soft); border-color: var(--ok); }
+  .opt.bad { background: var(--bad-soft); border-color: var(--bad); }
+  .opt.sel { background: var(--accent-soft); border-color: var(--accent); }
+  .expl { background: var(--card); border-radius: 12px; padding: 14px; margin-top: 8px; }
+  .qtitle { font-size: 20px; font-weight: 700; margin: 8px 0 6px; }
+  .check { display: flex; gap: 12px; align-items: flex-start; }
+  .box { width: 22px; height: 22px; border-radius: 5px; border: 2px solid var(--muted); flex: none; margin-top: 1px; display: grid; place-items: center; font-size: 14px; color: #fff; }
+  .box.on { background: var(--ok); border-color: var(--ok); }
+  .strike { text-decoration: line-through; color: var(--muted); }
+  .flash {
+    min-height: 300px; border-radius: 20px; background: var(--card); display: grid; place-items: center; padding: 24px;
+    text-align: center; cursor: pointer; white-space: pre-line; user-select: none;
+  }
+  .flash.back { background: var(--accent-soft); }
+  .flash .front { font-size: 22px; font-weight: 700; }
+  input[type=search], input[type=text], input[type=tel] {
+    width: 100%; padding: 11px 14px; border-radius: 10px; border: 0; background: var(--card); color: var(--text); font: inherit;
+    outline: none; -webkit-appearance: none;
+  }
+  input:focus { box-shadow: 0 0 0 2px var(--accent); }
+  .ring { width: 76px; height: 76px; flex: none; }
+  .stat { display: flex; gap: 16px; align-items: center; background: var(--card); border-radius: 12px; padding: 14px 16px; }
+  .fristrow { display: flex; justify-content: space-between; gap: 12px; }
+  .fristrow b:last-child { color: var(--accent); text-align: right; }
+  .norm b.n { color: var(--accent); }
+  .kbd { font-variant-numeric: tabular-nums; }
+  nav.tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    display: flex; justify-content: space-around;
+    background: color-mix(in srgb, var(--card) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-top: 0.5px solid var(--line);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  nav.tabs button {
+    background: none; border: 0; color: var(--muted); font: 11px/1.2 inherit; font-family: inherit; display: flex; flex-direction: column;
+    align-items: center; gap: 3px; flex: 1; cursor: pointer; padding: 4px 0;
+  }
+  nav.tabs button svg { width: 24px; height: 24px; }
+  nav.tabs button.on { color: var(--accent); }
+  .modal { position: fixed; inset: 0; background: #0008; z-index: 20; display: grid; place-items: end center; }
+  .modal .sheet { background: var(--bg); width: 100%; max-width: 760px; border-radius: 16px 16px 0 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); max-height: 92vh; overflow: auto; }
+  .modal .sheet label { display: block; font-size: 13px; color: var(--muted); margin: 12px 4px 4px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header class="top"><button class="back" id="back" hidden>‹ Zurück</button><h1 id="title">GEAS Hilfe</h1></header>
+<main id="app"></main>
+<nav class="tabs" id="tabs"></nav>
+<script id="content" type="application/json">__CONTENT__</script>
+<script>
+"use strict";
+const C = JSON.parse(document.getElementById("content").textContent);
+
+// ---------- Speicher (nur lokal) ----------
+const KEY = "geas.progress.v1";
+const S = (() => {
+  let s = {};
+  try { s = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+  s.gelesen ||= []; s.quiz ||= {}; s.checklisten ||= {}; s.karten ||= [];
+  return s;
+})();
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+// ---------- Hilfen ----------
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+function rich(text) {
+  let html = "", list = null;
+  const close = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    if (!line) { close(); continue; }
+    let m;
+    if (line.startsWith("• ")) {
+      if (list !== "ul") { close(); html += "<ul>"; list = "ul"; }
+      html += `<li>${inline(line.slice(2))}</li>`;
+    } else if ((m = line.match(/^(\d+)\.\s(.*)$/))) {
+      if (list !== "ol") { close(); html += `<ol start="${m[1]}">`; list = "ol"; }
+      html += `<li>${inline(m[2])}</li>`;
+    } else { close(); html += `<p>${inline(line)}</p>`; }
+  }
+  close();
+  return html;
+}
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const ring = v => {
+  const r = 32, c = 2 * Math.PI * r, p = Math.round(v * 100);
+  return `<svg class="ring" viewBox="0 0 76 76" role="img" aria-label="Fortschritt ${p} Prozent">
+    <circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--line)" stroke-width="8"/>
+    ${v > 0 ? `<circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"
+      stroke-dasharray="${c * v} ${c}" transform="rotate(-90 38 38)"/>` : ""}
+    <text x="38" y="43" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor">${p} %</text></svg>`;
+};
+const ICON = {
+  wissen: '<path d="M4 5h5v14H4zM10 5h5v14h-5zM16 6l4 1-3 13-4-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+  einsatz: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+  lernen: '<path d="M2 9l10-5 10 5-10 5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+  suche: '<circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  mehr: '<circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/>'
+};
+// SF-Symbol-Namen aus content.json auf kurze Zeichen abbilden
+const glyph = n => ({
+  "globe.europe.africa": "🌍", "person.text.rectangle": "🪪", "touchid": "☝", "doc.text.magnifyingglass": "📄",
+  "arrow.left.arrow.right.circle": "⇄", "airplane.departure": "✈", "lock.shield": "🔒", "figure.and.child.holdinghands": "👪",
+  "scalemass": "⚖", "building.columns": "🏛", "shield.lefthalf.filled": "🛡", "person.crop.circle.badge.questionmark": "❓",
+  "hand.raised": "✋", "list.clipboard": "📋", "checklist": "☑", "lock.doc": "🔐", "figure.child": "🧒"
+}[n] || "•");
+
+// ---------- Router ----------
+const app = document.getElementById("app");
+const titleEl = document.getElementById("title");
+const backBtn = document.getElementById("back");
+const TABS = [["wissen", "Wissen"], ["einsatz", "Einsatz"], ["lernen", "Lernen"], ["suche", "Suche"], ["mehr", "Mehr"]];
+let stack = [];
+let tab = "wissen";
+
+function go(view, push = true) {
+  if (push) stack.push(view); else stack = [view];
+  render();
+}
+backBtn.onclick = () => { if (stack.length > 1) { stack.pop(); render(); } };
+function render() {
+  const v = stack[stack.length - 1];
+  backBtn.hidden = stack.length <= 1;
+  const out = v();
+  titleEl.textContent = out.title;
+  app.innerHTML = out.html;
+  out.bind && out.bind();
+  window.scrollTo(0, 0);
+  document.querySelectorAll("nav.tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === tab));
+}
+function renderTabs() {
+  const nav = document.getElementById("tabs");
+  nav.innerHTML = TABS.map(([id, label]) =>
+    `<button data-t="${id}" aria-label="${label}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[id]}</svg>${label}</button>`).join("");
+  nav.querySelectorAll("button").forEach(b => b.onclick = () => { tab = b.dataset.t; go(ROOT[tab], false); });
+}
+const on = (sel, fn) => document.querySelectorAll(sel).forEach(el => el.addEventListener("click", () => fn(el)));
+
+// ---------- Wissen ----------
+function kapitelRow(k) {
+  const read = S.gelesen.includes(k.id);
+  return `<button class="row" data-k="${k.id}"><span class="ico">${glyph(k.icon)}</span>
+    <span class="txt"><span class="t">${esc(k.titel)}</span><br><span class="s">${esc(k.kurz)}</span></span>
+    ${read ? '<span class="done" aria-label="gelesen">✔</span>' : ""}<span class="chev"></span></button>`;
+}
+function Wissen() {
+  const n = S.gelesen.length, t = C.kapitel.length;
+  return {
+    title: "Wissen",
+    html: `<div class="info"><div><div class="small">${esc(C.meta.untertitel)}</div>
+      <div class="progress"><div style="width:${(n / t) * 100}%"></div></div>
+      <div class="small">${n} von ${t} Kapiteln gelesen · Stand ${esc(C.meta.stand)}</div></div></div>
+      <h2 class="sec">Kapitel</h2><div class="card">${C.kapitel.map(kapitelRow).join("")}</div>`,
+    bind: () => on("[data-k]", el => go(() => KapitelDetail(el.dataset.k)))
+  };
+}
+function KapitelDetail(id) {
+  const k = C.kapitel.find(x => x.id === id);
+  const fragen = C.quiz.filter(q => q.kapitel === id);
+  const read = S.gelesen.includes(id);
+  return {
+    title: k.titel,
+    html: `<p class="lead">${esc(k.kurz)}</p>
+      ${k.abschnitte.map(a => `<section class="prose"><h3>${esc(a.titel)}</h3>${rich(a.text)}</section>`).join("")}
+      ${k.merke.length ? `<div class="merke"><b class="h">💡 Merke</b><ul>${k.merke.map(m => `<li>${inline(m)}</li>`).join("")}</ul></div>` : ""}
+      ${fragen.length ? `<button class="btn sec" id="kq">${fragen.length} Quizfragen zu diesem Kapitel</button>` : ""}
+      <button class="btn ${read ? "sec" : ""}" id="kr">${read ? "✔ Gelesen – Markierung entfernen" : "Als gelesen markieren"}</button>`,
+    bind: () => {
+      const q = document.getElementById("kq");
+      if (q) q.onclick = () => go(Quiz(fragen, k.titel));
+      document.getElementById("kr").onclick = () => {
+        S.gelesen = read ? S.gelesen.filter(x => x !== id) : [...S.gelesen, id]; save();
+        stack[stack.length - 1] = () => KapitelDetail(id); render();
+      };
+    }
+  };
+}
+
+// ---------- Einsatz ----------
+function Einsatz() {
+  return {
+    title: "Einsatz",
+    html: `<div class="info"><span>📞</span><span>Die Entscheidung über den Fortgang einer Abschiebung trifft die Ausländerbehörde (ZAB/LDS). Im Zweifel: Rücksprache halten und dokumentieren.</span></div>
+      <h2 class="sec">Checklisten</h2><div class="card">${C.checklisten.map(l => {
+        const n = (S.checklisten[l.id] || []).length;
+        return `<button class="row" data-l="${l.id}"><span class="ico">${glyph(l.icon)}</span><span class="txt"><span class="t">${esc(l.titel)}</span><br><span class="s">${esc(l.kontext)}</span></span><span class="end">${n}/${l.punkte.length}</span><span class="chev"></span></button>`;
+      }).join("")}</div>
+      <h2 class="sec">Nachschlagen</h2><div class="card">
+        <button class="row" id="fr"><span class="ico">⏱</span><span class="txt"><span class="t">Fristen & Höchstdauern</span></span><span class="chev"></span></button>
+        <button class="row" id="nr"><span class="ico">§</span><span class="txt"><span class="t">Paragraphen-Schnellzugriff</span></span><span class="chev"></span></button></div>`,
+    bind: () => {
+      on("[data-l]", el => go(() => Checkliste(el.dataset.l)));
+      document.getElementById("fr").onclick = () => go(Fristen);
+      document.getElementById("nr").onclick = () => go(() => Normen(""));
+    }
+  };
+}
+function Checkliste(id) {
+  const l = C.checklisten.find(x => x.id === id);
+  const set = new Set(S.checklisten[id] || []);
+  return {
+    title: l.titel,
+    html: `<p class="lead">${esc(l.kontext)}</p><div class="card">${l.punkte.map((p, i) => `
+      <button class="row check" data-i="${i}" role="checkbox" aria-checked="${set.has(i)}">
+        <span class="box ${set.has(i) ? "on" : ""}">${set.has(i) ? "✓" : ""}</span>
+        <span class="txt"><span class="${set.has(i) ? "strike" : ""}">${esc(p.text)}</span>${p.hinweis ? `<br><span class="s">${esc(p.hinweis)}</span>` : ""}</span>
+      </button>`).join("")}</div>
+      <p class="small" style="margin:8px 4px">Abgehakte Punkte werden nur lokal gespeichert. Keine Personendaten eintragen.</p>
+      <button class="btn danger" id="cr">Checkliste zurücksetzen</button>`,
+    bind: () => {
+      on("[data-i]", el => {
+        const i = +el.dataset.i;
+        set.has(i) ? set.delete(i) : set.add(i);
+        S.checklisten[id] = [...set]; save(); render();
+      });
+      document.getElementById("cr").onclick = () => { if (confirm("Alle Haken entfernen?")) { S.checklisten[id] = []; save(); render(); } };
+    }
+  };
+}
+function Fristen() {
+  return {
+    title: "Fristen",
+    html: `<div class="card">${C.fristen.map(f => `<div class="row" style="display:block;cursor:default">
+      <div class="fristrow"><b>${esc(f.was)}</b><b>${esc(f.frist)}</b></div><div class="s">${esc(f.grundlage)}</div></div>`).join("")}</div>`
+  };
+}
+const normHTML = n => `<div class="row norm" style="display:block;cursor:default"><b class="n">${esc(n.norm)}</b> <b>${esc(n.titel)}</b>
+  <div>${esc(n.inhalt)}</div><div class="s">👉 ${esc(n.praxis)}</div></div>`;
+function Normen(q) {
+  return {
+    title: "Paragraphen",
+    html: `<input type="search" id="nq" placeholder="z. B. 62 oder Duldung" value="${esc(q)}" aria-label="Paragraphen durchsuchen"><div class="card" id="nl" style="margin-top:12px"></div>`,
+    bind: () => {
+      const inp = document.getElementById("nq"), list = document.getElementById("nl");
+      const upd = () => {
+        const s = inp.value.toLowerCase();
+        const t = C.normen.filter(n => !s || (n.norm + n.titel + n.inhalt).toLowerCase().includes(s));
+        list.innerHTML = t.map(normHTML).join("") || '<div class="row">Keine Treffer.</div>';
+      };
+      inp.oninput = upd; upd();
+    }
+  };
+}
+
+// ---------- Lernen ----------
+function beherrscht(fragen) { return fragen.filter(q => S.quiz[q.frage]?.ok).length; }
+function Lernen() {
+  const falsch = C.quiz.filter(q => S.quiz[q.frage] && !S.quiz[q.frage].ok);
+  const b = beherrscht(C.quiz);
+  const kartenTotal = C.glossar.length + C.normen.length;
+  return {
+    title: "Lernen",
+    html: `<div class="stat">${ring(b / C.quiz.length)}<div><b>${b} von ${C.quiz.length} Fragen sicher</b><div class="small">${S.karten.length} von ${kartenTotal} Karteikarten gewusst</div></div></div>
+      <h2 class="sec">Trainieren</h2><div class="card">
+        <button class="row" id="qa"><span class="ico">?</span><span class="txt"><span class="t">Quiz – alle ${C.quiz.length} Fragen</span><br><span class="s">mit Erklärung nach jeder Antwort</span></span><span class="chev"></span></button>
+        <button class="row" id="qp"><span class="ico">⏱</span><span class="txt"><span class="t">Prüfungssimulation</span><br><span class="s">20 zufällige Fragen, Auswertung am Ende</span></span><span class="chev"></span></button>
+        ${falsch.length ? `<button class="row" id="qf"><span class="ico">↺</span><span class="txt"><span class="t">Falsch beantwortete wiederholen</span></span><span class="end">${falsch.length}</span><span class="chev"></span></button>` : ""}
+        <button class="row" id="kk"><span class="ico">🗂</span><span class="txt"><span class="t">Karteikarten</span><br><span class="s">Begriffe & Paragraphen</span></span><span class="chev"></span></button>
+      </div>
+      <h2 class="sec">Nach Kapitel</h2><div class="card">${C.kapitel.map(k => {
+        const f = C.quiz.filter(q => q.kapitel === k.id);
+        return f.length ? `<button class="row" data-qk="${k.id}"><span class="ico">${glyph(k.icon)}</span><span class="txt"><span class="t">${esc(k.titel)}</span></span><span class="end">${beherrscht(f)}/${f.length}</span><span class="chev"></span></button>` : "";
+      }).join("")}</div>
+      <button class="btn danger" id="lr" style="margin-top:22px">Lernfortschritt zurücksetzen</button>`,
+    bind: () => {
+      document.getElementById("qa").onclick = () => go(Quiz(C.quiz, "Alle Fragen"));
+      document.getElementById("qp").onclick = () => go(Quiz(shuffle(C.quiz).slice(0, 20), "Prüfung", true));
+      const qf = document.getElementById("qf"); if (qf) qf.onclick = () => go(Quiz(falsch, "Wiederholen"));
+      document.getElementById("kk").onclick = () => go(Karten());
+      on("[data-qk]", el => go(Quiz(C.quiz.filter(q => q.kapitel === el.dataset.qk), C.kapitel.find(k => k.id === el.dataset.qk).titel)));
+      document.getElementById("lr").onclick = () => { if (confirm("Gesamten Lernfortschritt löschen?")) { S.gelesen = []; S.quiz = {}; S.checklisten = {}; S.karten = []; save(); render(); } };
+    }
+  };
+}
+// Quiz und Karten halten ihren Zustand in einer Closure und liefern die Ansichtsfunktion zurück.
+function Quiz(fragenIn, titel, pruefung = false) {
+  const fragen = shuffle(fragenIn);
+  let i = 0, punkte = 0, gewaehlt = null;
+  const view = () => {
+    if (i >= fragen.length) {
+      const q = punkte / fragen.length;
+      return {
+        title: titel,
+        html: `<div style="text-align:center;padding:30px 0">${ring(q).replace('class="ring"', 'class="ring" style="width:150px;height:150px"')}
+          <h2>${punkte} von ${fragen.length} richtig</h2>
+          <p class="small">${q >= .8 ? "Sehr gut – bestanden." : q >= .6 ? "Bestanden – einzelne Themen wiederholen." : "Nicht bestanden – Kapitel noch einmal durcharbeiten."}</p></div>
+          <button class="btn" id="again">Noch einmal</button>`,
+        bind: () => document.getElementById("again").onclick = () => { stack[stack.length - 1] = Quiz(fragenIn, titel, pruefung); render(); }
+      };
+    }
+    const f = fragen[i];
+    const cls = j => {
+      if (gewaehlt === null) return "";
+      if (pruefung) return j === gewaehlt ? "sel" : "";
+      return j === f.richtig ? "ok" : j === gewaehlt ? "bad" : "";
+    };
+    return {
+      title: titel,
+      html: `<div class="progress"><div style="width:${(i / fragen.length) * 100}%"></div></div>
+        <div class="small">Frage ${i + 1} von ${fragen.length}</div>
+        <div class="qtitle">${esc(f.frage)}</div>
+        ${f.antworten.map((a, j) => `<button class="opt ${cls(j)}" data-a="${j}" ${gewaehlt !== null ? "disabled" : ""}>${esc(a)}</button>`).join("")}
+        ${gewaehlt !== null && !pruefung ? `<div class="expl"><b style="color:var(${gewaehlt === f.richtig ? "--ok" : "--bad"})">${gewaehlt === f.richtig ? "✔ Richtig" : "✘ Leider falsch"}</b><div>${esc(f.erklaerung)}</div></div>` : ""}
+        ${gewaehlt !== null ? `<button class="btn" id="next">${i + 1 < fragen.length ? "Weiter" : "Auswertung"}</button>` : ""}`,
+      bind: () => {
+        on("[data-a]", el => {
+          if (gewaehlt !== null) return;
+          gewaehlt = +el.dataset.a;
+          const ok = gewaehlt === f.richtig;
+          if (ok) punkte++;
+          const st = S.quiz[f.frage] || { r: 0, f: 0 };
+          ok ? st.r++ : st.f++; st.ok = ok; S.quiz[f.frage] = st; save();
+          render();
+        });
+        const n = document.getElementById("next");
+        if (n) n.onclick = () => { i++; gewaehlt = null; render(); };
+      }
+    };
+  };
+  return view;
+}
+
+function Karten() {
+  let nurNeu = true, stapel = [], i = 0, back = false;
+  const alle = () => C.glossar.map(g => ({ id: "g:" + g.begriff, v: g.begriff, h: g.erklaerung }))
+    .concat(C.normen.map(n => ({ id: "n:" + n.norm, v: n.norm + "\n" + n.titel, h: n.inhalt + "\n\nPraxis: " + n.praxis })));
+  const bau = () => { stapel = shuffle(alle().filter(k => !nurNeu || !S.karten.includes(k.id))); i = 0; back = false; };
+  bau();
+  const self = () => {
+    const k = stapel[i];
+    return {
+      title: "Karteikarten",
+      html: `<label class="check" style="margin:4px 4px 14px;cursor:pointer"><input type="checkbox" id="nn" ${nurNeu ? "checked" : ""}> Nur noch nicht gewusste Karten</label>
+        ${!k ? `<div class="flash"><div><div class="front">⭐ Alle Karten gewusst!</div><button class="btn sec" id="all">Alle Karten erneut üben</button></div></div>` : `
+        <div class="small" style="margin:0 4px 8px">Karte ${i + 1} von ${stapel.length}</div>
+        <div class="flash ${back ? "back" : ""}" id="fc" role="button" tabindex="0" aria-label="Karte umdrehen">
+          ${back ? `<div>${esc(k.h)}</div>` : `<div class="front">${esc(k.v)}</div>`}</div>
+        <p class="small" style="text-align:center">${back ? "" : "Tippen zum Umdrehen"}</p>
+        <div class="hstack"><button class="btn warn" id="no">↺ Nochmal</button><button class="btn" id="yes">✔ Gewusst</button></div>`}`,
+      bind: () => {
+        document.getElementById("nn").onchange = e => { nurNeu = e.target.checked; bau(); render(); };
+        const all = document.getElementById("all"); if (all) all.onclick = () => { nurNeu = false; bau(); render(); };
+        const fc = document.getElementById("fc"); if (!fc) return;
+        fc.onclick = () => { back = !back; render(); };
+        const next = known => {
+          S.karten = S.karten.filter(x => x !== k.id); if (known) S.karten.push(k.id); save();
+          back = false; if (i + 1 < stapel.length) i++; else bau(); render();
+        };
+        document.getElementById("no").onclick = () => next(false);
+        document.getElementById("yes").onclick = () => next(true);
+      }
+    };
+  };
+  return self;
+}
+
+// ---------- Suche ----------
+function Suche() {
+  return {
+    title: "Suche & Glossar",
+    html: `<input type="search" id="sq" placeholder="Begriff, Paragraph, Thema …" aria-label="Suchen"><div id="sr"></div>`,
+    bind: () => {
+      const inp = document.getElementById("sq"), out = document.getElementById("sr");
+      const upd = () => {
+        const s = inp.value.trim().toLowerCase();
+        const has = t => t.toLowerCase().includes(s);
+        let html = "";
+        if (s) {
+          const k = C.kapitel.filter(k => has(k.titel) || has(k.kurz) || k.abschnitte.some(a => has(a.titel) || has(a.text)) || k.merke.some(has));
+          const n = C.normen.filter(n => has(n.norm) || has(n.titel) || has(n.inhalt) || has(n.praxis));
+          if (k.length) html += `<h2 class="sec">Kapitel</h2><div class="card">${k.map(kapitelRow).join("")}</div>`;
+          if (n.length) html += `<h2 class="sec">Paragraphen</h2><div class="card">${n.map(normHTML).join("")}</div>`;
+        }
+        const g = C.glossar.filter(g => !s || has(g.begriff) || has(g.erklaerung));
+        if (g.length) html += `<h2 class="sec">${s ? "Glossar" : "Glossar A–Z"}</h2><div class="card">${g.map(g => `<div class="row" style="display:block;cursor:default"><b>${esc(g.begriff)}</b><div class="s">${esc(g.erklaerung)}</div></div>`).join("")}</div>`;
+        out.innerHTML = html || `<p class="small" style="margin:16px 4px">Keine Treffer für „${esc(inp.value)}“.</p>`;
+        out.querySelectorAll("[data-k]").forEach(el => el.onclick = () => go(() => KapitelDetail(el.dataset.k)));
+      };
+      inp.oninput = upd; upd();
+    }
+  };
+}
+
+// ---------- Mehr ----------
+function kontakte() {
+  if (!S.kontakte) S.kontakte = C.kontakte.map(k => ({ ...k }));
+  return S.kontakte;
+}
+function Mehr() {
+  return {
+    title: "Mehr",
+    html: `<h2 class="sec">Einsatz</h2><div class="card"><button class="row" id="kt"><span class="ico">📞</span><span class="txt"><span class="t">Wichtige Erreichbarkeiten</span></span><span class="chev"></span></button></div>
+      <h2 class="sec">Über diese App</h2>
+      <section class="prose"><h3>Wichtiger Hinweis</h3><p>${esc(C.meta.hinweis)}</p></section>
+      <section class="prose"><h3>Quellen & Rechtsstand</h3><ul>${C.quellen.map(q => `<li>${esc(q)}</li>`).join("")}</ul>
+      <p class="small">Version ${esc(C.meta.version)} · Inhaltsstand ${esc(C.meta.stand)}</p></section>
+      <section class="prose"><h3>Auf dem iPhone installieren</h3><p>In Safari öffnen → Teilen-Symbol → „Zum Home-Bildschirm“. Die App funktioniert danach wie eine normale App – auch offline.</p></section>`,
+    bind: () => document.getElementById("kt").onclick = () => go(Kontakte)
+  };
+}
+function Kontakte() {
+  const ks = kontakte();
+  return {
+    title: "Erreichbarkeiten",
+    html: `<div class="card">${ks.map((k, i) => {
+        const tel = (k.telefon || "").replace(/[^\d+]/g, "");
+        return `<div class="row"><span class="txt" data-e="${i}" style="cursor:pointer"><span class="t">${esc(k.name)}</span><br><span class="s">${esc(k.rolle)}</span><br>
+          <span class="kbd" style="color:${k.telefon ? "inherit" : "var(--warn)"}">${k.telefon ? esc(k.telefon) : "Nummer noch nicht hinterlegt – tippen zum Eintragen"}</span></span>
+          ${tel ? `<a class="ico" href="tel:${tel}" aria-label="${esc(k.name)} anrufen" style="text-decoration:none">📞</a>` : ""}</div>`;
+      }).join("")}</div>
+      <p class="small" style="margin:8px 4px">Bitte die dienstlich gültigen Nummern selbst eintragen. Die Daten bleiben ausschließlich auf diesem Gerät.</p>
+      <button class="btn sec" id="add">+ Kontakt hinzufügen</button>`,
+    bind: () => {
+      on("[data-e]", el => editKontakt(+el.dataset.e));
+      document.getElementById("add").onclick = () => editKontakt(-1);
+    }
+  };
+}
+function editKontakt(i) {
+  const ks = kontakte();
+  const k = i >= 0 ? ks[i] : { name: "", rolle: "", telefon: "" };
+  const m = document.createElement("div");
+  m.className = "modal";
+  m.innerHTML = `<div class="sheet" role="dialog" aria-label="Kontakt bearbeiten">
+    <h3 style="margin:0 0 4px">${i >= 0 ? "Kontakt bearbeiten" : "Neuer Kontakt"}</h3>
+    <label for="kn">Name / Stelle</label><input type="text" id="kn" value="${esc(k.name)}">
+    <label for="kr2">Zuständigkeit</label><input type="text" id="kr2" value="${esc(k.rolle)}">
+    <label for="kp">Telefon</label><input type="tel" id="kp" value="${esc(k.telefon)}">
+    <button class="btn" id="ks">Sichern</button>
+    ${i >= 0 ? '<button class="btn danger" id="kd">Löschen</button>' : ""}
+    <button class="btn sec" id="kc">Abbrechen</button></div>`;
+  document.body.appendChild(m);
+  const close = () => { m.remove(); render(); };
+  m.onclick = e => { if (e.target === m) close(); };
+  m.querySelector("#kc").onclick = close;
+  m.querySelector("#ks").onclick = () => {
+    const neu = { name: m.querySelector("#kn").value.trim(), rolle: m.querySelector("#kr2").value.trim(), telefon: m.querySelector("#kp").value.trim() };
+    if (!neu.name) return;
+    if (i >= 0) ks[i] = neu; else ks.push(neu);
+    save(); close();
+  };
+  const d = m.querySelector("#kd");
+  if (d) d.onclick = () => { if (confirm("Kontakt löschen?")) { ks.splice(i, 1); save(); close(); } };
+}
+
+// ---------- Start ----------
+const ROOT = { wissen: Wissen, einsatz: Einsatz, lernen: Lernen, suche: Suche, mehr: Mehr };
+function hinweis() {
+  try { if (localStorage.getItem("geas.hinweis") === "1") return; } catch (e) {}
+  const m = document.createElement("div");
+  m.className = "modal";
+  m.innerHTML = `<div class="sheet" role="dialog" aria-label="Hinweis"><div style="font-size:40px">🛡</div>
+    <h2 style="margin:6px 0">${esc(C.meta.titel)}</h2><p class="small"><b>${esc(C.meta.untertitel)}</b></p>
+    <p>${esc(C.meta.hinweis)}</p><p class="small">Stand: ${esc(C.meta.stand)}</p><button class="btn" id="ok">Verstanden</button></div>`;
+  document.body.appendChild(m);
+  m.querySelector("#ok").onclick = () => { try { localStorage.setItem("geas.hinweis", "1"); } catch (e) {} m.remove(); };
+}
+renderTabs();
+go(ROOT.wissen, false);
+hinweis();
+if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
