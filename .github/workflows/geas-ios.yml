@@ -26,8 +26,12 @@ jobs:
         run: xcodegen generate
       - name: Für den iOS-Simulator bauen (ohne Signatur)
         working-directory: geas-app/ios
+        shell: bash {0}
         run: |
           xcodebuild -project GEASHilfe.xcodeproj -scheme GEASHilfe \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            -configuration Debug CODE_SIGNING_ALLOWED=NO build | tail -n 40
-          exit ${PIPESTATUS[0]}
+            -configuration Debug CODE_SIGNING_ALLOWED=NO build > build.log 2>&1
+          STATUS=$?
+          grep -E "error:|\*\* BUILD" build.log | sort -u | head -80 || true
+          if [ $STATUS -ne 0 ]; then grep -B2 -A6 "error:" build.log | head -250; fi
+          exit $STATUS
