@@ -35,3 +35,36 @@ jobs:
           grep -E "error:|\*\* BUILD" build.log | sort -u | head -80 || true
           if [ $STATUS -ne 0 ]; then grep -B2 -A6 "error:" build.log | head -250; fi
           exit $STATUS
+      - name: Bildschirmfotos im Simulator
+        if: success()
+        working-directory: geas-app/ios
+        shell: bash {0}
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          geraete = json.load(sys.stdin)['devices']
+          for runtime, liste in sorted(geraete.items(), reverse=True):
+              if 'iOS' not in runtime: continue
+              for g in liste:
+                  if g['name'].startswith('iPhone') and 'Pro' in g['name'] and 'Max' not in g['name']:
+                      print(g['udid']); sys.exit()
+          ")
+          echo "Simulator: $UDID"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          APP=$(find ~/Library/Developer/Xcode/DerivedData -name GEASHilfe.app -path "*Debug-iphonesimulator*" | head -1)
+          xcrun simctl install "$UDID" "$APP"
+          ID=de.polizei.sachsen.leipzig.geashilfe
+          mkdir -p ../../bilder
+          foto() { sleep 6; xcrun simctl io "$UDID" screenshot "../../bilder/$1.png"; xcrun simctl terminate "$UDID" $ID; }
+          xcrun simctl launch "$UDID" $ID; foto 1-einfuehrung
+          xcrun simctl launch "$UDID" $ID -geas.onboarding.v2 YES; foto 2-start-hell
+          xcrun simctl ui "$UDID" appearance dark
+          xcrun simctl launch "$UDID" $ID -geas.onboarding.v2 YES; foto 3-start-dunkel
+          ls -la ../../bilder
+      - name: Bildschirmfotos hochladen
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bildschirmfotos
+          path: geas-app/bilder

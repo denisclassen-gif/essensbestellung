@@ -399,6 +399,7 @@ struct Fortschrittsbalken: View {
 // MARK: - Eingabe
 
 /// Textfeld mit schwebender Beschriftung und animiertem Fokusrand.
+/// Mehrzeilige Felder zeigen die (oft lange) Beschriftung fest oberhalb, damit nichts überlappt.
 struct SchwebeFeld: View {
     let label: String
     @Binding var text: String
@@ -409,38 +410,50 @@ struct SchwebeFeld: View {
 
     @FocusState private var fokus: Bool
 
-    private var oben: Bool { fokus || !text.isEmpty }
+    private var oben: Bool { mehrzeilig || fokus || !text.isEmpty }
+
+    private var beschriftung: some View {
+        HStack(spacing: 6) {
+            Text(label)
+                .lineLimit(mehrzeilig ? 3 : 1)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: mehrzeilig)
+            if pflicht {
+                Text("Pflicht")
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill((text.isEmpty ? Stil.koralle : Stil.gruen).opacity(0.15)))
+                    .foregroundStyle(text.isEmpty ? Stil.koralle : Stil.gruen)
+                    .fixedSize()
+            }
+        }
+        .font(oben ? .caption.weight(.semibold) : .body)
+        .foregroundStyle(fokus ? Color.accentColor : Color.secondary)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            ZStack(alignment: .topLeading) {
-                HStack(spacing: 6) {
-                    Text(label)
-                    if pflicht {
-                        Text("Pflicht")
-                            .font(.caption2.weight(.bold))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Capsule().fill((text.isEmpty ? Stil.koralle : Stil.gruen).opacity(0.15)))
-                            .foregroundStyle(text.isEmpty ? Stil.koralle : Stil.gruen)
-                    }
-                }
-                .font(oben ? .caption.weight(.semibold) : .body)
-                .foregroundStyle(fokus ? Color.accentColor : Color.secondary)
-                .offset(y: oben ? 0 : 13)
-                .allowsHitTesting(false)
-
-                Group {
-                    if mehrzeilig {
-                        TextField("", text: $text, prompt: oben ? Text(platzhalter ?? "") : nil, axis: .vertical)
+            Group {
+                if mehrzeilig {
+                    VStack(alignment: .leading, spacing: 8) {
+                        beschriftung
+                        TextField("", text: $text, prompt: Text(platzhalter ?? ""), axis: .vertical)
                             .lineLimit(2...8)
-                    } else {
+                            .focused($fokus)
+                            .accessibilityLabel(label)
+                    }
+                } else {
+                    ZStack(alignment: .topLeading) {
+                        beschriftung
+                            .offset(y: oben ? 0 : 13)
+                            .allowsHitTesting(false)
                         TextField("", text: $text, prompt: oben ? Text(platzhalter ?? "") : nil)
+                            .focused($fokus)
+                            .padding(.top, 21)
+                            .accessibilityLabel(label)
                     }
                 }
-                .focused($fokus)
-                .padding(.top, 21)
-                .accessibilityLabel(label)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)

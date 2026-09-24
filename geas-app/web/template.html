@@ -56,6 +56,9 @@
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; background: var(--bg); color: var(--text); }
+  html { overflow-x: clip; }
+  /* Beim Fokussieren/Scrollen bleiben Felder oberhalb von Knopf- und Reiterleiste sichtbar */
+  html { scroll-padding-top: calc(env(safe-area-inset-top) + 70px); }
   body {
     font: 17px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -137,7 +140,8 @@
   h3.sec small { font-size: 14px; font-weight: 500; color: var(--muted); }
 
   /* Kacheln */
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .tile { min-width: 0; overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; }
   .tile { display: flex; flex-direction: column; gap: 8px; padding: 16px; min-height: 136px; text-align: left; border: 0; width: 100%; }
   .tile .top { display: flex; justify-content: space-between; align-items: flex-start; }
   .tile .t { font-weight: 700; font-size: 17px; margin-top: auto; line-height: 1.25; }
@@ -231,6 +235,10 @@
   .step .s { font-size: 13px; color: var(--muted); display: block; }
   .bottombar { position: sticky; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); display: flex; gap: 12px; margin-top: 18px; z-index: 5; }
   .bottombar .btn { margin: 0; }
+  .bottombar .btn.glassy { background: var(--glass-strong); }
+  .bottombar.fest { position: fixed; left: 50%; transform: translateX(-50%); width: min(calc(100% - 40px), 740px); margin: 0; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 20px); }
+  .platz-unten { height: 90px; }
+  .bottombar.static { position: static; }
   pre.proto { white-space: pre-wrap; font-size: 13px; margin: 0 0 12px; font-family: ui-monospace, Menlo, monospace; }
   .frist { padding: 18px; }
   .frist .row { display: flex; gap: 14px; align-items: flex-start; margin: 14px 0; }
@@ -251,6 +259,10 @@
   .field input:focus + label, .field textarea:focus + label { color: var(--green); }
   .field input::placeholder, .field textarea::placeholder { color: transparent; }
   .field input:focus::placeholder, .field textarea:focus::placeholder { color: var(--faint); }
+  .field label { right: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .field.ml label { position: static; white-space: normal; margin: 0 4px 6px; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .field.ml textarea { padding: 14px 16px; }
+  .field.ml textarea::placeholder { color: var(--faint); }
   .pflicht { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 99px; background: rgba(255, 92, 94, .15); color: var(--coral); }
   .pflicht.ok { background: rgba(15, 138, 95, .15); color: var(--ok); }
   .hint { font-size: 13px; color: var(--muted); margin: 6px 4px 0; display: flex; gap: 6px; }
@@ -310,11 +322,10 @@
   .opt.sel { box-shadow: inset 0 0 0 2px var(--green); }
   .qtitle { font-size: 22px; font-weight: 800; margin: 10px 0 6px; line-height: 1.3; }
   .expl { padding: 16px; margin-top: 8px; }
-  .flip { perspective: 1200px; margin-bottom: 8px; }
-  .flip .inner { position: relative; min-height: 320px; transition: transform .7s var(--spring); transform-style: preserve-3d; cursor: pointer; }
-  .flip.back .inner { transform: rotateY(180deg); }
-  .flip .face { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; backface-visibility: hidden; -webkit-backface-visibility: hidden; white-space: pre-line; border-radius: 28px; }
-  .flip .face.b { transform: rotateY(180deg); background: rgba(0, 107, 92, .12); }
+  .flip { margin-bottom: 8px; cursor: pointer; }
+  .flip .face { min-height: 320px; display: grid; place-items: center; padding: 24px; text-align: center; white-space: pre-line; border-radius: 28px;
+    background: var(--glass-strong); border: 1px solid var(--glass-edge); box-shadow: var(--shadow); }
+  .flip.umgedreht .face { background: color-mix(in srgb, var(--green) 14%, var(--glass-strong)); }
   .flip .front { font-size: 23px; font-weight: 800; }
   .stat { display: flex; gap: 16px; align-items: center; padding: 18px; }
   .fristrow { display: flex; justify-content: space-between; gap: 12px; }
@@ -723,7 +734,7 @@ function ScreeningWizard() {
     z.push("", "Erstellt mit GEAS Hilfe (inoffizielle Arbeitshilfe). Enthält keine personenbezogenen Daten.");
     return z.join("\n");
   };
-  const leiste = () => verlauf.length ? `<div class="bottombar"><button class="btn glassy" id="wb">${svg("chevl", 2.2)} Zurück</button><button class="btn glassy danger" id="wr">${svg("rotate")} Neu</button></div>` : "";
+  const leiste = () => verlauf.length ? `<div class="bottombar static"><button class="btn glassy" id="wb">${svg("chevl", 2.2)} Zurück</button><button class="btn glassy danger" id="wr">${svg("rotate")} Neu</button></div>` : "";
   const schritt = (richtung, fn) => uebergang(richtung, animiert => { fn(); render(animiert ? (richtung === "back" ? "enter-back" : "enter-fwd") : ""); });
   const neu = () => schritt("back", () => { verlauf = []; aktuell = SP.start; erledigt = new Set(); });
   const view = () => {
@@ -865,8 +876,10 @@ function feldHTML(f) {
   if (f.typ === "text" || f.typ === "mehrzeilig") {
     const inp = f.typ === "text"
       ? `<input id="i-${f.id}" data-f="${f.id}" value="${esc(v)}" placeholder="${esc(f.platzhalter || " ")}" autocomplete="off">`
-      : `<textarea id="i-${f.id}" data-f="${f.id}" rows="3" placeholder="${esc(f.platzhalter || " ")}">${esc(v)}</textarea>`;
-    return `<div class="field">${inp}<label for="i-${f.id}">${esc(f.label)} ${pf}</label>${hint}</div>`;
+      : `<textarea id="i-${f.id}" data-f="${f.id}" rows="3" placeholder="${esc(f.platzhalter || "")}">${esc(v)}</textarea>`;
+    return f.typ === "text"
+      ? `<div class="field">${inp}<label for="i-${f.id}">${esc(f.label)} ${pf}</label>${hint}</div>`
+      : `<div class="field ml"><label for="i-${f.id}">${esc(f.label)} ${pf}</label>${inp}${hint}</div>`;
   }
   if (f.typ === "datumzeit") {
     return `<div class="box glass"><div class="lbl">${esc(f.label)} ${pf}</div>
@@ -892,7 +905,8 @@ function Erfassung(start) {
           <div class="small" id="offen" style="font-weight:700;color:${o ? "var(--coral)" : "var(--ok)"}">${o ? `${o} Pflichtangabe${o === 1 ? "" : "n"} offen` : "Alle Pflichtangaben erfasst"}</div></div></div>
         <p class="small" style="font-size:15px">${esc(s.beschreibung)}</p>
         <div id="felder">${s.felder.filter(sichtbar).map(feldHTML).join("")}</div>
-        <div class="bottombar">
+        <div class="platz-unten"></div>
+        <div class="bottombar fest">
           ${index > 0 ? `<button class="btn glassy" id="ep" style="flex:.6">${svg("chevl", 2.2)} Zurück</button>` : ""}
           ${index < sch.length - 1 ? `<button class="btn" id="en">Weiter ${svg("chevr", 2.2)}</button>` : `<button class="btn" id="ef" style="${farbVars(2)}">${svg("docs")} Fertig – zu den Unterlagen</button>`}
         </div>`,
@@ -991,7 +1005,8 @@ function Dokument(docs, titel) {
     html: `${offen.length ? `<div class="note glass">${svg("alert").replace("<svg", '<svg style="color:#f7a524"')}<span><b>${offen.length} Pflichtangabe${offen.length === 1 ? "" : "n"} fehlen noch</b><br>
         <span class="small">${esc(offen.slice(0, 4).map(f => f.label).join(" · "))}${offen.length > 4 ? " …" : ""}</span></span></div>` : ""}
       <div class="paper enter-fade">${dokHTML(docs)}</div>
-      <div class="bottombar"><button class="btn" id="dp">${svg("print")} Drucken / als PDF sichern</button></div>
+      <div class="platz-unten"></div>
+      <div class="bottombar fest"><button class="btn" id="dp">${svg("print")} Drucken / als PDF sichern</button></div>
       <p class="small" style="text-align:center">Auf dem iPhone: Drucken → mit zwei Fingern auf die Vorschau ziehen → Teilen → „In Dateien sichern“.</p>`,
     bind: () => $("dp").onclick = () => { vibrate(); $("druck").innerHTML = dokHTML(docs); window.print(); }
   };
@@ -1207,15 +1222,27 @@ function Karten() {
       html: `<label class="confirm glass" style="margin-bottom:14px"><input type="checkbox" id="nn" ${nurNeu ? "checked" : ""}> Nur noch nicht gewusste Karten</label>
         ${!k ? `<div class="glass" style="padding:40px 20px;text-align:center"><b class="rounded" style="font-size:22px">Alle Karten gewusst!</b><button class="btn glassy" id="all">Alle Karten erneut üben</button></div>` : `
         <div class="small" style="margin:0 4px 8px">Karte ${i + 1} von ${stapel.length}</div>
-        <div class="flip ${back ? "back" : ""}" id="fc" role="button" tabindex="0" aria-label="Karte umdrehen">
-          <div class="inner"><div class="face glass"><div class="front rounded">${esc(k.v)}</div></div><div class="face b glass"><div>${esc(k.h)}</div></div></div></div>
+        <div class="flip ${back ? "umgedreht" : ""}" id="fc" role="button" tabindex="0" aria-label="Karte umdrehen">
+          <div class="face">${back ? `<div>${esc(k.h)}</div>` : `<div class="front rounded">${esc(k.v)}</div>`}</div></div>
         <p class="small" style="text-align:center">Tippen zum Umdrehen</p>
         <div class="hstack"><button class="btn glassy" id="no" style="color:#e08600">${svg("rotate")} Nochmal</button><button class="btn" id="yes">${svg("check", 2.6)} Gewusst</button></div>`}`,
       bind: () => {
         $("nn").onchange = e => { nurNeu = e.target.checked; bau(); neuZeichnen(); };
         const all = $("all"); if (all) all.onclick = () => { nurNeu = false; bau(); neuZeichnen(); };
         const fc = $("fc"); if (!fc) return;
-        fc.onclick = () => { vibrate(); back = !back; fc.classList.toggle("back", back); };
+        // Umklappen: Karte auf null Breite, Inhalt tauschen, mit Feder wieder aufklappen
+        fc.onclick = () => {
+          vibrate();
+          const face = fc.querySelector(".face");
+          const tausch = () => {
+            back = !back;
+            fc.classList.toggle("umgedreht", back);
+            face.innerHTML = back ? `<div>${esc(k.h)}</div>` : `<div class="front rounded">${esc(k.v)}</div>`;
+            face.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: 380, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" });
+          };
+          if (!face.animate || matchMedia("(prefers-reduced-motion: reduce)").matches) { tausch(); return; }
+          face.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }], { duration: 160, easing: "ease-in" }).onfinish = tausch;
+        };
         const next = known => {
           vibrate();
           S.karten = S.karten.filter(x => x !== k.id); if (known) S.karten.push(k.id); save();
