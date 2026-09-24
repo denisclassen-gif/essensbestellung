@@ -57,13 +57,13 @@ jobs:
           APP=$(find ~/Library/Developer/Xcode/DerivedData -name GEASHilfe.app -path "*Debug-iphonesimulator*" | head -1)
           xcrun simctl install "$UDID" "$APP"
           ID=de.polizei.sachsen.leipzig.geashilfe
-          mkdir -p ../../bilder
-          foto() { sleep 6; xcrun simctl io "$UDID" screenshot "../../bilder/$1.png"; xcrun simctl terminate "$UDID" $ID; }
+          mkdir -p "$GITHUB_WORKSPACE/geas-app/bilder"
+          foto() { sleep 6; xcrun simctl io "$UDID" screenshot "$GITHUB_WORKSPACE/geas-app/bilder/$1.png"; xcrun simctl terminate "$UDID" $ID; }
           xcrun simctl launch "$UDID" $ID; foto 1-einfuehrung
           xcrun simctl launch "$UDID" $ID -geas.onboarding.v2 YES; foto 2-start-hell
           xcrun simctl ui "$UDID" appearance dark
           xcrun simctl launch "$UDID" $ID -geas.onboarding.v2 YES; foto 3-start-dunkel
-          ls -la ../../bilder
+          ls -la "$GITHUB_WORKSPACE/geas-app/bilder"
       - name: Bildschirmfotos hochladen
         if: success()
         uses: actions/upload-artifact@v4
