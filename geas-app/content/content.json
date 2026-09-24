@@ -2,7 +2,7 @@
   "meta": {
     "titel": "GEAS & Rückführung",
     "untertitel": "Einsatz- und Lernhilfe für den Polizeivollzugsdienst – Zuschnitt Polizei Sachsen / PD Leipzig",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "stand": "September 2026",
     "hinweis": "Diese App ist eine inoffizielle Arbeits- und Lernhilfe. Sie ersetzt weder Gesetzestext, Erlasse, Dienstanweisungen der Polizei Sachsen noch die Weisung der zuständigen Ausländerbehörde oder der Führung im Einsatz. Rechtsstand: GEAS-Reform (EU) und GEAS-Anpassungsgesetz, in Kraft seit 12.06.2026. Paragraphenangaben zum neuen nationalen Recht vor dienstlicher Verwendung stets gegen die aktuelle Gesetzesfassung und die Erlasslage des SMI prüfen. Personenbezogene Daten nur im Unterlagen-Assistenten und nur auf dienstlich zugelassenen Geräten erfassen; erzeugte Unterlagen sind Entwürfe, maßgeblich sind die amtlichen Vordrucke."
   },
@@ -57,6 +57,10 @@
         {
           "titel": "Ergebnis des Screenings",
           "text": "Das Screening endet mit der **Weiterleitung**:\n• ins **Asylverfahren** (regulär oder Grenzverfahren), wenn ein Antrag auf internationalen Schutz gestellt wurde,\n• ins **Zuständigkeitsverfahren** (AMM-VO), wenn ein anderer Mitgliedstaat zuständig sein könnte,\n• ins **Rückkehrverfahren**, wenn kein Schutzantrag gestellt wurde und kein Aufenthaltsrecht besteht.\n\nWichtig: Während des Screenings **bleibt das Recht, Asyl zu beantragen**, unberührt. Ein Asylgesuch ist aufzunehmen und weiterzugeben."
+        },
+        {
+          "titel": "Sonderfälle",
+          "text": "• **Visum abgelaufen / 90 Tage überschritten** (z. B. vietnamesische Person mit Besuchsvisum): kontrollierte Einreise → **kein Screening**; unerlaubter Aufenthalt, Rückkehrverfahren über die Ausländerbehörde. Nachweis auch ohne Pass über **VIS/EES** möglich.\n• **Wiedereinreise nach Abschiebung oder Ausreise** (z. B. Syrer, 2025 abgeschoben, jetzt ohne Kontrolle zurück): neuer unerlaubter Grenzübertritt → **Screening**; zusätzlich Einreise- und Aufenthaltsverbot (§ 11 AufenthG), Straftat nach § 95 Abs. 2 Nr. 1 AufenthG, ggf. Folgeantrag.\n• **Überstellung in einen anderen EU-Staat und Rückkehr** (z. B. nach Italien überstellt, wieder in Leipzig): Schengen-Raum nie verlassen → **kein erneutes Screening**; AMM-Verfahren, Überstellungsfrist beachten.\n• **Titel eines anderen Schengen-Staates**, länger als 90 Tage in Deutschland: **kein Screening**; Rückkehr in den Ausstellerstaat.\n• **In Deutschland geborene Kinder** unerlaubt aufhältiger Eltern: nie eingereist → **kein Screening**.\n• **Ausreise unklar**: sofort mit der Ausländerbehörde klären; bis dahin als bekannte Person behandeln."
         },
         {
           "titel": "Praxis PD Leipzig",
@@ -898,6 +902,10 @@
       "erklaerung": "Vorübergehende Aussetzung der Abschiebung (§ 60a AufenthG). Kein Aufenthaltstitel, Ausreisepflicht bleibt bestehen."
     },
     {
+      "begriff": "EES",
+      "erklaerung": "Einreise-/Ausreisesystem der EU: erfasst Ein- und Ausreisen von Drittstaatsangehörigen an den Außengrenzen (Kurzaufenthalte) – hilft, Überschreitungen der 90 Tage nachzuweisen."
+    },
+    {
       "begriff": "Eurodac",
       "erklaerung": "EU-Datenbank für biometrische Daten (Fingerabdrücke, Gesichtsbild) von Schutzsuchenden und irregulär Einreisenden/Aufhältigen; ab 6 Jahren."
     },
@@ -946,16 +954,12 @@
       "erklaerung": "Verpflichtende, aber flexible Solidarität nach AMM-VO: Umsiedlung, finanzielle Beiträge oder andere Unterstützung; jährlicher Pool mind. 30.000 Umsiedlungen."
     },
     {
-      "begriff": "Überprüfungshaft",
-      "erklaerung": "Haft zur Durchführung des Screenings (§§ 14a, 15b AufenthG)."
-    },
-    {
-      "begriff": "Überstellung",
-      "erklaerung": "Verbringung einer Person in den nach AMM-VO zuständigen Mitgliedstaat (früher: Dublin-Überstellung)."
-    },
-    {
       "begriff": "UMA",
       "erklaerung": "Unbegleitete minderjährige Ausländer/innen."
+    },
+    {
+      "begriff": "VIS",
+      "erklaerung": "Visa-Informationssystem der EU: enthält erteilte Schengen-Visa mit Fingerabdrücken und Lichtbild."
     },
     {
       "begriff": "Vollzugshilfe",
@@ -976,9 +980,101 @@
     {
       "begriff": "Zurückweisung",
       "erklaerung": "Verweigerung der Einreise an der Grenze (§ 15 AufenthG)."
+    },
+    {
+      "begriff": "Überprüfungshaft",
+      "erklaerung": "Haft zur Durchführung des Screenings (§§ 14a, 15b AufenthG)."
+    },
+    {
+      "begriff": "Überstellung",
+      "erklaerung": "Verbringung einer Person in den nach AMM-VO zuständigen Mitgliedstaat (früher: Dublin-Überstellung)."
     }
   ],
   "quiz": [
+    {
+      "kapitel": "screening",
+      "frage": "Eine vietnamesische Frau reiste mit einem Schengen-Besuchsvisum über Prag ein. Sie ist seit fünf Monaten in Leipzig. Screening?",
+      "antworten": [
+        "Ja – sie hält sich unerlaubt auf",
+        "Nein – kontrollierte Einreise; unerlaubter Aufenthalt, Rückkehrverfahren über die Ausländerbehörde",
+        "Nur wenn sie Asyl beantragt",
+        "Ja, aber nur 3 Tage"
+      ],
+      "richtig": 1,
+      "erklaerung": "Es gibt einen Hinweis auf eine Kontrolle an der Außengrenze (Visum, Einreise). Die Screening-VO greift nicht; § 95 Abs. 1 Nr. 2 AufenthG prüfen."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Dieselbe Frau hat keinen Pass dabei. Wie lässt sich die kontrollierte Einreise trotzdem feststellen?",
+      "antworten": [
+        "Gar nicht – dann immer Screening",
+        "Über eine Abfrage im VIS bzw. EES",
+        "Durch ihre bloße Aussage",
+        "Über das Melderegister"
+      ],
+      "richtig": 1,
+      "erklaerung": "VIS enthält das erteilte Visum mit Biometrie, EES die registrierte Einreise."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Ein Syrer wurde 2025 nach Syrien abgeschoben. Jetzt wird er ohne Papiere in Leipzig kontrolliert; wie er zurückkam, sagt er nicht. Screening?",
+      "antworten": [
+        "Nein – er ist ja bereits in Eurodac",
+        "Ja – nach Verlassen des Schengen-Raums ist die unkontrollierte Rückkehr ein neuer unerlaubter Grenzübertritt; zusätzlich Einreiseverbot und § 95 Abs. 2 Nr. 1 AufenthG",
+        "Nur Strafanzeige, kein Screening",
+        "Sofort abschieben ohne weitere Prüfung"
+      ],
+      "richtig": 1,
+      "erklaerung": "Frühere Registrierung ersetzt kein Screening nach einer neuen unerlaubten Einreise. Frühere Daten beschleunigen aber die Identifizierung."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Ein Afghane wurde nach der AMM-VO nach Italien überstellt und ist nun wieder in Leipzig. Screening?",
+      "antworten": [
+        "Ja – er ist neu eingereist",
+        "Nein – er hat den Schengen-Raum nie verlassen; Zuständigkeitsverfahren und Überstellung weiterbetreiben",
+        "Ja, weil Italien zuständig ist",
+        "Nur mit Zustimmung Italiens"
+      ],
+      "richtig": 1,
+      "erklaerung": "Eine Überstellung innerhalb der EU ist kein Verlassen des Schengen-Raums; es gibt keine Einreise über eine Außengrenze."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Ein Georgier hat eine gültige italienische Aufenthaltserlaubnis und lebt seit einem Jahr in Leipzig. Screening?",
+      "antworten": [
+        "Ja",
+        "Nein – erlaubte Einreise; nach 90 Tagen unerlaubter Aufenthalt, Rückkehr in den Ausstellerstaat",
+        "Nur wenn er arbeitet",
+        "Nur Ordnungswidrigkeit"
+      ],
+      "richtig": 1,
+      "erklaerung": "Titel anderer Schengen-Staaten erlauben nur 90 Tage in 180 Tagen; Screening kommt nicht in Betracht."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Ein zweijähriges Kind unerlaubt aufhältiger Eltern wurde in Leipzig geboren. Screening?",
+      "antworten": [
+        "Ja, ab 6 Jahren",
+        "Nein – es hat nie eine Außengrenze überschritten",
+        "Ja, zusammen mit den Eltern",
+        "Nur Eurodac-Erfassung"
+      ],
+      "richtig": 1,
+      "erklaerung": "Die Screening-VO setzt einen unerlaubten Grenzübertritt voraus."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Ein früher abgeschobener Mann reist mit neuem Visum über den Flughafen Berlin ein, obwohl ein Einreiseverbot besteht. Screening?",
+      "antworten": [
+        "Ja – wegen des Einreiseverbots",
+        "Nein – kontrollierte Einreise; aber Einreise trotz Verbots ist strafbar (§ 95 Abs. 2 Nr. 1 AufenthG)",
+        "Nein, und auch keine Straftat, weil er ein Visum hat",
+        "Nur Bußgeld"
+      ],
+      "richtig": 1,
+      "erklaerung": "Screening entfällt bei kontrollierter Einreise; das Einreiseverbot wirkt trotzdem."
+    },
     {
       "kapitel": "screening",
       "frage": "Kontrolle am Hauptbahnhof Leipzig: Ein Mann ohne Papiere gibt an, aus Afghanistan zu kommen. Die Abfragen ergeben keine Treffer, und es gibt keinen Hinweis auf eine Grenzkontrolle. Was ist zu tun?",
@@ -1743,6 +1839,8 @@
     "grundsaetze": [
       "Screening gilt nur für Drittstaatsangehörige – nie für EU-, EWR- oder Schweizer Staatsangehörige.",
       "Screening im Inland nur, wenn es keinen Hinweis auf eine Kontrolle an einer EU-Außengrenze gibt und die Person noch nicht überprüft oder registriert wurde.",
+      "Legal eingereist und zu lange geblieben (z. B. Visum abgelaufen, 90 Tage überschritten) → kein Screening, sondern Rückkehrverfahren.",
+      "Nach Abschiebung/Ausreise ohne Kontrolle zurückgekehrt → erneutes Screening; eine Überstellung innerhalb der EU zählt nicht als Ausreise.",
       "Ein Asylgesuch verhindert das Screening nicht.",
       "Höchstdauer im Inland: 3 Tage. Festhalten ohne Richter: bis Ende des Tages nach dem Ergreifen.",
       "Die Polizei prüft keine Asylgründe und stellt keine Gesundheit fest – das machen BAMF bzw. Gesundheitsbehörde."
@@ -1792,19 +1890,24 @@
         "typ": "frage",
         "schritt": "Aufenthaltsnachweis",
         "frage": "Hat die Person ein GÜLTIGES Dokument, das ihren Aufenthalt oder ihr Verfahren in Deutschland belegt?",
-        "hilfe": "Gültigkeitsdatum und Echtheit prüfen. Abgelaufene Dokumente zählen NICHT als gültig – dafür gibt es eine eigene Antwort.",
+        "hilfe": "Gültigkeitsdatum und Echtheit prüfen. Abgelaufene Visa oder überschrittene visumfreie Aufenthalte zählen NICHT als gültig – dafür gibt es eine eigene Antwort. Titel anderer Schengen-Staaten berechtigen nur zu 90 Tagen Aufenthalt in 180 Tagen in Deutschland.",
         "beispiele": [
-          "Aufenthaltstitel (eAT), nationales Visum, Schengen-Visum",
-          "Duldung, Aufenthaltsgestattung, Ankunftsnachweis",
-          "Fiktionsbescheinigung, Aufenthaltstitel eines anderen Schengen-Staates"
+          "Aufenthaltstitel (eAT), nationales Visum, gültiges Schengen-Visum",
+          "Duldung, Aufenthaltsgestattung, Ankunftsnachweis, Fiktionsbescheinigung",
+          "Aufenthaltserlaubnis zum vorübergehenden Schutz (z. B. Ukraine, § 24 AufenthG)",
+          "Abgelaufen: Schengen-Visum abgelaufen oder visumfreie 90 Tage überschritten (z. B. vietnamesische Person mit Besuchsvisum)"
         ],
         "antworten": [
           {
-            "text": "Ja – gültiges Dokument",
+            "text": "Ja – gültiges deutsches Dokument oder gültiges Visum",
             "ziel": "e_status"
           },
           {
-            "text": "Nur ein ABGELAUFENES Visum / abgelaufener Titel",
+            "text": "Titel eines anderen Schengen-Staates – aber länger als 90 Tage in Deutschland oder unklar",
+            "ziel": "e_anderer_staat"
+          },
+          {
+            "text": "Nur ein ABGELAUFENES Visum / visumfreie 90 Tage überschritten",
             "ziel": "e_overstay"
           },
           {
@@ -1816,25 +1919,33 @@
       "q_abfrage": {
         "typ": "frage",
         "schritt": "Datenbankabfrage",
-        "frage": "Ergebnis der Abfrage (INPOL, AZR, SIS, Eurodac/Fast-ID): Ist die Person bereits erfasst?",
-        "hilfe": "Noch nicht abgefragt? Dann JETZT abfragen – erst danach weiter. Erfasst heißt: Asylantrag, bereits überprüft (Screening), Eurodac-Treffer eines EU-Staates oder bekannter Aufenthaltsstatus.",
+        "frage": "Ergebnis der Abfragen (INPOL, AZR, SIS, Eurodac/Fast-ID, VIS/EES): Was ist über die Person bekannt?",
+        "hilfe": "Noch nicht abgefragt? Dann JETZT abfragen – erst danach weiter. Gibt es mehrere Treffer, gilt die Antwort weiter oben. Eine frühere Abschiebung oder Ausreise immer mit der dritten Antwort erfassen.",
         "beispiele": [
-          "Eurodac-Treffer Italien (Asylantrag oder irreguläre Einreise registriert)",
-          "AZR: Asylverfahren in Sachsen läuft",
-          "Kein Treffer in allen Systemen"
+          "VIS: Visum erteilt · EES: registrierte Einreise an einer Außengrenze",
+          "AZR: laufendes Asylverfahren in Sachsen · Eurodac-Treffer Italien",
+          "INPOL/AZR: Abschiebung 2025 vollzogen, Einreise- und Aufenthaltsverbot (§ 11 AufenthG)"
         ],
         "antworten": [
           {
-            "text": "Ja – Treffer: bereits erfasst / überprüft / im Verfahren",
+            "text": "VIS/EES-Treffer: Visum erteilt oder kontrollierte Einreise registriert",
+            "ziel": "e_overstay"
+          },
+          {
+            "text": "Bekannt in Deutschland oder einem EU-Staat (Asylverfahren, Duldung, Eurodac) – ohne dokumentierte Ausreise",
             "ziel": "e_bekannt"
           },
           {
-            "text": "Nein – kein Treffer",
-            "ziel": "q_einreise"
+            "text": "Frühere Abschiebung, Ausreise oder Einreiseverbot bekannt",
+            "ziel": "q_ausreise"
+          },
+          {
+            "text": "Kein Treffer",
+            "ziel": "q_geboren"
           },
           {
             "text": "Abfrage gerade nicht möglich (Systemausfall)",
-            "ziel": "q_einreise"
+            "ziel": "q_geboren"
           }
         ]
       },
@@ -1844,9 +1955,9 @@
         "frage": "Gibt es einen konkreten Hinweis, dass die Person bei der Einreise in den Schengen-Raum an einer Grenzkontrolle (Außengrenze) kontrolliert wurde?",
         "hilfe": "Es zählen nur belegbare Hinweise, keine bloße Behauptung. Fehlen Belege → „Nein / kein Hinweis“.",
         "beispiele": [
-          "Einreisestempel im Pass",
-          "Eintrag im Einreise-/Ausreisesystem (EES)",
-          "Visum im Pass und Flugticket mit Ankunft an einem Schengen-Flughafen"
+          "Einreisestempel im Pass oder EES-Eintrag",
+          "Visum im Pass und Flugticket mit Ankunft an einem Schengen-Flughafen",
+          "Visumfreie Staatsangehörige (z. B. Kolumbien, Georgien) mit belegter Einreise per Flugzeug"
         ],
         "antworten": [
           {
@@ -2016,6 +2127,10 @@
           {
             "text": "Unerlaubten Aufenthalt prüfen (§ 95 AufenthG).",
             "hinweis": null
+          },
+          {
+            "text": "Unklar, ob die Person zwischenzeitlich den Schengen-Raum verlassen hatte? Bei der Ausländerbehörde klären – ergibt sich eine Ausreise, Prüfung neu starten.",
+            "hinweis": null
           }
         ],
         "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356, AMM-VO"
@@ -2024,16 +2139,20 @@
         "typ": "ergebnis",
         "ergebnis": "kein",
         "titel": "Kein Screening – Rückkehrverfahren",
-        "kurz": "Die Person wurde bei der Einreise kontrolliert und hält sich jetzt unerlaubt auf (z. B. Visum abgelaufen). Zuständig ist die Ausländerbehörde, nicht das Screening.",
+        "kurz": "Die Person ist kontrolliert eingereist (z. B. mit Visum oder visumfrei) und hält sich jetzt unerlaubt auf – etwa weil die 90 Tage überschritten sind. Zuständig ist die Ausländerbehörde, nicht das Screening.",
         "fristen": false,
         "schritte": [
           {
-            "text": "Nachweis der kontrollierten Einreise dokumentieren (Stempel, EES, Visum).",
+            "text": "Nachweis der kontrollierten Einreise dokumentieren (Stempel, EES, VIS, Visum).",
+            "hinweis": null
+          },
+          {
+            "text": "Aufenthaltsdauer berechnen: 90 Tage in 180 Tagen (Schengen-Rechner, EES).",
             "hinweis": null
           },
           {
             "text": "Strafbarkeit prüfen: unerlaubter Aufenthalt (§ 95 Abs. 1 Nr. 2 AufenthG).",
-            "hinweis": null
+            "hinweis": "Bei Duldung keine Strafbarkeit"
           },
           {
             "text": "Zuständige Ausländerbehörde informieren – sie entscheidet über die Rückkehr.",
@@ -2071,6 +2190,264 @@
           }
         ],
         "rechtsgrundlage": "Art. 7 Abs. 2 VO (EU) 2024/1356"
+      },
+      "q_ausreise": {
+        "typ": "frage",
+        "schritt": "Frühere Ausreise",
+        "frage": "Hat die Person den Schengen-Raum nachweislich verlassen – und ist danach wieder hier?",
+        "hilfe": "Entscheidend ist, ob die Person den **Schengen-Raum** verlassen hat. Eine Überstellung oder Reise in einen anderen EU-/Schengen-Staat zählt **nicht** als Verlassen.",
+        "beispiele": [
+          "Ja: Abschiebung nach Syrien, Afghanistan, Georgien vollzogen; Grenzübertrittsbescheinigung; EES-Ausreise",
+          "Nein: Dublin-/AMM-Überstellung nach Italien; Abschiebung gescheitert; Person war untergetaucht"
+        ],
+        "antworten": [
+          {
+            "text": "Ja – Ausreise aus dem Schengen-Raum ist dokumentiert",
+            "ziel": "q_wiedereinreise"
+          },
+          {
+            "text": "Nein – nur innerhalb der EU / Schengen oder nie ausgereist",
+            "ziel": "e_bekannt"
+          },
+          {
+            "text": "Unklar – Ausreise lässt sich nicht feststellen",
+            "ziel": "e_ausreise_unklar"
+          }
+        ]
+      },
+      "q_wiedereinreise": {
+        "typ": "frage",
+        "schritt": "Erneute Einreise",
+        "frage": "Wie ist die Person nach der Ausreise wieder in den Schengen-Raum gekommen?",
+        "hilfe": "Nur belegbare Kontrollen zählen (Stempel, EES-Eintrag, Visum mit Flugbuchung). Angaben der Person ohne Beleg → „Ohne Kontrolle / unklar“.",
+        "beispiele": [
+          "Mit Kontrolle: neues Visum, Einreisestempel Flughafen Frankfurt",
+          "Ohne Kontrolle: über die Balkanroute, geschleust im Lkw, keine Angaben"
+        ],
+        "antworten": [
+          {
+            "text": "Mit Grenzkontrolle (belegt)",
+            "ziel": "e_wieder_kontrolliert"
+          },
+          {
+            "text": "Ohne Kontrolle / geschleust / unklar",
+            "ziel": "e_wiedereinreise"
+          }
+        ]
+      },
+      "q_geboren": {
+        "typ": "frage",
+        "schritt": "Geburt",
+        "frage": "Ist die Person im Schengen-Raum geboren und hat ihn seitdem nie verlassen?",
+        "hilfe": "Wer hier geboren ist, hat die Außengrenze nie überschritten – ein Screening kommt dann nicht in Betracht. Typischer Fall: Kinder unerlaubt aufhältiger Eltern.",
+        "beispiele": [
+          "Ja: Kind, in Leipzig geboren (Geburtsurkunde)",
+          "Nein / unklar: keine Unterlagen, Angaben widersprüchlich"
+        ],
+        "antworten": [
+          {
+            "text": "Ja – Geburt im Schengen-Raum belegt",
+            "ziel": "e_geboren"
+          },
+          {
+            "text": "Nein / unklar",
+            "ziel": "q_einreise"
+          }
+        ]
+      },
+      "e_anderer_staat": {
+        "typ": "ergebnis",
+        "ergebnis": "kein",
+        "titel": "Kein Screening – Titel eines anderen Schengen-Staates",
+        "kurz": "Die Person ist mit einem Aufenthaltstitel eines anderen Schengen-Staates erlaubt eingereist. Hält sie sich länger als 90 Tage in 180 Tagen in Deutschland auf, ist der Aufenthalt hier unerlaubt – ein Screening ist trotzdem nicht durchzuführen.",
+        "fristen": false,
+        "schritte": [
+          {
+            "text": "Titel, Ausstellerstaat und Gültigkeit dokumentieren; Echtheit prüfen.",
+            "hinweis": null
+          },
+          {
+            "text": "Aufenthaltsdauer in Deutschland feststellen (Angaben, Belege, EES).",
+            "hinweis": null
+          },
+          {
+            "text": "Bei Überschreitung: unerlaubter Aufenthalt – Strafbarkeit prüfen (§ 95 AufenthG).",
+            "hinweis": null
+          },
+          {
+            "text": "Ausländerbehörde informieren: Die Person ist grundsätzlich zur Rückkehr in den Staat verpflichtet, der den Titel ausgestellt hat.",
+            "hinweis": "Art. 6 Abs. 2 Rückführungsrichtlinie 2008/115/EG"
+          },
+          {
+            "text": "Bittet die Person um Schutz: wörtlich notieren und weiterleiten.",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356 (kein Anwendungsfall), Art. 21 SDÜ, § 95 AufenthG"
+      },
+      "e_wiedereinreise": {
+        "typ": "ergebnis",
+        "ergebnis": "screening",
+        "titel": "Screening durchführen – erneute unerlaubte Einreise",
+        "kurz": "Die Person hat den Schengen-Raum verlassen und ist ohne Kontrolle zurückgekommen. Das ist ein neuer unerlaubter Grenzübertritt: Screening nach Art. 7 Screening-VO und § 15b AufenthG – zusätzlich Einreiseverbot und Strafbarkeit prüfen.",
+        "fristen": true,
+        "schritte": [
+          {
+            "text": "Aufgriffszeit notieren und unten in den Fristenrechner eintragen.",
+            "hinweis": "Tipp: Unterlagen-Assistent starten – er führt durch alle Angaben."
+          },
+          {
+            "text": "Person in verständlicher Sprache belehren: Überprüfung nach Screening-VO.",
+            "hinweis": "Dolmetscher, keine Kinder oder Mitbewohner"
+          },
+          {
+            "text": "Minderjährig oder besonders schutzbedürftig? → Jugendamt bzw. Fachstelle einbinden, kindgerecht vorgehen.",
+            "hinweis": "Im Zweifel als minderjährig behandeln"
+          },
+          {
+            "text": "Nur festhalten, wenn die Überprüfung sonst nicht möglich ist. Dann richterliche Entscheidung beantragen – spätestens bis Ende des Folgetages.",
+            "hinweis": "§ 15b AufenthG, Art. 104 GG"
+          },
+          {
+            "text": "Einreise- und Aufenthaltsverbot prüfen (§ 11 AufenthG): Einreise trotz Verbots ist eine Straftat – Strafanzeige nach § 95 Abs. 2 Nr. 1 AufenthG.",
+            "hinweis": "Frist des Verbots beachten"
+          },
+          {
+            "text": "SIS-/INPOL-Ausschreibung (z. B. Einreiseverweigerung, Festnahme) befolgen.",
+            "hinweis": null
+          },
+          {
+            "text": "Frühere Daten (Eurodac, AZR, ED-Bestand) für die Identifizierung nutzen – Abgleich statt Neuerfassung, soweit möglich.",
+            "hinweis": null
+          },
+          {
+            "text": "ZAB/LDS sofort informieren: Zurückschiebung (§ 57 AufenthG) und Haft (§ 62 AufenthG) prüfen lassen.",
+            "hinweis": null
+          },
+          {
+            "text": "Identität prüfen: Dokumente sichten und sichern.",
+            "hinweis": "Datenträger nur nach § 48 Abs. 3a AufenthG"
+          },
+          {
+            "text": "Sicherheitsabfragen vollständig durchführen (SIS, INPOL, weitere über die zuständige Stelle).",
+            "hinweis": null
+          },
+          {
+            "text": "ED-Behandlung und Eurodac: Fingerabdrücke und Gesichtsbild (ab 6 Jahren).",
+            "hinweis": null
+          },
+          {
+            "text": "Vorläufige Gesundheitskontrolle durch die zuständige Gesundheitsbehörde veranlassen – nicht selbst durchführen.",
+            "hinweis": null
+          },
+          {
+            "text": "Hinweise auf Vulnerabilität festhalten (Minderjährige, Schwangere, Kranke, Opfer von Folter oder Menschenhandel).",
+            "hinweis": null
+          },
+          {
+            "text": "Überprüfungsformular (Screening-Formular) vollständig ausfüllen.",
+            "hinweis": null
+          },
+          {
+            "text": "Bittet die Person um Schutz: wörtlich notieren. Nach früherem Asylverfahren handelt es sich regelmäßig um einen Folgeantrag – Entscheidung durch das BAMF. Das Screening läuft weiter.",
+            "hinweis": null
+          },
+          {
+            "text": "Übergabe an die zuständige Stelle nach sächsischer Zuständigkeitsregelung (Asylverfahren oder Ausländerbehörde für die Rückkehr).",
+            "hinweis": "Erlasslage SMI beachten"
+          },
+          {
+            "text": "Screening spätestens nach 3 Tagen abschließen und alles dokumentieren.",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356, § 15b AufenthG, §§ 11, 57, 95 Abs. 2 Nr. 1 AufenthG"
+      },
+      "e_wieder_kontrolliert": {
+        "typ": "ergebnis",
+        "ergebnis": "kein",
+        "titel": "Kein Screening – erneute kontrollierte Einreise",
+        "kurz": "Die Person ist nach früherer Ausreise wieder mit Grenzkontrolle eingereist (z. B. mit neuem Visum). Ein Screening entfällt. Besteht ein Einreiseverbot, ist die Einreise trotzdem strafbar.",
+        "fristen": false,
+        "schritte": [
+          {
+            "text": "Beleg der kontrollierten Einreise dokumentieren (Stempel, EES, Visum).",
+            "hinweis": null
+          },
+          {
+            "text": "Einreise- und Aufenthaltsverbot prüfen – ggf. Strafanzeige nach § 95 Abs. 2 Nr. 1 AufenthG.",
+            "hinweis": null
+          },
+          {
+            "text": "Wurde das Visum trotz Verbots erteilt? Hinweis an Ausländerbehörde (Rücknahme/Annullierung prüfen).",
+            "hinweis": null
+          },
+          {
+            "text": "ZAB/LDS bzw. Ausländerbehörde informieren; Festnahme nur bei Haftgrund (§ 62 Abs. 5 AufenthG).",
+            "hinweis": null
+          },
+          {
+            "text": "Bittet die Person um Schutz: wörtlich notieren und weiterleiten (ggf. Folgeantrag).",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356 (kein Anwendungsfall), §§ 11, 95 AufenthG"
+      },
+      "e_ausreise_unklar": {
+        "typ": "ergebnis",
+        "ergebnis": "sonder",
+        "titel": "Klären: Ist die Person ausgereist?",
+        "kurz": "Ohne Nachweis einer Ausreise gilt die Person als weiterhin hier aufhältig und bekannt – dann kein erneutes Screening. Die Frage muss aber zeitnah geklärt werden.",
+        "fristen": true,
+        "schritte": [
+          {
+            "text": "Aufgriffszeit notieren – falls sich doch ein Screening ergibt, laufen die Fristen bereits.",
+            "hinweis": null
+          },
+          {
+            "text": "Ausländerbehörde / ZAB sofort befragen: Abschiebung vollzogen? Grenzübertrittsbescheinigung? EES-Ausreise?",
+            "hinweis": null
+          },
+          {
+            "text": "Person befragen (Dolmetscher): Wann und wie ausgereist, wann und wie wieder eingereist? Antworten wörtlich notieren.",
+            "hinweis": null
+          },
+          {
+            "text": "Ergibt sich eine Ausreise aus dem Schengen-Raum: Prüfung neu starten und „Ja“ wählen.",
+            "hinweis": null
+          },
+          {
+            "text": "Bleibt es unklar: weiter wie „bekannte Person“ – Ausschreibungen befolgen, § 95 AufenthG prüfen, Ausländerbehörde entscheidet.",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356"
+      },
+      "e_geboren": {
+        "typ": "ergebnis",
+        "ergebnis": "kein",
+        "titel": "Kein Screening – im Schengen-Raum geboren",
+        "kurz": "Die Person hat die Außengrenze nie überschritten. Die Screening-VO setzt einen unerlaubten Grenzübertritt voraus – sie greift hier nicht.",
+        "fristen": false,
+        "schritte": [
+          {
+            "text": "Geburtsnachweis dokumentieren (Geburtsurkunde, Melderegister).",
+            "hinweis": null
+          },
+          {
+            "text": "Status der Eltern bzw. Sorgeberechtigten klären.",
+            "hinweis": null
+          },
+          {
+            "text": "Minderjährige ohne Sorgeberechtigte: Jugendamt informieren.",
+            "hinweis": null
+          },
+          {
+            "text": "Zuständige Ausländerbehörde informieren.",
+            "hinweis": null
+          }
+        ],
+        "rechtsgrundlage": "Art. 7 VO (EU) 2024/1356 (kein Anwendungsfall)"
       }
     }
   },

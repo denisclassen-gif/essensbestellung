@@ -1,0 +1,113 @@
+name: GEAS Hilfe – TestFlight-Upload
+
+# Wird von Hand gestartet: GitHub → Actions → „GEAS Hilfe – TestFlight-Upload“ → „Run workflow“.
+# Voraussetzungen (einmalig, siehe geas-app/README.md → „TestFlight“):
+#   Secrets:   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64, APPLE_TEAM_ID
+#   Variable:  IOS_BUNDLE_ID (Bundle-ID der in App Store Connect angelegten App)
+on:
+  workflow_dispatch:
+    inputs:
+      notiz:
+        description: "Was ist neu? (erscheint bei den Testern in TestFlight)"
+        required: false
+        default: "Neue Testversion der GEAS Hilfe"
+
+jobs:
+  testflight:
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+    steps:
+      - name: Zugangsdaten prüfen
+        run: |
+          FEHLT=""
+          for NAME in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8_BASE64 APPLE_TEAM_ID IOS_BUNDLE_ID; do
+            if [ -z "${!NAME}" ]; then FEHLT="$FEHLT $NAME"; fi
+          done
+          if [ -n "$FEHLT" ]; then
+            echo "::error::Es fehlen Secrets/Variablen:$FEHLT – Anleitung: geas-app/README.md, Abschnitt „TestFlight“."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Neueste Xcode-Version wählen
+        run: |
+          NEUESTE=$(ls -d /Applications/Xcode_*.app | grep -vi beta | sort -V | tail -1)
+          sudo xcode-select -s "$NEUESTE"
+          xcodebuild -version
+
+      - name: Xcode-Projekt erzeugen
+        working-directory: geas-app/ios
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: App-Store-Connect-Schlüssel ablegen
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/asc/AuthKey_$ASC_KEY_ID.p8"
+          chmod 600 "$RUNNER_TEMP/asc/AuthKey_$ASC_KEY_ID.p8"
+
+      - name: Archiv bauen und signieren (automatische Signierung)
+        working-directory: geas-app/ios
+        shell: bash {0}
+        run: |
+          xcodebuild archive \
+            -project GEASHilfe.xcodeproj -scheme GEASHilfe \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/GEASHilfe.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/asc/AuthKey_$ASC_KEY_ID.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" > archive.log 2>&1
+          STATUS=$?
+          grep -E "error:|\*\* ARCHIVE" archive.log | sort -u | head -60 || true
+          exit $STATUS
+
+      - name: Zu App Store Connect / TestFlight hochladen
+        working-directory: geas-app/ios
+        shell: bash {0}
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$APPLE_TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+          </dict>
+          </plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/GEASHilfe.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/asc/AuthKey_$ASC_KEY_ID.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" > export.log 2>&1
+          STATUS=$?
+          grep -E "error:|Upload|\*\* EXPORT" export.log | sort -u | head -60 || true
+          if [ $STATUS -eq 0 ]; then
+            echo "### Hochgeladen: Build ${{ github.run_number }}" >> "$GITHUB_STEP_SUMMARY"
+            echo "Nach der Verarbeitung durch Apple (meist 5–30 Minuten) erscheint der Build in App Store Connect → TestFlight." >> "$GITHUB_STEP_SUMMARY"
+            echo "Notiz: ${{ github.event.inputs.notiz }}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit $STATUS
+
+      - name: Schlüssel entfernen
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/asc"

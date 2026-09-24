@@ -2,7 +2,7 @@
 
 Inoffizielle Arbeits- und Lernhilfe für Beamtinnen und Beamte der Polizei Sachsen
 (Zuschnitt PD Leipzig) zum Gemeinsamen Europäischen Asylsystem (GEAS) und zur Rückführung.
-Rechtsstand: GEAS-Reform und GEAS-Anpassungsgesetz, **in Kraft seit 12.06.2026**, Inhaltsstand September 2026.
+Rechtsstand: GEAS-Reform und GEAS-Anpassungsgesetz, **in Kraft seit 12.06.2026**, Inhaltsstand September 2026 (Version 2.1).
 
 > Die App ersetzt weder Gesetzestext noch Erlasse, Dienstanweisungen oder die Weisung der
 > zuständigen Ausländerbehörde. Vor dienstlichem Einsatz fachlich prüfen lassen (z. B. durch die
@@ -71,10 +71,46 @@ open GEASHilfe.xcodeproj
 In Xcode unter *Signing & Capabilities* das eigene Team wählen und auf dem iPhone oder im Simulator starten.
 Jeder Push baut die App zusätzlich per GitHub Actions (`.github/workflows/geas-ios.yml`).
 
+## TestFlight (Testversion auf echten iPhones)
+
+Der Workflow `.github/workflows/geas-testflight.yml` baut, signiert und lädt die App zu TestFlight hoch.
+Er wird von Hand gestartet und braucht einmalig folgende Einrichtung:
+
+1. **Apple Developer Program** (Organisation oder Einzelperson). Für eine dienstliche Verteilung sollte das Konto
+   der Polizei Sachsen bzw. der zuständigen IT-Stelle genutzt werden.
+2. **App in App Store Connect anlegen** (Apps → „+“ → Neue App, Plattform iOS). Die **Bundle-ID** frei wählen,
+   z. B. `de.<eure-domain>.geashilfe` – sie muss zum Konto passen.
+3. **API-Schlüssel erstellen:** App Store Connect → Benutzer und Zugriff → Integrationen → App Store Connect API →
+   Schlüssel mit Rolle **Admin** (nötig für die automatische Zertifikatserstellung). Die `.p8`-Datei herunterladen
+   (nur einmal möglich), Key-ID und Issuer-ID notieren.
+4. **In GitHub hinterlegen** (Repository → Settings → Secrets and variables → Actions):
+
+   | Art | Name | Inhalt |
+   |---|---|---|
+   | Secret | `ASC_KEY_ID` | Key-ID des API-Schlüssels |
+   | Secret | `ASC_ISSUER_ID` | Issuer-ID |
+   | Secret | `ASC_KEY_P8_BASE64` | Inhalt der `.p8`-Datei, Base64-kodiert (`base64 -i AuthKey_XXXX.p8`) |
+   | Secret | `APPLE_TEAM_ID` | Team-ID (developer.apple.com → Membership) |
+   | Variable | `IOS_BUNDLE_ID` | Bundle-ID aus Schritt 2 |
+
+5. **Starten:** GitHub → Actions → „GEAS Hilfe – TestFlight-Upload“ → *Run workflow*. Nach 5–30 Minuten Verarbeitung
+   erscheint der Build in App Store Connect → TestFlight.
+6. **Tester einladen:** interne Tester (Mitglieder des Teams, ohne Prüfung) oder externe Tester per E-Mail/öffentlichem
+   Link (bis 10.000 Personen; der erste Build durchläuft eine kurze Beta-Prüfung durch Apple – dafür Testinformationen
+   und eine Datenschutz-URL angeben). Die Tester installieren die App **TestFlight** aus dem App Store.
+
+Die Build-Nummer wird automatisch hochgezählt; die Versionsnummer steht in `ios/project.yml` (`MARKETING_VERSION`).
+
 **Verteilung an alle Beamten:** Für dienstliche iPhones läuft das üblicherweise über das
 Mobile-Device-Management der Polizei Sachsen (Apple Developer Enterprise Program oder
 Apple Business Manager/Custom Apps). Das muss die zuständige IT-Stelle freigeben.
 Für einen Test reichen TestFlight oder die Web-Variante.
+
+## Tests
+
+- `node tests/screening_faelle.mjs` prüft den Screening-Entscheidungsbaum gegen 15 Beispielfälle
+  (u. a. Visum abgelaufen, Wiedereinreise nach Abschiebung, Überstellung innerhalb der EU, in Deutschland geborenes Kind).
+  Läuft bei jedem Push automatisch mit.
 
 ## Quellen
 

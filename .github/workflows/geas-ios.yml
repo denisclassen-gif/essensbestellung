@@ -12,6 +12,8 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      - name: Screening-Entscheidungsbaum gegen Beispielfälle prüfen
+        run: node geas-app/tests/screening_faelle.mjs
       - name: Neueste Xcode-Version wählen (Liquid Glass benötigt Xcode 26)
         run: |
           ls -d /Applications/Xcode*.app || true
