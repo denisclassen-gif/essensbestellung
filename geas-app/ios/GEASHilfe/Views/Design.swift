@@ -238,7 +238,7 @@ struct ParallaxHero<Inhalt: View>: View {
 
     var body: some View {
         GeometryReader { geo in
-            let y = geo.frame(in: .named("scroll")).minY
+            let y: CGFloat = geo.frame(in: .named("scroll")).minY
             ZStack(alignment: .bottomLeading) {
                 verlauf
                 // Dekorative Kreise, bewegen sich gegenläufig
@@ -255,7 +255,7 @@ struct ParallaxHero<Inhalt: View>: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 44)
                     .offset(y: y < 0 ? y * 0.25 : 0)
-                    .opacity(y < 0 ? max(0, 1 + y / (hoehe * 0.7)) : 1)
+                    .opacity(y < 0 ? Double(max(0, 1 + y / (hoehe * 0.7))) : 1)
             }
             .frame(width: geo.size.width, height: hoehe + max(0, y))
             .clipped()
