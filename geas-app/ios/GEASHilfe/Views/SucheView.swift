@@ -53,6 +53,8 @@ struct SucheView: View {
                 Text("Keine Treffer für „\(suche)“.").foregroundStyle(.secondary)
             }
         }
+        .scrollContentBackground(.hidden)
+        .seitenHintergrund()
         .searchable(text: $suche, placement: .navigationBarDrawer(displayMode: .always), prompt: "Begriff, Paragraph, Thema …")
         .navigationTitle("Suche & Glossar")
     }

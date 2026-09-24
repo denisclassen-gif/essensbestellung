@@ -28,13 +28,23 @@ struct OnboardingView: View {
                 ForEach(Array(seiten.enumerated()), id: \.offset) { i, seite in
                     ScrollView {
                         VStack(alignment: .leading, spacing: 18) {
-                            Image(systemName: seite.icon)
-                                .font(.system(size: 56))
-                                .foregroundStyle(.tint)
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 20)
+                            Group {
+                                if i == 0 {
+                                    Emblem(groesse: 76)
+                                        .padding(26)
+                                        .background(RoundedRectangle(cornerRadius: 34, style: .continuous).fill(Stil.heroVerlauf))
+                                        .shadow(color: Stil.tiefgruen.opacity(0.4), radius: 20, y: 12)
+                                } else {
+                                    IconPlakette(icon: seite.icon, farbe: Stil.farbe(i), groesse: 96)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 24)
+                            .scaleEffect(index == i ? 1 : 0.7)
+                            .opacity(index == i ? 1 : 0)
+                            .animation(.spring(response: 0.6, dampingFraction: 0.7), value: index)
                             Text(seite.titel)
-                                .font(.largeTitle.bold())
+                                .font(.system(.largeTitle, design: .rounded).weight(.bold))
                                 .fixedSize(horizontal: false, vertical: true)
                             RichText(text: seite.text)
                                 .font(.title3)
@@ -55,36 +65,38 @@ struct OnboardingView: View {
                             .font(.headline)
                     }
                     .toggleStyle(.switch)
+                    .tint(Stil.gruen)
+                    .padding(14)
+                    .glas(18)
                     Button {
                         fertig()
                     } label: {
-                        Text("Los geht's").font(.headline).frame(maxWidth: .infinity)
+                        Text("Los geht's")
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+                    .buttonStyle(PrimaerStil())
                     .disabled(!bestaetigt)
+                    .opacity(bestaetigt ? 1 : 0.45)
                 } else {
                     HStack(spacing: 12) {
                         if index > 0 {
                             Button {
                                 withAnimation { index -= 1 }
                             } label: {
-                                Text("Zurück").frame(maxWidth: .infinity)
+                                Text("Zurück")
                             }
-                            .buttonStyle(.bordered)
+                            .buttonStyle(GlasKnopfStil())
                         }
                         Button {
                             withAnimation { index += 1 }
                         } label: {
-                            Text("Weiter").font(.headline).frame(maxWidth: .infinity)
+                            Text("Weiter")
                         }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(PrimaerStil())
                     }
-                    .controlSize(.large)
                 }
             }
-            .padding()
-            .background(.bar)
+            .padding(20)
         }
+        .seitenHintergrund()
     }
 }

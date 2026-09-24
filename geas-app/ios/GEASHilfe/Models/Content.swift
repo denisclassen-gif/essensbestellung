@@ -12,12 +12,16 @@ struct AppContent: Decodable {
     let quellen: [String]
     let onboarding: [OnboardingSeite]
     let screening: ScreeningPruefung
+    let fall: FallVorlage
+    let dokumente: [DokumentVorlage]
 
     static let empty = AppContent(
         meta: Meta(titel: "GEAS & Rückführung", untertitel: "", version: "", stand: "", hinweis: ""),
         kapitel: [], checklisten: [], fristen: [], normen: [], glossar: [], quiz: [], kontakte: [], quellen: [],
         onboarding: [],
-        screening: ScreeningPruefung(start: "", kurzanleitung: [], grundsaetze: [], knoten: [:])
+        screening: ScreeningPruefung(start: "", kurzanleitung: [], grundsaetze: [], knoten: [:]),
+        fall: FallVorlage(hinweis: "", schritte: []),
+        dokumente: []
     )
 
     static func loadFromBundle() -> AppContent {
@@ -146,4 +150,62 @@ struct ScreeningKnoten: Decodable, Hashable {
     let rechtsgrundlage: String?
 
     var istFrage: Bool { typ == "frage" }
+}
+
+// MARK: - Unterlagen-Assistent
+
+struct Bedingung: Decodable, Hashable {
+    let feld: String
+    /// Erwarteter Wert. Beginnt er mit „!“, muss das Feld ausgefüllt sein und darf den Wert NICHT enthalten.
+    let wert: String
+}
+
+struct FallVorlage: Decodable {
+    let hinweis: String
+    let schritte: [FallSchritt]
+
+    var alleFelder: [FallFeld] { schritte.flatMap(\.felder) }
+
+    func feld(_ id: String) -> FallFeld? { alleFelder.first { $0.id == id } }
+}
+
+struct FallSchritt: Decodable, Identifiable, Hashable {
+    let id: String
+    let titel: String
+    let icon: String
+    let beschreibung: String
+    let felder: [FallFeld]
+}
+
+struct FallFeld: Decodable, Identifiable, Hashable {
+    enum Typ: String, Decodable {
+        case text, mehrzeilig, datumzeit, auswahl, mehrfach
+    }
+
+    let id: String
+    let label: String
+    let typ: Typ
+    let pflicht: Bool?
+    let optionen: [String]?
+    let hinweis: String?
+    let platzhalter: String?
+    let bedingung: Bedingung?
+
+    var istPflicht: Bool { pflicht ?? false }
+}
+
+struct DokumentVorlage: Decodable, Identifiable, Hashable {
+    struct Abschnitt: Decodable, Hashable {
+        let titel: String
+        let text: String
+    }
+
+    let id: String
+    let titel: String
+    let untertitel: String
+    let icon: String
+    let beschreibung: String
+    let bedingung: Bedingung?
+    let pflichtfelder: [String]
+    let abschnitte: [Abschnitt]
 }

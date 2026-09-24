@@ -3,13 +3,15 @@ import SwiftUI
 @main
 struct GEASHilfeApp: App {
     @StateObject private var progress = ProgressStore()
-    @AppStorage("geas.onboarding.v1") private var onboardingFertig = false
+    @StateObject private var fall = FallStore()
+    @AppStorage("geas.onboarding.v2") private var onboardingFertig = false
     private let content = AppContent.loadFromBundle()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(progress)
+                .environmentObject(fall)
                 .environment(\.appContent, content)
                 .fullScreenCover(isPresented: Binding(get: { !onboardingFertig }, set: { _ in })) {
                     OnboardingView(seiten: content.onboarding) { onboardingFertig = true }
@@ -32,12 +34,12 @@ extension EnvironmentValues {
 struct RootView: View {
     var body: some View {
         TabView {
-            ScreeningView()
-                .tabItem { Label("Screening", systemImage: "checkmark.shield") }
+            StartView()
+                .tabItem { Label("Start", systemImage: "shield.lefthalf.filled") }
+            FallView()
+                .tabItem { Label("Unterlagen", systemImage: "doc.richtext") }
             WissenView()
                 .tabItem { Label("Wissen", systemImage: "books.vertical") }
-            EinsatzView()
-                .tabItem { Label("Einsatz", systemImage: "shield.lefthalf.filled") }
             LernenView()
                 .tabItem { Label("Lernen", systemImage: "graduationcap") }
             MehrView()

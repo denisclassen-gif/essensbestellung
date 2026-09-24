@@ -12,6 +12,13 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      - name: Neueste Xcode-Version wählen (Liquid Glass benötigt Xcode 26)
+        run: |
+          ls -d /Applications/Xcode*.app || true
+          NEUESTE=$(ls -d /Applications/Xcode_*.app | grep -vi beta | sort -V | tail -1)
+          echo "Verwende $NEUESTE"
+          sudo xcode-select -s "$NEUESTE"
+          xcodebuild -version
       - name: XcodeGen installieren
         run: brew install xcodegen
       - name: Xcode-Projekt erzeugen

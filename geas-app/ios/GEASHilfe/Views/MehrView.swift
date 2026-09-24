@@ -6,36 +6,47 @@ struct MehrView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section("Einsatz") {
-                    NavigationLink {
-                        KontakteView()
-                    } label: {
-                        Label("Wichtige Erreichbarkeiten", systemImage: "phone")
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 16) {
+                        Emblem(groesse: 54)
+                            .padding(14)
+                            .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Stil.heroVerlauf))
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(content.meta.titel).font(.system(.title2, design: .rounded).weight(.bold))
+                            Text("Version \(content.meta.version) · Stand \(content.meta.stand)")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
                     }
-                }
-                Section("Hilfe") {
-                    Button {
-                        einfuehrung = true
-                    } label: {
-                        Label("Einführung erneut ansehen", systemImage: "play.rectangle")
+                    .padding(.bottom, 8)
+
+                    Abschnittstitel(text: "Einsatz")
+                    NavigationLink { KontakteView() } label: {
+                        ZeilenKachel(titel: "Wichtige Erreichbarkeiten", untertitel: "Eigene Telefonliste der Dienststelle", icon: "phone.fill", farbe: Stil.farbe(0))
                     }
-                }
-                Section("Über diese App") {
-                    NavigationLink {
-                        TextSeite(titel: "Wichtiger Hinweis", text: content.meta.hinweis)
-                    } label: {
-                        Label("Hinweis & Haftung", systemImage: "exclamationmark.shield")
+                    .buttonStyle(DrueckStil())
+
+                    Abschnittstitel(text: "Hilfe")
+                    Button { einfuehrung = true } label: {
+                        ZeilenKachel(titel: "Einführung erneut ansehen", icon: "play.rectangle.fill", farbe: Stil.farbe(1))
                     }
+                    .buttonStyle(DrueckStil())
+
+                    Abschnittstitel(text: "Über diese App")
+                    NavigationLink { TextSeite(titel: "Wichtiger Hinweis", text: content.meta.hinweis) } label: {
+                        ZeilenKachel(titel: "Hinweis & Haftung", icon: "exclamationmark.shield.fill", farbe: Stil.farbe(3))
+                    }
+                    .buttonStyle(DrueckStil())
                     NavigationLink {
                         TextSeite(titel: "Quellen", text: content.quellen.map { "• " + $0 }.joined(separator: "\n"))
                     } label: {
-                        Label("Quellen & Rechtsstand", systemImage: "books.vertical")
+                        ZeilenKachel(titel: "Quellen & Rechtsstand", icon: "books.vertical.fill", farbe: Stil.farbe(4))
                     }
-                    LabeledContent("Version", value: content.meta.version)
-                    LabeledContent("Inhaltsstand", value: content.meta.stand)
+                    .buttonStyle(DrueckStil())
                 }
+                .padding(20)
             }
+            .seitenHintergrund()
             .navigationTitle("Mehr")
             .fullScreenCover(isPresented: $einfuehrung) {
                 OnboardingView(seiten: content.onboarding) { einfuehrung = false }
@@ -50,8 +61,12 @@ struct TextSeite: View {
 
     var body: some View {
         ScrollView {
-            RichText(text: text).padding()
+            RichText(text: text)
+                .padding(20)
+                .glas(24)
+                .padding(20)
         }
+        .seitenHintergrund()
         .navigationTitle(titel)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -94,6 +109,8 @@ struct KontakteView: View {
                 Text("Bitte die dienstlich gültigen Nummern der PD Leipzig selbst eintragen. Die Daten bleiben ausschließlich auf diesem Gerät.")
             }
         }
+        .scrollContentBackground(.hidden)
+        .seitenHintergrund()
         .navigationTitle("Erreichbarkeiten")
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) { EditButton() }

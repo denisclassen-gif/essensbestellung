@@ -7,67 +7,104 @@ struct LernenView: View {
 
     private var falsche: [QuizFrage] { progress.falschBeantwortet(content.quiz) }
 
+    private let spalten = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
+
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    FortschrittKarte(
-                        beherrscht: progress.beherrscht(content.quiz),
-                        gesamt: content.quiz.count,
-                        karten: progress.anzahlGewussteKarten,
-                        kartenGesamt: content.glossar.count + content.normen.count
-                    )
-                }
-
-                Section("Trainieren") {
-                    NavigationLink {
-                        QuizView(fragen: content.quiz, titel: "Alle Fragen")
-                    } label: {
-                        Label("Quiz – alle \(content.quiz.count) Fragen", systemImage: "questionmark.circle")
-                    }
-                    NavigationLink {
-                        QuizView(fragen: Array(content.quiz.shuffled().prefix(20)), titel: "Prüfung", pruefungsModus: true)
-                    } label: {
-                        Label("Prüfungssimulation (20 Fragen)", systemImage: "timer")
-                    }
-                    if !falsche.isEmpty {
-                        NavigationLink {
-                            QuizView(fragen: falsche, titel: "Wiederholen")
-                        } label: {
-                            Label("Falsch beantwortete wiederholen (\(falsche.count))", systemImage: "arrow.counterclockwise")
+            ScrollView {
+                VStack(spacing: 0) {
+                    ParallaxHero(hoehe: 250, verlauf: LinearGradient(
+                        colors: [Stil.farbe(2), Color(red: 0.55, green: 0.16, blue: 0.24)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Image(systemName: "graduationcap.fill")
+                                .font(.system(size: 36, weight: .semibold))
+                                .foregroundStyle(.white)
+                            Text("Lernen")
+                                .font(.system(size: 38, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                            Text("Quiz, Fallbeispiele, Prüfung, Karteikarten")
+                                .foregroundStyle(.white.opacity(0.85))
                         }
                     }
-                    NavigationLink {
-                        KarteikartenView()
-                    } label: {
-                        Label("Karteikarten (Begriffe & Paragraphen)", systemImage: "rectangle.on.rectangle.angled")
-                    }
-                }
 
-                Section("Nach Kapitel") {
-                    ForEach(content.kapitel) { kapitel in
-                        let fragen = content.quiz.filter { $0.kapitel == kapitel.id }
-                        if !fragen.isEmpty {
+                    VStack(alignment: .leading, spacing: 16) {
+                        FortschrittKarte(
+                            beherrscht: progress.beherrscht(content.quiz),
+                            gesamt: content.quiz.count,
+                            karten: progress.anzahlGewussteKarten,
+                            kartenGesamt: content.glossar.count + content.normen.count
+                        )
+                        .padding(18)
+                        .glas(26)
+
+                        Abschnittstitel(text: "Trainieren")
+                        LazyVGrid(columns: spalten, spacing: 14) {
                             NavigationLink {
-                                QuizView(fragen: fragen, titel: kapitel.titel)
+                                QuizView(fragen: content.quiz, titel: "Alle Fragen")
                             } label: {
-                                HStack {
-                                    Label(kapitel.titel, systemImage: kapitel.icon)
-                                    Spacer()
-                                    Text("\(progress.beherrscht(fragen))/\(fragen.count)")
-                                        .font(.caption.monospacedDigit())
-                                        .foregroundStyle(.secondary)
+                                Kachel(titel: "Quiz", untertitel: "Alle \(content.quiz.count) Fragen mit Erklärung", icon: "questionmark.circle.fill", farbe: Stil.farbe(0))
+                            }
+                            .buttonStyle(DrueckStil())
+                            NavigationLink {
+                                QuizView(fragen: Array(content.quiz.shuffled().prefix(20)), titel: "Prüfung", pruefungsModus: true)
+                            } label: {
+                                Kachel(titel: "Prüfung", untertitel: "20 zufällige Fragen", icon: "timer", farbe: Stil.farbe(2))
+                            }
+                            .buttonStyle(DrueckStil())
+                            NavigationLink {
+                                KarteikartenView()
+                            } label: {
+                                Kachel(titel: "Karteikarten", untertitel: "Begriffe & Paragraphen", icon: "rectangle.on.rectangle.angled", farbe: Stil.farbe(1))
+                            }
+                            .buttonStyle(DrueckStil())
+                            NavigationLink {
+                                QuizView(fragen: falsche.isEmpty ? content.quiz.filter { $0.kapitel == "screening" } : falsche,
+                                         titel: falsche.isEmpty ? "Fallbeispiele" : "Wiederholen")
+                            } label: {
+                                Kachel(titel: falsche.isEmpty ? "Fallbeispiele" : "Wiederholen",
+                                       untertitel: falsche.isEmpty ? "Screening-Fälle" : "Falsch beantwortete",
+                                       icon: falsche.isEmpty ? "person.fill.questionmark" : "arrow.counterclockwise",
+                                       farbe: Stil.farbe(3),
+                                       plakette: falsche.isEmpty ? nil : "\(falsche.count)")
+                            }
+                            .buttonStyle(DrueckStil())
+                        }
+
+                        Abschnittstitel(text: "Nach Kapitel")
+                        VStack(spacing: 10) {
+                            ForEach(Array(content.kapitel.enumerated()), id: \.element.id) { index, kapitel in
+                                let fragen = content.quiz.filter { $0.kapitel == kapitel.id }
+                                if !fragen.isEmpty {
+                                    NavigationLink {
+                                        QuizView(fragen: fragen, titel: kapitel.titel)
+                                    } label: {
+                                        ZeilenKachel(titel: kapitel.titel, icon: kapitel.icon, farbe: Stil.farbe(index),
+                                                     rechts: "\(progress.beherrscht(fragen))/\(fragen.count)")
+                                    }
+                                    .buttonStyle(DrueckStil())
+                                    .scrollEinblenden()
                                 }
                             }
                         }
-                    }
-                }
 
-                Section {
-                    Button("Lernfortschritt zurücksetzen", role: .destructive) { resetFragen = true }
+                        Button(role: .destructive) { resetFragen = true } label: {
+                            Label("Lernfortschritt zurücksetzen", systemImage: "arrow.counterclockwise")
+                                .foregroundStyle(Stil.koralle)
+                        }
+                        .buttonStyle(GlasKnopfStil())
+                        .padding(.top, 8)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, -28)
+                    .padding(.bottom, 30)
                 }
             }
-            .navigationTitle("Lernen")
+            .coordinateSpace(name: "scroll")
+            .ignoresSafeArea(edges: .top)
+            .seitenHintergrund()
+            .toolbar(.hidden, for: .navigationBar)
             .confirmationDialog("Gesamten Lernfortschritt löschen?", isPresented: $resetFragen, titleVisibility: .visible) {
                 Button("Löschen", role: .destructive) { progress.allesZuruecksetzen() }
             }
@@ -142,6 +179,8 @@ struct QuizView: View {
                 frageAnsicht(fragen[index])
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .seitenHintergrund()
         .navigationTitle(titel)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -172,10 +211,10 @@ struct QuizView: View {
                         }
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(hintergrund(fuer: i, frage: frage), in: RoundedRectangle(cornerRadius: 12))
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.secondary.opacity(0.25)))
+                        .background(hintergrund(fuer: i, frage: frage), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .glas(18, interaktiv: true)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(DrueckStil())
                     .disabled(gewaehlt != nil)
                 }
 
@@ -190,17 +229,15 @@ struct QuizView: View {
                         }
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+                        .glas(18)
                     }
 
                     Button {
                         weiter()
                     } label: {
                         Text(index + 1 < fragen.count ? "Weiter" : "Auswertung")
-                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+                    .buttonStyle(PrimaerStil())
                 }
             }
             .padding()
@@ -246,7 +283,7 @@ struct QuizView: View {
                 punkte = 0
                 fertig = false
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PrimaerStil())
         }
         .padding()
     }
@@ -294,8 +331,9 @@ struct KarteikartenView: View {
 
                 let karte = stapel[index]
                 ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(umgedreht ? Color.accentColor.opacity(0.12) : Color.secondary.opacity(0.08))
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .fill(umgedreht ? Stil.gruen.opacity(0.14) : Color.clear)
+                        .glas(28)
                     ScrollView {
                         Text(umgedreht ? karte.hinten : karte.vorne)
                             .font(umgedreht ? Font.body : Font.title2.bold())
@@ -303,9 +341,15 @@ struct KarteikartenView: View {
                             .padding(24)
                             .frame(maxWidth: .infinity)
                     }
+                    // Rückseite nicht spiegelverkehrt anzeigen
+                    .scaleEffect(x: umgedreht ? -1 : 1, y: 1)
                 }
                 .frame(maxHeight: .infinity)
-                .onTapGesture { withAnimation(.easeInOut) { umgedreht.toggle() } }
+                .rotation3DEffect(.degrees(umgedreht ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.6)
+                .onTapGesture {
+                    Haptik.tippen()
+                    withAnimation(.spring(response: 0.55, dampingFraction: 0.78)) { umgedreht.toggle() }
+                }
                 .accessibilityAddTraits(.isButton)
                 .accessibilityHint("Tippen zum Umdrehen")
 
@@ -316,23 +360,23 @@ struct KarteikartenView: View {
                         progress.setGewusst(karte.id, false)
                         naechste()
                     } label: {
-                        Label("Nochmal", systemImage: "arrow.uturn.left").frame(maxWidth: .infinity)
+                        Label("Nochmal", systemImage: "arrow.uturn.left")
+                            .foregroundStyle(Stil.farbe(3))
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.orange)
+                    .buttonStyle(GlasKnopfStil())
 
                     Button {
                         progress.setGewusst(karte.id, true)
                         naechste()
                     } label: {
-                        Label("Gewusst", systemImage: "checkmark").frame(maxWidth: .infinity)
+                        Label("Gewusst", systemImage: "checkmark")
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(PrimaerStil())
                 }
-                .controlSize(.large)
             }
         }
         .padding()
+        .seitenHintergrund()
         .navigationTitle("Karteikarten")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { if stapel.isEmpty { baueStapel() } }

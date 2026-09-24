@@ -2,9 +2,9 @@
   "meta": {
     "titel": "GEAS & Rückführung",
     "untertitel": "Einsatz- und Lernhilfe für den Polizeivollzugsdienst – Zuschnitt Polizei Sachsen / PD Leipzig",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "stand": "September 2026",
-    "hinweis": "Diese App ist eine inoffizielle Arbeits- und Lernhilfe. Sie ersetzt weder Gesetzestext, Erlasse, Dienstanweisungen der Polizei Sachsen noch die Weisung der zuständigen Ausländerbehörde oder der Führung im Einsatz. Rechtsstand: GEAS-Reform (EU) und GEAS-Anpassungsgesetz, in Kraft seit 12.06.2026. Paragraphenangaben zum neuen nationalen Recht vor dienstlicher Verwendung stets gegen die aktuelle Gesetzesfassung und die Erlasslage des SMI prüfen. Keine personenbezogenen Daten in dieser App speichern."
+    "hinweis": "Diese App ist eine inoffizielle Arbeits- und Lernhilfe. Sie ersetzt weder Gesetzestext, Erlasse, Dienstanweisungen der Polizei Sachsen noch die Weisung der zuständigen Ausländerbehörde oder der Führung im Einsatz. Rechtsstand: GEAS-Reform (EU) und GEAS-Anpassungsgesetz, in Kraft seit 12.06.2026. Paragraphenangaben zum neuen nationalen Recht vor dienstlicher Verwendung stets gegen die aktuelle Gesetzesfassung und die Erlasslage des SMI prüfen. Personenbezogene Daten nur im Unterlagen-Assistenten und nur auf dienstlich zugelassenen Geräten erfassen; erzeugte Unterlagen sind Entwürfe, maßgeblich sind die amtlichen Vordrucke."
   },
   "kapitel": [
     {
@@ -1722,12 +1722,12 @@
     {
       "icon": "square.grid.2x2",
       "titel": "Was gibt es noch?",
-      "text": "• **Wissen** – 11 Kapitel zum Nachlesen, mit Suche und Glossar\n• **Einsatz** – Checklisten zum Abhaken, Fristen, Paragraphen\n• **Lernen** – Quiz, Fallbeispiele, Prüfung, Karteikarten\n• **Mehr** – eigene Telefonliste, Einführung erneut ansehen"
+      "text": "• **Unterlagen** – Fall anlegen, Schritt für Schritt erfassen, alle Dokumente als PDF erzeugen\n• **Wissen** – 11 Kapitel zum Nachlesen, mit Suche und Glossar\n• **Einsatz** – Checklisten zum Abhaken, Fristen, Paragraphen\n• **Lernen** – Quiz, Fallbeispiele, Prüfung, Karteikarten\n• **Mehr** – eigene Telefonliste, Einführung erneut ansehen"
     },
     {
       "icon": "lock.shield",
       "titel": "Wichtiger Hinweis",
-      "text": "Die App ist eine **inoffizielle Arbeitshilfe**. Sie ersetzt weder Gesetz, Erlass oder Dienstanweisung noch die Weisung der Führung oder der Ausländerbehörde.\n\n**Keine personenbezogenen Daten** eintragen. Alles bleibt nur auf diesem Gerät gespeichert."
+      "text": "Die App ist eine **inoffizielle Arbeitshilfe**. Sie ersetzt weder Gesetz, Erlass oder Dienstanweisung noch die Weisung der Führung oder der Ausländerbehörde. Erzeugte Unterlagen sind **Entwürfe** – maßgeblich sind die amtlichen Vordrucke.\n\n**Personendaten** nur im Unterlagen-Assistenten und nur auf dienstlich zugelassenen Geräten eingeben. Sie werden verschlüsselt gespeichert und nach 7 Tagen automatisch gelöscht."
     }
   ],
   "screening": {
@@ -1737,7 +1737,7 @@
       "Eigensicherung und Personalien, Dokumente sichten.",
       "Abfragen: INPOL, AZR, SIS, Eurodac/Fast-ID.",
       "Screening-Prüfung in der App Schritt für Schritt beantworten.",
-      "Ergebnis befolgen und das Prüfprotokoll in die Vorgangsdokumentation übernehmen.",
+      "Ergebnis befolgen. Bei „Screening durchführen“: Fall im Unterlagen-Assistenten anlegen – die App erstellt alle Unterlagen.",
       "Festhalten? Richterliche Entscheidung bis Ende des Folgetages – Fristenrechner nutzen."
     ],
     "grundsaetze": [
@@ -1885,7 +1885,7 @@
         "schritte": [
           {
             "text": "Aufgriffszeit notieren und unten in den Fristenrechner eintragen.",
-            "hinweis": "Ab jetzt laufen die Fristen."
+            "hinweis": "Tipp: Unterlagen-Assistent starten – er führt durch alle Angaben."
           },
           {
             "text": "Person in verständlicher Sprache belehren: Überprüfung nach Screening-VO.",
@@ -2073,5 +2073,829 @@
         "rechtsgrundlage": "Art. 7 Abs. 2 VO (EU) 2024/1356"
       }
     }
-  }
+  },
+  "fall": {
+    "hinweis": "Die Falldaten enthalten personenbezogene Daten. Sie werden nur verschlüsselt auf diesem Gerät gespeichert und nach 7 Tagen automatisch gelöscht. Nur auf dienstlich zugelassenen Geräten verwenden. Nach Übernahme der Unterlagen in das Vorgangsbearbeitungssystem den Fall löschen.",
+    "schritte": [
+      {
+        "id": "einsatz",
+        "titel": "Einsatz",
+        "icon": "car.side",
+        "beschreibung": "Wann, wo und durch wen wurde die Person angetroffen?",
+        "felder": [
+          {
+            "id": "vorgang",
+            "label": "Vorgangsnummer",
+            "typ": "text",
+            "pflicht": true,
+            "platzhalter": "z. B. aus dem Vorgangsbearbeitungssystem"
+          },
+          {
+            "id": "dienststelle",
+            "label": "Dienststelle",
+            "typ": "text",
+            "pflicht": true,
+            "platzhalter": "z. B. PD Leipzig, PR Leipzig-Zentrum"
+          },
+          {
+            "id": "sachbearbeiter",
+            "label": "Sachbearbeiter:in (Name, Dienstgrad)",
+            "typ": "text",
+            "pflicht": true
+          },
+          {
+            "id": "erreichbarkeit",
+            "label": "Erreichbarkeit (Telefon)",
+            "typ": "text"
+          },
+          {
+            "id": "aufgriff_zeit",
+            "label": "Aufgriff (Datum und Uhrzeit)",
+            "typ": "datumzeit",
+            "pflicht": true,
+            "hinweis": "Ab diesem Zeitpunkt laufen die Fristen."
+          },
+          {
+            "id": "aufgriff_ort",
+            "label": "Aufgriffsort",
+            "typ": "text",
+            "pflicht": true,
+            "platzhalter": "z. B. Leipzig Hbf, Westhalle"
+          },
+          {
+            "id": "anlass",
+            "label": "Anlass",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Personenkontrolle",
+              "Verkehrskontrolle",
+              "Bahnhof / ÖPNV",
+              "Hinweis Dritter",
+              "Im Zusammenhang mit Straftat",
+              "Sonstiges"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "person",
+        "titel": "Person",
+        "icon": "person.text.rectangle",
+        "beschreibung": "Personalien – so wie angegeben bzw. aus Dokumenten ersichtlich.",
+        "felder": [
+          {
+            "id": "name",
+            "label": "Familienname",
+            "typ": "text",
+            "pflicht": true
+          },
+          {
+            "id": "vorname",
+            "label": "Vorname(n)",
+            "typ": "text",
+            "pflicht": true
+          },
+          {
+            "id": "geburtsdatum",
+            "label": "Geburtsdatum",
+            "typ": "text",
+            "pflicht": true,
+            "platzhalter": "TT.MM.JJJJ oder „unbekannt“"
+          },
+          {
+            "id": "geburtsort",
+            "label": "Geburtsort / -land",
+            "typ": "text"
+          },
+          {
+            "id": "geschlecht",
+            "label": "Geschlecht",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "männlich",
+              "weiblich",
+              "divers",
+              "unbekannt"
+            ]
+          },
+          {
+            "id": "staatsangehoerigkeit",
+            "label": "Staatsangehörigkeit(en)",
+            "typ": "text",
+            "pflicht": true,
+            "platzhalter": "laut Angabe / Dokument"
+          },
+          {
+            "id": "alias",
+            "label": "Weitere Personalien / Aliase",
+            "typ": "mehrzeilig",
+            "hinweis": "Alle abweichenden Angaben vollständig erfassen."
+          },
+          {
+            "id": "sprachen",
+            "label": "Gesprochene Sprachen",
+            "typ": "text",
+            "pflicht": true
+          },
+          {
+            "id": "dolmetscher",
+            "label": "Sprachmittlung (Name, Sprache, Art)",
+            "typ": "text",
+            "platzhalter": "z. B. Telefondolmetscher Dari"
+          },
+          {
+            "id": "dokumente",
+            "label": "Vorgelegte Dokumente",
+            "typ": "mehrfach",
+            "pflicht": true,
+            "optionen": [
+              "Reisepass",
+              "Personalausweis / ID-Karte",
+              "Geburtsurkunde",
+              "Sonstiges Dokument",
+              "Keine Dokumente"
+            ]
+          },
+          {
+            "id": "dokument_details",
+            "label": "Dokumentenangaben (Art, Nummer, Aussteller, Gültigkeit)",
+            "typ": "mehrzeilig"
+          }
+        ]
+      },
+      {
+        "id": "reise",
+        "titel": "Reiseweg",
+        "icon": "map",
+        "beschreibung": "Angaben der Person zu Einreise und Reiseweg (Art. 17 Screening-VO).",
+        "felder": [
+          {
+            "id": "einreise_datum",
+            "label": "Einreise in den Schengen-Raum (Datum, ca.)",
+            "typ": "text"
+          },
+          {
+            "id": "einreise_ort",
+            "label": "Ort / Staat des Grenzübertritts",
+            "typ": "text"
+          },
+          {
+            "id": "reiseweg",
+            "label": "Reiseweg, Transitstaaten, frühere Aufenthaltsorte",
+            "typ": "mehrzeilig",
+            "pflicht": true
+          },
+          {
+            "id": "grund",
+            "label": "Grund für Einreise / Aufenthalt (Angabe der Person)",
+            "typ": "mehrzeilig",
+            "pflicht": true
+          },
+          {
+            "id": "schleusung",
+            "label": "Hinweise auf Schleusung / Unterstützung beim Grenzübertritt?",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Ja",
+              "Nein"
+            ]
+          },
+          {
+            "id": "schleusung_details",
+            "label": "Einzelheiten zur Schleusung",
+            "typ": "mehrzeilig",
+            "bedingung": {
+              "feld": "schleusung",
+              "wert": "Ja"
+            }
+          }
+        ]
+      },
+      {
+        "id": "abfragen",
+        "titel": "Abfragen",
+        "icon": "magnifyingglass",
+        "beschreibung": "Identitäts- und Sicherheitsprüfung – Ergebnis jeder Abfrage festhalten.",
+        "felder": [
+          {
+            "id": "abfrage_inpol",
+            "label": "INPOL",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Kein Treffer",
+              "Treffer",
+              "Nicht durchgeführt"
+            ]
+          },
+          {
+            "id": "abfrage_azr",
+            "label": "AZR",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Kein Treffer",
+              "Treffer",
+              "Nicht durchgeführt"
+            ]
+          },
+          {
+            "id": "abfrage_sis",
+            "label": "SIS",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Kein Treffer",
+              "Treffer",
+              "Nicht durchgeführt"
+            ]
+          },
+          {
+            "id": "abfrage_eurodac",
+            "label": "Eurodac / Fast-ID",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Kein Treffer",
+              "Treffer",
+              "Nicht durchgeführt"
+            ]
+          },
+          {
+            "id": "abfrage_weitere",
+            "label": "Weitere Abfragen (z. B. Europol/Interpol über zuständige Stelle)",
+            "typ": "text"
+          },
+          {
+            "id": "treffer_details",
+            "label": "Treffer und sicherheitsrelevante Erkenntnisse",
+            "typ": "mehrzeilig",
+            "hinweis": "Bei „Treffer“ immer ausfüllen."
+          }
+        ]
+      },
+      {
+        "id": "biometrie",
+        "titel": "Biometrie",
+        "icon": "touchid",
+        "beschreibung": "Erkennungsdienstliche Behandlung und Eurodac-Erfassung.",
+        "felder": [
+          {
+            "id": "ed",
+            "label": "ED-Behandlung durchgeführt?",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Ja",
+              "Nein"
+            ]
+          },
+          {
+            "id": "eurodac",
+            "label": "Eurodac-Erfassung (Fingerabdrücke + Gesichtsbild)",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Erfolgt",
+              "Nicht erfolgt",
+              "Nicht zulässig (unter 6 Jahre)"
+            ]
+          },
+          {
+            "id": "biometrie_zeit",
+            "label": "Zeitpunkt der Erfassung",
+            "typ": "datumzeit"
+          },
+          {
+            "id": "biometrie_bemerkung",
+            "label": "Bemerkungen (z. B. Verweigerung, Verletzungen der Fingerkuppen)",
+            "typ": "mehrzeilig"
+          }
+        ]
+      },
+      {
+        "id": "gesundheit",
+        "titel": "Gesundheit & Vulnerabilität",
+        "icon": "cross.case",
+        "beschreibung": "Vorläufige Gesundheitskontrolle veranlassen, Schutzbedürftigkeit erkennen.",
+        "felder": [
+          {
+            "id": "gesundheitsbehoerde",
+            "label": "Informierte Gesundheitsbehörde",
+            "typ": "text",
+            "pflicht": true
+          },
+          {
+            "id": "gesundheit_zeit",
+            "label": "Informiert am (Datum, Uhrzeit)",
+            "typ": "datumzeit",
+            "pflicht": true
+          },
+          {
+            "id": "beschwerden",
+            "label": "Erkennbare Beschwerden / Angaben zur Gesundheit",
+            "typ": "mehrzeilig",
+            "hinweis": "Nur Beobachtungen und Angaben – keine eigene Diagnose."
+          },
+          {
+            "id": "vulnerabilitaet",
+            "label": "Hinweise auf besondere Schutzbedürftigkeit",
+            "typ": "mehrfach",
+            "pflicht": true,
+            "optionen": [
+              "Keine erkennbar",
+              "Unbegleitete:r Minderjährige:r",
+              "Begleitete:r Minderjährige:r",
+              "Schwangerschaft",
+              "Behinderung",
+              "Ältere Person",
+              "Schwere Erkrankung / psychische Störung",
+              "Opfer von Folter / Gewalt",
+              "Hinweise auf Menschenhandel"
+            ]
+          },
+          {
+            "id": "vulnerabilitaet_details",
+            "label": "Beobachtungen zur Schutzbedürftigkeit",
+            "typ": "mehrzeilig"
+          },
+          {
+            "id": "jugendamt",
+            "label": "Jugendamt informiert (Stelle, Zeit, Ansprechperson)",
+            "typ": "text",
+            "bedingung": {
+              "feld": "vulnerabilitaet",
+              "wert": "Unbegleitete:r Minderjährige:r"
+            }
+          }
+        ]
+      },
+      {
+        "id": "schutz",
+        "titel": "Schutzersuchen",
+        "icon": "hand.raised",
+        "beschreibung": "Hat die Person um Schutz / Asyl gebeten?",
+        "felder": [
+          {
+            "id": "asyl",
+            "label": "Schutzersuchen geäußert?",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Ja",
+              "Nein"
+            ]
+          },
+          {
+            "id": "asyl_wortlaut",
+            "label": "Wortlaut (wörtlich, in der verwendeten Sprache)",
+            "typ": "mehrzeilig",
+            "pflicht": true,
+            "bedingung": {
+              "feld": "asyl",
+              "wert": "Ja"
+            }
+          },
+          {
+            "id": "asyl_zeit",
+            "label": "Zeitpunkt der Äußerung",
+            "typ": "datumzeit",
+            "pflicht": true,
+            "bedingung": {
+              "feld": "asyl",
+              "wert": "Ja"
+            }
+          }
+        ]
+      },
+      {
+        "id": "festhalten",
+        "titel": "Festhalten",
+        "icon": "lock.shield",
+        "beschreibung": "Festhalten nur, wenn die Überprüfung sonst nicht oder nur unter erheblichen Schwierigkeiten möglich ist (§ 15b AufenthG).",
+        "felder": [
+          {
+            "id": "festgehalten",
+            "label": "Wird die Person festgehalten?",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Ja",
+              "Nein"
+            ]
+          },
+          {
+            "id": "festhalten_beginn",
+            "label": "Beginn des Festhaltens",
+            "typ": "datumzeit",
+            "pflicht": true,
+            "bedingung": {
+              "feld": "festgehalten",
+              "wert": "Ja"
+            }
+          },
+          {
+            "id": "festhalten_grund",
+            "label": "Warum ist die Überprüfung ohne Festhalten nicht möglich?",
+            "typ": "mehrzeilig",
+            "pflicht": true,
+            "bedingung": {
+              "feld": "festgehalten",
+              "wert": "Ja"
+            },
+            "hinweis": "Konkrete Tatsachen, z. B. keine Unterkunft, Fluchtverhalten, fehlende Mitwirkung."
+          },
+          {
+            "id": "milderes_mittel",
+            "label": "Geprüfte mildere Mittel und warum sie nicht ausreichen",
+            "typ": "mehrzeilig",
+            "pflicht": true,
+            "bedingung": {
+              "feld": "festgehalten",
+              "wert": "Ja"
+            }
+          },
+          {
+            "id": "unterbringung",
+            "label": "Ort des Festhaltens",
+            "typ": "text",
+            "pflicht": true,
+            "bedingung": {
+              "feld": "festgehalten",
+              "wert": "Ja"
+            }
+          },
+          {
+            "id": "gericht",
+            "label": "Zuständiges Amtsgericht",
+            "typ": "text",
+            "pflicht": true,
+            "bedingung": {
+              "feld": "festgehalten",
+              "wert": "Ja"
+            },
+            "platzhalter": "z. B. Amtsgericht Leipzig"
+          },
+          {
+            "id": "benachrichtigung",
+            "label": "Benachrichtigung (Angehörige, Rechtsbeistand, Konsulat auf Wunsch)",
+            "typ": "mehrzeilig",
+            "bedingung": {
+              "feld": "festgehalten",
+              "wert": "Ja"
+            }
+          }
+        ]
+      },
+      {
+        "id": "abschluss",
+        "titel": "Abschluss",
+        "icon": "checkmark.seal",
+        "beschreibung": "Ergebnis des Screenings, Weiterleitung und Übergabe.",
+        "felder": [
+          {
+            "id": "weiterleitung",
+            "label": "Weiterleitung",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Asylverfahren – Aufnahmeeinrichtung / BAMF",
+              "Zuständigkeitsverfahren (AMM-VO) – ZAB / BAMF",
+              "Rückkehrverfahren – Ausländerbehörde",
+              "Sonstiges"
+            ]
+          },
+          {
+            "id": "uebergabe_an",
+            "label": "Übergeben an (Stelle, Name)",
+            "typ": "text",
+            "pflicht": true
+          },
+          {
+            "id": "uebergabe_zeit",
+            "label": "Übergabe / Ende des Screenings",
+            "typ": "datumzeit",
+            "pflicht": true
+          },
+          {
+            "id": "sichergestellt",
+            "label": "Sichergestellte / übergebene Gegenstände und Dokumente",
+            "typ": "mehrzeilig"
+          },
+          {
+            "id": "bemerkungen",
+            "label": "Sonstige Bemerkungen",
+            "typ": "mehrzeilig"
+          }
+        ]
+      }
+    ]
+  },
+  "dokumente": [
+    {
+      "id": "formular",
+      "titel": "Überprüfungsformular",
+      "untertitel": "Art. 17 Screening-VO – Arbeitsentwurf",
+      "icon": "doc.text.fill",
+      "beschreibung": "Alle Angaben des Screenings in einem Dokument.",
+      "pflichtfelder": [
+        "vorgang",
+        "dienststelle",
+        "sachbearbeiter",
+        "aufgriff_zeit",
+        "aufgriff_ort",
+        "name",
+        "vorname",
+        "geburtsdatum",
+        "geschlecht",
+        "staatsangehoerigkeit",
+        "sprachen",
+        "dokumente",
+        "reiseweg",
+        "grund",
+        "schleusung",
+        "abfrage_inpol",
+        "abfrage_azr",
+        "abfrage_sis",
+        "abfrage_eurodac",
+        "ed",
+        "eurodac",
+        "gesundheitsbehoerde",
+        "vulnerabilitaet",
+        "asyl",
+        "weiterleitung"
+      ],
+      "abschnitte": [
+        {
+          "titel": "",
+          "text": "**Hinweis:** Arbeitsentwurf auf Grundlage von Art. 17 VO (EU) 2024/1356. Maßgeblich ist der amtliche Vordruck bzw. die Maske im Vorgangsbearbeitungssystem.\n\n| Vorgangsnummer | {{vorgang}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})"
+        },
+        {
+          "titel": "1. Aufgriff",
+          "text": "| Zeitpunkt | {{aufgriff_zeit}}\n| Ort | {{aufgriff_ort}}\n| Anlass | {{anlass}}\n| Rechtsgrundlage | Art. 7 VO (EU) 2024/1356, § 15b AufenthG"
+        },
+        {
+          "titel": "2. Personalien",
+          "text": "| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}\n| Geburtsort | {{geburtsort}}\n| Weitere Personalien / Aliase | {{alias}}\n| Sprachen | {{sprachen}}\n| Sprachmittlung | {{dolmetscher}}\n| Dokumente | {{dokumente}}\n| Dokumentenangaben | {{dokument_details}}"
+        },
+        {
+          "titel": "3. Einreise und Reiseweg",
+          "text": "| Einreise (ca.) | {{einreise_datum}}\n| Ort des Grenzübertritts | {{einreise_ort}}\n| Reiseweg / Transit | {{reiseweg}}\n| Grund für Einreise/Aufenthalt | {{grund}}\n| Hinweise auf Schleusung | {{schleusung}}\n| Einzelheiten | {{schleusung_details}}"
+        },
+        {
+          "titel": "4. Identitäts- und Sicherheitsprüfung",
+          "text": "| INPOL | {{abfrage_inpol}}\n| AZR | {{abfrage_azr}}\n| SIS | {{abfrage_sis}}\n| Eurodac / Fast-ID | {{abfrage_eurodac}}\n| Weitere Abfragen | {{abfrage_weitere}}\n| Erkenntnisse | {{treffer_details}}"
+        },
+        {
+          "titel": "5. Biometrische Daten",
+          "text": "| ED-Behandlung | {{ed}}\n| Eurodac | {{eurodac}}\n| Zeitpunkt | {{biometrie_zeit}}\n| Bemerkungen | {{biometrie_bemerkung}}"
+        },
+        {
+          "titel": "6. Vorläufige Gesundheitskontrolle",
+          "text": "| Gesundheitsbehörde | {{gesundheitsbehoerde}}\n| Informiert am | {{gesundheit_zeit}}\n| Beobachtungen | {{beschwerden}}"
+        },
+        {
+          "titel": "7. Vorläufige Vulnerabilitätsprüfung",
+          "text": "| Hinweise | {{vulnerabilitaet}}\n| Beobachtungen | {{vulnerabilitaet_details}}\n| Jugendamt | {{jugendamt}}"
+        },
+        {
+          "titel": "8. Antrag auf internationalen Schutz",
+          "text": "| Schutzersuchen | {{asyl}}\n| Wortlaut | {{asyl_wortlaut}}\n| Zeitpunkt | {{asyl_zeit}}"
+        },
+        {
+          "titel": "9. Festhalten",
+          "text": "| Festgehalten | {{festgehalten}}\n| Beginn | {{festhalten_beginn}}\n| Ort | {{unterbringung}}\n| Richterliche Entscheidung spätestens | {{frist_richter}}"
+        },
+        {
+          "titel": "10. Ergebnis und Weiterleitung",
+          "text": "| Weiterleitung | {{weiterleitung}}\n| Übergeben an | {{uebergabe_an}}\n| Zeitpunkt | {{uebergabe_zeit}}\n| Screening endet spätestens | {{frist_screening}}\n| Sichergestellte Gegenstände | {{sichergestellt}}\n| Bemerkungen | {{bemerkungen}}\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
+        }
+      ]
+    },
+    {
+      "id": "belehrung",
+      "titel": "Belehrung",
+      "untertitel": "Deutsch / English – zum Aushändigen",
+      "icon": "text.bubble.fill",
+      "beschreibung": "Information der Person über das Screening, zweisprachig mit Unterschriftsfeldern.",
+      "pflichtfelder": [
+        "name",
+        "vorname",
+        "aufgriff_zeit",
+        "sprachen"
+      ],
+      "abschnitte": [
+        {
+          "titel": "Information über die Überprüfung (Screening)",
+          "text": "| Name | {{name}}, {{vorname}}\n| Datum / Uhrzeit | {{aufgriff_zeit}}\n| Sprachmittlung | {{dolmetscher}}"
+        },
+        {
+          "titel": "Deutsch",
+          "text": "Sie werden nach Art. 7 der Verordnung (EU) 2024/1356 und § 15b Aufenthaltsgesetz überprüft (Screening). Die Überprüfung dauert höchstens drei Tage.\n\nDabei geschieht Folgendes:\n• Ihre Identität wird festgestellt.\n• Es wird eine Sicherheitsüberprüfung in Datenbanken durchgeführt.\n• Ihre Fingerabdrücke und ein Gesichtsbild werden aufgenommen und in Eurodac gespeichert.\n• Eine Gesundheitsbehörde führt eine vorläufige Gesundheitskontrolle durch.\n• Es wird geprüft, ob Sie besonderen Schutz benötigen.\n\nSie sind verpflichtet, mitzuwirken und wahrheitsgemäße Angaben zu machen.\n\nSie können **jederzeit internationalen Schutz (Asyl) beantragen**. Wenn Sie festgehalten werden, entscheidet ein Gericht spätestens bis zum Ende des folgenden Tages. Sie haben das Recht, einen Rechtsbeistand und auf Wunsch Ihr Konsulat zu benachrichtigen."
+        },
+        {
+          "titel": "English",
+          "text": "You are being screened under Article 7 of Regulation (EU) 2024/1356 and Section 15b of the German Residence Act. The screening lasts no longer than three days.\n\nThe screening includes:\n• identification of your person,\n• a security check in databases,\n• taking your fingerprints and a facial image and storing them in Eurodac,\n• a preliminary health check carried out by a health authority,\n• a check whether you have special needs.\n\nYou are obliged to cooperate and to provide truthful information.\n\nYou may **apply for international protection (asylum) at any time**. If you are held, a court will decide by the end of the following day at the latest. You have the right to contact a lawyer and, if you wish, your consulate."
+        },
+        {
+          "titel": "Bestätigung / Confirmation",
+          "text": "Die Belehrung wurde mir in einer Sprache erläutert, die ich verstehe. / This information was explained to me in a language I understand.\n\nSprache / Language: {{sprachen}}\n\n\n______________________________          ______________________________\nUnterschrift / Signature                           Sprachmittler:in / Interpreter\n\n\n______________________________\nBelehrende:r Beamt:in ({{sachbearbeiter}}), {{heute}}\n\nUnterschrift verweigert: ☐"
+        }
+      ]
+    },
+    {
+      "id": "festhalten",
+      "titel": "Festhalten & Antrag an das Gericht",
+      "untertitel": "§ 15b AufenthG, Art. 104 GG",
+      "icon": "building.columns.fill",
+      "beschreibung": "Vermerk über das Festhalten und Antrag auf richterliche Entscheidung.",
+      "bedingung": {
+        "feld": "festgehalten",
+        "wert": "Ja"
+      },
+      "pflichtfelder": [
+        "vorgang",
+        "dienststelle",
+        "sachbearbeiter",
+        "name",
+        "vorname",
+        "geburtsdatum",
+        "staatsangehoerigkeit",
+        "aufgriff_zeit",
+        "festhalten_beginn",
+        "festhalten_grund",
+        "milderes_mittel",
+        "unterbringung",
+        "gericht"
+      ],
+      "abschnitte": [
+        {
+          "titel": "",
+          "text": "An das {{gericht}}\n– Bereitschaftsdienst –\n\n| Vorgangsnummer | {{vorgang}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})"
+        },
+        {
+          "titel": "Antrag auf Anordnung der Fortdauer des Festhaltens zur Durchführung der Überprüfung",
+          "text": "Es wird beantragt, die Fortdauer des Festhaltens der nachstehend bezeichneten Person zur Durchführung der Überprüfung nach Art. 7 VO (EU) 2024/1356 i. V. m. § 15b AufenthG anzuordnen.\n\n| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}"
+        },
+        {
+          "titel": "Sachverhalt",
+          "text": "Die Person wurde am {{aufgriff_zeit}} in {{aufgriff_ort}} angetroffen (Anlass: {{anlass}}). Ein Aufenthaltsnachweis lag nicht vor. Hinweise auf eine Kontrolle an einer Außengrenze oder eine bereits erfolgte Überprüfung ergaben sich nicht.\n\n| Abfrage INPOL | {{abfrage_inpol}}\n| Abfrage AZR | {{abfrage_azr}}\n| Abfrage SIS | {{abfrage_sis}}\n| Eurodac / Fast-ID | {{abfrage_eurodac}}\n| Erkenntnisse | {{treffer_details}}"
+        },
+        {
+          "titel": "Begründung",
+          "text": "Die Überprüfung kann ohne Festhalten nicht oder nur unter erheblichen Schwierigkeiten durchgeführt werden:\n\n{{festhalten_grund}}\n\n**Mildere Mittel:** {{milderes_mittel}}\n\n| Beginn des Festhaltens | {{festhalten_beginn}}\n| Ort des Festhaltens | {{unterbringung}}\n| Richterliche Entscheidung spätestens | {{frist_richter}}\n| Höchstdauer der Überprüfung bis | {{frist_screening}}\n| Schutzersuchen | {{asyl}}\n| Hinweise Schutzbedürftigkeit | {{vulnerabilitaet}}\n| Benachrichtigungen | {{benachrichtigung}}\n| Sprachmittlung | {{dolmetscher}}\n\nWird die Fortdauer nicht bis zum Ende des Tages nach dem Ergreifen richterlich angeordnet, wird die Person freigelassen.\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
+        }
+      ]
+    },
+    {
+      "id": "asyl",
+      "titel": "Vermerk Schutzersuchen",
+      "untertitel": "Weiterleitung an Aufnahmeeinrichtung / BAMF",
+      "icon": "hand.raised.fill",
+      "beschreibung": "Wörtliche Dokumentation des Asylgesuchs.",
+      "bedingung": {
+        "feld": "asyl",
+        "wert": "Ja"
+      },
+      "pflichtfelder": [
+        "vorgang",
+        "name",
+        "vorname",
+        "geburtsdatum",
+        "staatsangehoerigkeit",
+        "asyl_wortlaut",
+        "asyl_zeit"
+      ],
+      "abschnitte": [
+        {
+          "titel": "",
+          "text": "| Vorgangsnummer | {{vorgang}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})"
+        },
+        {
+          "titel": "Vermerk über ein Schutzersuchen",
+          "text": "| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}\n| Sprachen | {{sprachen}}\n| Sprachmittlung | {{dolmetscher}}"
+        },
+        {
+          "titel": "Äußerung",
+          "text": "Am {{asyl_zeit}} äußerte die Person im Rahmen der Überprüfung wörtlich:\n\n„{{asyl_wortlaut}}“\n\nDie Äußerung wird als Antrag auf internationalen Schutz (Stellen des Antrags) behandelt. Die Person wurde über das weitere Verfahren informiert. Das Screening wird fortgesetzt; die Weiterleitung an die zuständige Aufnahmeeinrichtung bzw. das BAMF wird veranlasst.\n\n| Hinweise Schutzbedürftigkeit | {{vulnerabilitaet}}\n| ED-Behandlung | {{ed}}\n| Eurodac | {{eurodac}}\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
+        }
+      ]
+    },
+    {
+      "id": "gesundheit",
+      "titel": "Mitteilung Gesundheitsbehörde",
+      "untertitel": "Vorläufige Gesundheitskontrolle",
+      "icon": "cross.case.fill",
+      "beschreibung": "Veranlassung der vorläufigen Gesundheitskontrolle.",
+      "pflichtfelder": [
+        "vorgang",
+        "dienststelle",
+        "sachbearbeiter",
+        "gesundheitsbehoerde",
+        "gesundheit_zeit",
+        "name",
+        "vorname",
+        "geburtsdatum"
+      ],
+      "abschnitte": [
+        {
+          "titel": "",
+          "text": "An: {{gesundheitsbehoerde}}\n\n| Vorgangsnummer | {{vorgang}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})"
+        },
+        {
+          "titel": "Ersuchen um vorläufige Gesundheitskontrolle im Rahmen des Screenings",
+          "text": "Im Rahmen einer Überprüfung nach Art. 7 VO (EU) 2024/1356 wird um die vorläufige Gesundheitskontrolle folgender Person gebeten:\n\n| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}\n| Sprachen | {{sprachen}}\n| Aufenthaltsort | {{unterbringung}}\n| Informiert am | {{gesundheit_zeit}}"
+        },
+        {
+          "titel": "Beobachtungen der Polizei (keine Diagnose)",
+          "text": "{{beschwerden}}\n\n| Hinweise Schutzbedürftigkeit | {{vulnerabilitaet}}\n| Beobachtungen | {{vulnerabilitaet_details}}\n| Screening endet spätestens | {{frist_screening}}\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
+        }
+      ]
+    },
+    {
+      "id": "vulnerabilitaet",
+      "titel": "Vermerk Schutzbedürftigkeit",
+      "untertitel": "Mitteilung Jugendamt / Fachstelle",
+      "icon": "figure.and.child.holdinghands",
+      "beschreibung": "Dokumentation erkennbarer Vulnerabilität für die weiteren Stellen.",
+      "bedingung": {
+        "feld": "vulnerabilitaet",
+        "wert": "!Keine erkennbar"
+      },
+      "pflichtfelder": [
+        "vorgang",
+        "name",
+        "vorname",
+        "geburtsdatum",
+        "vulnerabilitaet",
+        "vulnerabilitaet_details"
+      ],
+      "abschnitte": [
+        {
+          "titel": "",
+          "text": "| Vorgangsnummer | {{vorgang}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})"
+        },
+        {
+          "titel": "Vorläufige Vulnerabilitätsprüfung",
+          "text": "| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}\n| Hinweise | {{vulnerabilitaet}}\n| Jugendamt | {{jugendamt}}"
+        },
+        {
+          "titel": "Beobachtungen",
+          "text": "{{vulnerabilitaet_details}}\n\n**Gesundheit:** {{beschwerden}}\n\nDie Hinweise wurden im Überprüfungsformular vermerkt und werden an die aufnehmende Stelle weitergegeben. Bei Minderjährigen erfolgt die Überprüfung kindgerecht und in Anwesenheit eines Vertreters.\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
+        }
+      ]
+    },
+    {
+      "id": "abschluss",
+      "titel": "Abschluss- und Übergabevermerk",
+      "untertitel": "Ende des Screenings",
+      "icon": "checkmark.seal.fill",
+      "beschreibung": "Ergebnis, Weiterleitung, Übergabe und sichergestellte Gegenstände.",
+      "pflichtfelder": [
+        "vorgang",
+        "name",
+        "vorname",
+        "weiterleitung",
+        "uebergabe_an",
+        "uebergabe_zeit"
+      ],
+      "abschnitte": [
+        {
+          "titel": "",
+          "text": "| Vorgangsnummer | {{vorgang}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})"
+        },
+        {
+          "titel": "Abschluss der Überprüfung",
+          "text": "| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}\n| Beginn (Aufgriff) | {{aufgriff_zeit}}\n| Ende / Übergabe | {{uebergabe_zeit}}\n| Höchstdauer bis | {{frist_screening}}"
+        },
+        {
+          "titel": "Ergebnis",
+          "text": "| Weiterleitung | {{weiterleitung}}\n| Übergeben an | {{uebergabe_an}}\n| Schutzersuchen | {{asyl}}\n| Eurodac | {{eurodac}}\n| Gesundheitskontrolle veranlasst bei | {{gesundheitsbehoerde}}\n| Schutzbedürftigkeit | {{vulnerabilitaet}}\n| Sichergestellte / übergebene Gegenstände | {{sichergestellt}}\n| Bemerkungen | {{bemerkungen}}\n\nÜbernommen:\n\n\n______________________________\n{{uebergabe_an}}\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
+        }
+      ]
+    },
+    {
+      "id": "fristen",
+      "titel": "Fristenblatt",
+      "untertitel": "Alle Fristen auf einen Blick",
+      "icon": "clock.fill",
+      "beschreibung": "Automatisch berechnete Fristen ab Aufgriff.",
+      "pflichtfelder": [
+        "aufgriff_zeit"
+      ],
+      "abschnitte": [
+        {
+          "titel": "",
+          "text": "| Vorgangsnummer | {{vorgang}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})\n| Person | {{name}}, {{vorname}}"
+        },
+        {
+          "titel": "Fristen",
+          "text": "| Aufgriff | {{aufgriff_zeit}}\n| Festhalten seit | {{festhalten_beginn}}\n| Richterliche Entscheidung spätestens | {{frist_richter}}\n| Screening abgeschlossen spätestens | {{frist_screening}}\n\n**Ohne richterliche Entscheidung bis zum Ende des Tages nach dem Ergreifen ist die Person freizulassen.**\n\nHilfsrechnung ohne Gewähr – im Zweifel gilt die frühere Frist."
+        }
+      ]
+    }
+  ]
 }
