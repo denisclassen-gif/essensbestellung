@@ -43,7 +43,7 @@ geas-app/
 ├── content/content.json   ← alle Inhalte (eine Quelle für iOS und Web)
 ├── ios/                   ← native iOS-App (SwiftUI, ab iOS 16)
 ├── web/                   ← Web-App/PWA (läuft auf jedem iPhone über Safari)
-└── tools/                 ← build_web.py, Icon
+└── tools/                 ← build_web.py, lds_paket.py, vendor/ (Bibliotheken), Icon
 ```
 
 **Screening-Entscheidungsbaum ändern:** in `content.json` unter `screening.knoten`. Jede Frage verweist
@@ -51,6 +51,45 @@ mit `antworten[].ziel` auf die nächste Frage oder ein Ergebnis (`typ: "ergebnis
 
 **Inhalte ändern:** nur `content/content.json` bearbeiten, danach `python3 tools/build_web.py`
 ausführen (erzeugt `web/index.html`). Die iOS-App liest `content.json` direkt.
+
+## Interne Ausgabe (HTML-Datei für den Dienstgebrauch) – Arbeitsstand und Weiterarbeit
+
+Die interne Ausgabe ist **eine einzige HTML-Datei** (`web/intern/GEAS-Hilfe-intern.html`, ca. 30 MB), die offline in
+Edge/Chrome läuft. Sie enthält zusätzlich zur öffentlichen Web-App dienstinterne Inhalte, die **nicht** in dieses
+Repository gehören und per `.gitignore` ausgeschlossen sind:
+
+```
+geas-app/content/
+├── intern.json            ← interne Inhalte: geführter Einsatz, Ablauf/Checkliste, Kontakte, Formular-Regeln,
+│                            Dokumentauswahl, umA-Hinweise, SIDAS-PDF, Copyright
+└── intern/                ← Logo (logo_pdl.png, stern.png)
+    ├── vorlagen/          ← deutsche Original-Vorlagen (LDS-Paket) + beilagen/ (EUAA-Merkblätter)
+    └── sprachen/          ← Sprachfassungen (erzeugt mit tools/lds_paket.py)
+```
+
+**Weiterarbeiten in einer neuen Sitzung**
+
+1. Die gesicherte Datei `GEAS-intern-Arbeitsstand.zip` hochladen und im Ordner `geas-app/` entpacken
+   (sie enthält `content/intern.json` und `content/intern/`).
+2. Bauen: `python3 tools/build_web.py --intern` → `web/intern/GEAS-Hilfe-intern.html`.
+3. Neues LDS-Paket (ZIPs „mit Asylgesuch“, „ohne Asylgesuch“, „umA“) entpacken und
+   `python3 tools/lds_paket.py <Ordner>` ausführen – schneidet eingebettete Bildschirmfotos auf den sichtbaren
+   Ausschnitt zu und legt Sprachfassungen und Merkblätter unter `content/intern/` ab.
+
+**Was die HTML-Datei kann (Stand 2.9)**
+
+- Startseite „Einsatz starten“: geführter Einsatz in 13 Schritten (vor der Prüfung → Screening ja/nein →
+  Durchführung → Unterlagen → Abschluss), direkter Weg zum Dokumenten-Assistenten für Geübte.
+- Füllt die Original-Word-Vorlagen im Browser aus (Screeningformular ohne Abschnitt 3, Abschnitt 6 nur 6.1–6.3),
+  wählt die Fassung nach Fall (mit/ohne Asylgesuch, umA) und erzeugt Sprachfassungen (35 Sprachen).
+- Ein Download: ZIP mit allen Word-Dateien, EUAA-Merkblättern und der SIDAS-PDF
+  `AZR-Nr._Name_Vorname_Geburtsdatum.pdf`.
+- Design nach Markenhandbuch (Polizeiblau, Welle, Logo), Reiter „Kontakte“, Desktop-Ansicht mit Seitenleiste.
+- Offene Punkte: Liste der Dokumente für die SIDAS-PDF gegen Anlage 5 der Handlungsanleitung prüfen;
+  begleitete Minderjährige (Tabelle in der Anlaufbescheinigung); Vordrucke für Festhalten § 15b AufenthG.
+
+**Bibliotheken** (nur in der internen Ausgabe eingebettet, `tools/vendor/`): JSZip (MIT), docx-preview (Apache 2.0),
+html2canvas (MIT) – Lizenztexte liegen daneben.
 
 ## Variante 1: Web-App (sofort nutzbar, kein App Store nötig)
 

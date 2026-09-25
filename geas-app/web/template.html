@@ -309,6 +309,10 @@
   .dok.neu { margin-top: 36px; padding-top: 24px; border-top: 1px dashed #c7c7cc; }
   #druck { display: none; }
   @media print {
+    #druck.docxdruck .docx-wrapper { background: none !important; padding: 0 !important; }
+    #druck.docxdruck section.docx { box-shadow: none !important; margin: 0 !important; page-break-after: always; }
+  }
+  @media print {
     body { background: #fff; padding: 0; }
     body > *:not(#druck) { display: none !important; }
     #druck { display: block; color: #000; font: 10.5pt -apple-system, Helvetica, Arial, sans-serif; }
@@ -398,6 +402,86 @@
   .sheet label.f { display: block; font-size: 13px; color: var(--muted); margin: 12px 4px 4px; }
   .sheet input[type=text], .sheet input[type=tel] { width: 100%; padding: 13px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--glass); color: var(--text); font: inherit; }
   a { color: var(--green); }
+  /* ===== Erscheinungsbild Polizei Sachsen (nur interne Ausgabe, Klasse wird per Inhalt gesetzt) =====
+     Polizeiblau #002664, Hellblau #0082c4, Sachsengrün #008444, Schrift Arial, „Welle“ als Gestaltungselement */
+  html.polizei {
+    color-scheme: light;
+    --bg: #f3f4f6; --text: #1a1a1a; --muted: #5b6270; --faint: #8b919b; --line: rgba(0, 38, 100, .12);
+    --glass: #ffffff; --glass-strong: rgba(255, 255, 255, .96); --glass-edge: rgba(0, 38, 100, .10);
+    --shadow: 0 2px 10px rgba(0, 38, 100, .08);
+    --green: #002664; --deep: #002664; --mint: #0082c4; --ok: #008444; --coral: #c8102e; --amber: #ffdc00;
+  }
+  html.polizei body, html.polizei .rounded, html.polizei input, html.polizei textarea, html.polizei select { font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; }
+  html.polizei .bg { display: none; }
+  html.polizei .glass { backdrop-filter: none; -webkit-backdrop-filter: none; border-radius: 12px; }
+  html.polizei .rowtile, html.polizei .step, html.polizei .note, html.polizei .box { border-radius: 12px; }
+  html.polizei .btn { border-radius: 10px; background: #002664; box-shadow: none; }
+  html.polizei .btn.glassy { background: #fff; color: #002664; border: 1.5px solid #002664; }
+  html.polizei .field input, html.polizei .field textarea { border-radius: 10px; background: #fff; }
+  html.polizei .chip { border-radius: 10px; background: #fff; }
+  html.polizei .chip.on, html.polizei .stepper button.cur, html.polizei .on .cbox, html.polizei .step.on .dot { background: #002664; box-shadow: none; }
+  html.polizei .casehead .btn { background: #fff; color: #002664; box-shadow: none; }
+  html.polizei .casehead { border-radius: 14px; background: #002664; box-shadow: 0 8px 20px rgba(0, 38, 100, .25); }
+  html.polizei .sheet .emb { background: #fff; border: 1px solid var(--line); box-shadow: none; border-radius: 18px; }
+  html.polizei nav.tabs { border-radius: 14px; background: #fff; box-shadow: 0 6px 24px rgba(0, 38, 100, .18); }
+  html.polizei nav.tabs .pill { background: rgba(0, 38, 100, .10); border-radius: 10px; }
+  html.polizei .bar > div { background: linear-gradient(90deg, #0082c4, #002664); }
+  html.polizei .chipnum, html.polizei .normchip { background: rgba(0, 38, 100, .10); }
+  html.polizei .merke { border-radius: 12px; background: rgba(255, 220, 0, .16); border-color: rgba(200, 160, 0, .45); }
+  html.polizei .merke b.h { color: #7a5c00; }
+  html.polizei .result { border-radius: 14px; }
+  /* Kopf mit Logo und Welle */
+  html.polizei .hero { background: #002664; padding-top: calc(env(safe-area-inset-top) + 150px); min-height: 360px; }
+  html.polizei .hero .deco1, html.polizei .hero .deco2 { display: none; }
+  html.polizei .hero .kopf { position: absolute; left: 0; right: 0; top: 0; height: calc(env(safe-area-inset-top) + 128px); }
+  html.polizei .hero .kopf svg { position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; }
+  html.polizei .hero .kopf img { position: absolute; right: 24px; top: calc(env(safe-area-inset-top) + 16px); height: 46px; max-width: calc(100% - 40px); object-fit: contain; }
+  html.polizei .hero .unten { position: absolute; left: 0; right: 0; bottom: 0; height: 26px; }
+  html.polizei .hero h2 { font-weight: 700; letter-spacing: 0; }
+  html.polizei .stern { display: block; object-fit: contain; }
+  html.polizei header.top.solid { background: #fff; }
+  html.polizei a { color: #0082c4; }
+  html.polizei a.ico, html.polizei a.btn { color: #fff; }
+  html.polizei a.btn.glassy { color: #002664; }
+  /* ===== Desktop: Seitenleiste links, breiterer Inhalt – skaliert automatisch mit der Fensterbreite ===== */
+  .navmarke { display: none; }
+  @media (min-width: 1000px) {
+    :root { --nav-w: 250px; --tabbar-h: 0px; }
+    body { padding-left: var(--nav-w); padding-bottom: 40px; }
+    nav.tabs {
+      left: 0; top: 0; bottom: 0; transform: none; width: var(--nav-w); height: auto;
+      flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 4px;
+      padding: 20px 14px; border-radius: 0; border-width: 0 1px 0 0; box-shadow: none;
+    }
+    html.polizei nav.tabs { border-radius: 0; box-shadow: 1px 0 0 var(--line); }
+    html.polizei .hero .kopf img { display: none; }   /* Logo steht in der Seitenleiste */
+    nav.tabs .navmarke { display: block; padding: 6px 8px 22px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+    nav.tabs .navmarke img { width: 100%; height: auto; display: block; }
+    nav.tabs .navmarke b { display: block; font-size: 17px; margin-top: 12px; color: var(--green); }
+    nav.tabs .navmarke span { display: block; font-size: 12px; color: var(--muted); }
+    nav.tabs button { flex: none; flex-direction: row; justify-content: flex-start; gap: 12px; font-size: 16px; padding: 12px 14px; border-radius: 10px; }
+    nav.tabs button svg { width: 22px; height: 22px; }
+    nav.tabs .pill { left: 14px; right: 14px; bottom: auto; transition: top .45s var(--spring), height .45s var(--spring); border-radius: 10px; }
+    header.top { left: var(--nav-w); }
+    main { max-width: 1100px; }
+    .pad { padding-left: 40px; padding-right: 40px; }
+    .content { padding: 0 40px; }
+    .hero { padding-left: 44px; padding-right: 44px; min-height: 320px; }
+    .overlap { margin-top: -40px; }
+    .grid2 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .kontaktgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+    .fristen2 { grid-template-columns: repeat(2, minmax(0, 320px)); }
+    .bottombar { bottom: 20px; }
+    .bottombar.fest { left: calc(var(--nav-w) + (100vw - var(--nav-w)) / 2); bottom: 20px; width: min(calc(100vw - var(--nav-w) - 80px), 1020px); }
+    .modal { padding-left: var(--nav-w); place-items: center; }
+    .sheet { border-radius: 24px; max-height: 90vh; }
+    .qbig { font-size: 30px; }
+  }
+  @media (min-width: 1500px) {
+    main { max-width: 1280px; }
+    .grid2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .kontaktgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
 </style>
 </head>
 <body>
@@ -410,9 +494,16 @@
 <script>
 "use strict";
 const C = JSON.parse(document.getElementById("content").textContent);
+const POL = C.meta.theme === "polizei";
+if (C.meta.copyright) { const m = document.createElement("meta"); m.name = "author"; m.content = C.meta.copyright; document.head.appendChild(m); }
+if (POL) {
+  document.documentElement.classList.add("polizei");
+  document.querySelector('meta[name="theme-color"]').content = "#002664";
+  document.title = C.meta.titel || document.title;
+}
 
 // ================= Speicher =================
-const KEY = "geas.progress.v1";
+const KEY = C.intern ? "geas.intern.progress.v1" : "geas.progress.v1";
 const S = (() => {
   let s = {};
   try { s = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
@@ -422,7 +513,7 @@ const S = (() => {
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
 // Fall: nur auf diesem Gerät, automatische Löschung nach 7 Tagen
-const FKEY = "geas.fall.v1", AUFBEWAHRUNG = 7 * 864e5;
+const FKEY = C.intern ? "geas.intern.fall.v1" : "geas.fall.v1", AUFBEWAHRUNG = 7 * 864e5;
 let F = (() => {
   try {
     const f = JSON.parse(localStorage.getItem(FKEY) || "null");
@@ -458,7 +549,9 @@ const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 const vibrate = () => { try { navigator.vibrate && navigator.vibrate(8); } catch (e) {} };
 
 // Farben der Kacheln
-const PAL = [["#0b8c78", "#006b5c"], ["#6d6ae0", "#4744b8"], ["#ff7a5c", "#e8504a"], ["#f7a524", "#e08600"], ["#3a8ff0", "#1f66cf"], ["#a45de0", "#7c3bbf"], ["#ec5a92", "#c93a72"], ["#34aacc", "#1b84a6"]];
+const PAL = POL
+  ? [["#0082c4", "#002664"], ["#008444", "#006751"], ["#26387d", "#002664"], ["#e75113", "#b83d0c"], ["#509c8b", "#006751"], ["#981e32", "#672146"], ["#6d1f80", "#3e2c7e"], ["#747678", "#4a4c4e"]]
+  : [["#0b8c78", "#006b5c"], ["#6d6ae0", "#4744b8"], ["#ff7a5c", "#e8504a"], ["#f7a524", "#e08600"], ["#3a8ff0", "#1f66cf"], ["#a45de0", "#7c3bbf"], ["#ec5a92", "#c93a72"], ["#34aacc", "#1b84a6"]];
 const pal = i => PAL[Math.abs(i) % PAL.length];
 const farbVars = i => { const [a, b] = pal(i); return `--c1:${a};--c2:${b};--c-shadow:${a}55`; };
 
@@ -532,6 +625,7 @@ const SF = {
 const icon = n => svg(SF[n] || n);
 const ico = (n, i, cls = "") => `<span class="ico ${cls}" style="background:linear-gradient(135deg,${pal(i)[0]},${pal(i)[1]});--c-shadow:${pal(i)[0]}55">${icon(n)}</span>`;
 const EMBLEM = (w = 62, star = "#ffbd47") => {
+  if (POL && C.stern) return `<img class="stern" src="${C.stern}" alt="Polizeistern" style="width:${w}px;height:${w}px">`;
   let stars = "";
   for (let i = 0; i < 12; i++) { const a = (i * 30 - 90) * Math.PI / 180; stars += `<circle cx="${(50 + 23.5 * Math.cos(a)).toFixed(2)}" cy="${(52 + 23.5 * Math.sin(a)).toFixed(2)}" r="3.2" fill="${star}"/>`; }
   return `<svg class="emblem" style="width:${w}px;height:${w * 1.12}px" viewBox="0 0 100 112" aria-hidden="true">
@@ -555,7 +649,9 @@ const topEl = document.getElementById("top");
 const titleEl = document.getElementById("title");
 const backBtn = document.getElementById("back");
 backBtn.innerHTML = svg("chevl", 2.4) + "Zurück";
-const TABS = [["start", "Start", "home"], ["fall", "Unterlagen", "docs"], ["wissen", "Wissen", "books"], ["lernen", "Lernen", "grad"], ["mehr", "Mehr", "dots"]];
+const TABS = C.intern
+  ? [["start", "Start", "home"], ["fall", "Unterlagen", "docs"], ["kontakte", "Kontakte", "phone"], ["wissen", "Wissen", "books"], ["lernen", "Lernen", "grad"], ["mehr", "Mehr", "dots"]]
+  : [["start", "Start", "home"], ["fall", "Unterlagen", "docs"], ["wissen", "Wissen", "books"], ["lernen", "Lernen", "grad"], ["mehr", "Mehr", "dots"]];
 let stack = [];
 let tab = "start";
 let heroView = false;
@@ -605,8 +701,8 @@ function onScroll() {
     const h = hero.offsetHeight;
     inner.style.transform = `translateY(${y * 0.35}px)`;
     inner.style.opacity = Math.max(0, 1 - y / (h * 0.7));
-    d1.style.transform = `translateY(${y * 0.2}px)`;
-    d2.style.transform = `translateY(${y * -0.12}px)`;
+    if (d1) d1.style.transform = `translateY(${y * 0.2}px)`;
+    if (d2) d2.style.transform = `translateY(${y * -0.12}px)`;
     topEl.classList.toggle("solid", y > h - 90);
   } else {
     topEl.classList.toggle("solid", y > 4);
@@ -627,7 +723,7 @@ function beobachten() {
 // Reiterleiste mit gleitender Markierung
 function renderTabs() {
   const nav = document.getElementById("tabs");
-  nav.innerHTML = `<span class="pill" id="pill"></span>` + TABS.map(([id, label, ic]) =>
+  nav.innerHTML = `<div class="navmarke">${C.logo ? `<img src="${C.logo}" alt="Polizeidirektion Leipzig · Polizei Sachsen">` : EMBLEM(44)}<b>${esc(C.meta.titel)}</b><span>${esc(C.meta.untertitel || "Screening · Asyl · Rückführung")}</span>${C.meta.copyright ? `<span style="margin-top:8px;font-size:11px">${esc(C.meta.copyright.split("·")[0].trim())}</span>` : ""}</div><span class="pill" id="pill"></span>` + TABS.map(([id, label, ic]) =>
     `<button data-t="${id}" aria-label="${label}">${svg(ic)}${label}</button>`).join("");
   nav.querySelectorAll("button").forEach(b => b.onclick = () => { vibrate(); if (tab === b.dataset.t && stack.length === 1) { window.scrollTo({ top: 0, behavior: "smooth" }); return; } tab = b.dataset.t; go(ROOT[tab], false); });
 }
@@ -636,12 +732,20 @@ function markTab() {
   let aktiv = null;
   nav.querySelectorAll("button").forEach(b => { const on = b.dataset.t === tab; b.classList.toggle("on", on); if (on) aktiv = b; });
   const pill = document.getElementById("pill");
-  if (aktiv && pill) { pill.style.left = aktiv.offsetLeft + "px"; pill.style.width = aktiv.offsetWidth + "px"; }
+  if (!aktiv || !pill) return;
+  if (matchMedia("(min-width: 1000px)").matches) { pill.style.left = pill.style.width = ""; pill.style.top = aktiv.offsetTop + "px"; pill.style.height = aktiv.offsetHeight + "px"; }
+  else { pill.style.top = pill.style.height = ""; pill.style.left = aktiv.offsetLeft + "px"; pill.style.width = aktiv.offsetWidth + "px"; }
 }
 addEventListener("resize", markTab);
+function zeigeTab(t) { tab = t; go(ROOT[t], false); markTab(); }
 const on = (sel, fn) => app.querySelectorAll(sel).forEach(el => el.addEventListener("click", () => { vibrate(); fn(el); }));
 const $ = id => document.getElementById(id);
-const hero = (cls, inner) => `<section class="hero ${cls}"><span class="deco1"></span><span class="deco2"></span><div class="inner">${inner}</div></section>`;
+// Welle nach Markenhandbuch: weiße Fläche oben (mit Logo), blaue Fläche steigt rechts in einem weichen Bogen an
+const WELLE = `<svg viewBox="0 0 1000 128" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0H1000V58H790C752 58 742 72 726 96C712 116 700 128 660 128H0Z" fill="#fff"/></svg>`;
+const WELLE_UNTEN = `<svg viewBox="0 0 1000 26" preserveAspectRatio="none" aria-hidden="true" style="width:100%;height:100%;display:block"><path d="M0 26V14H700C738 14 748 2 790 2H1000V26Z" fill="var(--bg)"/></svg>`;
+const hero = (cls, inner) => POL
+  ? `<section class="hero"><div class="kopf">${WELLE}${C.logo ? `<img src="${C.logo}" alt="Polizeidirektion Leipzig · Polizei Sachsen">` : ""}</div><div class="inner">${inner}</div><div class="unten">${WELLE_UNTEN}</div></section>`
+  : `<section class="hero ${cls}"><span class="deco1"></span><span class="deco2"></span><div class="inner">${inner}</div></section>`;
 const tile = (id, titel, sub, ic, i, badge = "") => `<button class="tile glass press reveal" id="${id}">
   <span class="top">${ico(ic, i)}${badge ? `<span class="badge" style="background:${pal(i)[0]}22;color:${pal(i)[0]}">${esc(badge)}</span>` : ""}</span>
   <span class="t">${esc(titel)}</span>${sub ? `<span class="s">${esc(sub)}</span>` : ""}</button>`;
@@ -723,7 +827,7 @@ function fallKarte() {
 // ================= Screening-Prüfung =================
 const SP = C.screening;
 function maxTiefe(id) { const k = SP.knoten[id]; return k.typ !== "frage" ? 0 : 1 + Math.max(...k.antworten.map(a => maxTiefe(a.ziel))); }
-function ScreeningWizard() {
+function ScreeningWizard(imEinsatz) {
   let verlauf = [], aktuell = SP.start, erledigt = new Set();
   const tiefe = maxTiefe(SP.start);
   const protokoll = k => {
@@ -758,8 +862,11 @@ function ScreeningWizard() {
       title: "Ergebnis",
       html: `<div class="result" style="${farbVars(farbe)}">${svg(k.ergebnis === "screening" ? "shieldalert" : k.ergebnis === "kein" ? "shieldcheck" : "info", 2)}
           <h2 class="rounded">${esc(k.titel)}</h2><div>${esc(k.kurz)}</div></div>
-        ${k.ergebnis === "screening" ? `<button class="btn" id="wa">${svg("docs")} Unterlagen-Assistent starten</button>` : ""}
-        ${k.schritte && k.schritte.length ? `<h3 class="sec">Das musst du jetzt tun <small>${erledigt.size}/${k.schritte.length}</small></h3>
+        ${imEinsatz ? (k.ergebnis === "screening"
+          ? `<button class="btn" id="wE" style="font-size:19px;padding:20px">${svg("arrowr", 2.4)} Weiter: Screening durchführen</button>`
+          : `<div class="note glass" style="border:2px solid #008444"><span><b>Kein Screening.</b> Arbeite die Punkte unten ab – dann ist der Einsatz für die Screening-Hilfe beendet.</span></div>`)
+          : k.ergebnis === "screening" ? `<button class="btn" id="wa">${svg("docs")} Unterlagen-Assistent starten</button>` : ""}
+        ${k.schritte && k.schritte.length && !(imEinsatz && k.ergebnis === "screening") ? `<h3 class="sec">Das musst du jetzt tun <small>${erledigt.size}/${k.schritte.length}</small></h3>
           ${k.schritte.map((st, i) => `<button class="step glass press ${erledigt.has(i) ? "on" : ""}" data-st="${i}" role="checkbox" aria-checked="${erledigt.has(i)}">
             <span class="dot">${erledigt.has(i) ? svg("check", 3) .replace("<svg", '<svg style="width:16px;height:16px"') : i + 1}</span>
             <span class="txt"><span>${esc(st.text)}</span>${st.hinweis ? `<span class="s">${esc(st.hinweis)}</span>` : ""}</span></button>`).join("")}` : ""}
@@ -787,6 +894,8 @@ function ScreeningWizard() {
         };
         const wl = $("wl"); if (wl) wl.onclick = () => go(() => Checkliste("screening-inland"));
         const wa = $("wa"); if (wa) wa.onclick = () => go(FallUebersicht);
+        const wE = $("wE"); if (wE) wE.onclick = () => { vibrate(); imEinsatz("ja", k.titel); };
+        if (imEinsatz && k.ergebnis !== "screening") imEinsatz("nein", k.titel, true);
         $("wn").onclick = neu;
       }
     };
@@ -820,6 +929,7 @@ const leer = id => !wert(id).trim();
 const offenIn = s => s.felder.filter(f => f.pflicht && sichtbar(f) && leer(f.id));
 const offenDok = d => d.pflichtfelder.map(id => FELDER[id]).filter(f => f && sichtbar(f) && leer(f.id));
 const relevant = d => erfuellt(d.bedingung);
+const istUma = () => wert("uma") === "Ja" || auswahl("vulnerabilitaet").includes("Unbegleitete:r Minderjährige:r");
 const aufgriff = () => { const w = wert("aufgriff_zeit"); return w ? new Date(w) : null; };
 
 function FallUebersicht() {
@@ -854,17 +964,24 @@ function FallUebersicht() {
         <div class="glass reveal"><div class="small"><b>Screening bis</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b></div></div>` : ""}
       <h3 class="sec">Erfassung <small>${fertig}/${sch.length} vollständig</small></h3>
       ${sch.map((s, i) => { const o = offenIn(s).length; return rowtile(`data-s="${i}"`, `${i + 1}. ${s.titel}`, o ? `${o} Pflichtangabe${o === 1 ? "" : "n"} offen` : "Vollständig", o ? s.icon : "check", o ? i + 1 : 0); }).join("")}
-      <h3 class="sec">Unterlagen <small>${docs.length} Dokumente</small></h3>
+      ${C.vorlagen ? `<h3 class="sec">Originalformulare <small>Word</small></h3>
+      <div class="glass reveal" style="padding:16px;margin-bottom:6px"><p style="margin:0 0 4px"><b>Die App füllt alle Original-Formulare für diesen Fall automatisch aus</b> – ein Klick: speichern oder drucken.</p>
+        <p class="small" style="margin:0">Dateiname: <b>${esc(dateiBasis())}.docx</b></p>
+        <button class="btn" id="fo" style="margin-bottom:0">${svg("docs")} Alle Unterlagen erstellen</button></div>
+      ` : `<h3 class="sec">Unterlagen <small>${docs.length} Dokumente</small></h3>
       <div class="grid2">${docs.map((d, i) => { const o = offenDok(d).length; return tile(`d-${d.id}`, d.titel, d.untertitel, d.icon, i + 2, o ? `${o} offen` : "Bereit"); }).join("")}</div>
-      <button class="btn" id="fa2" style="${farbVars(2)}">${svg("print")} Alle Unterlagen drucken / als PDF</button>
+      <button class="btn" id="fa2" style="${farbVars(2)}">${svg("print")} Alle Unterlagen drucken / als PDF</button>`}
       <button class="btn glassy danger" id="fl">${svg("trash")} Fall abschließen und löschen</button>
       <div class="note glass">${svg("lock").replace("<svg", '<svg style="color:var(--green)"')}<span class="small">${esc(C.fall.hinweis)}</span></div>`,
     bind: () => {
       $("fw").onclick = () => { vibrate(); const i = sch.findIndex(s => offenIn(s).length); go(Erfassung(i < 0 ? 0 : i)); };
       on("[data-s]", el => go(Erfassung(+el.dataset.s)));
-      docs.forEach(d => $("d-" + d.id).onclick = () => { vibrate(); go(() => Dokument([d], d.titel)); });
-      $("fa2").onclick = () => { vibrate(); go(() => Dokument(docs, "Alle Unterlagen")); };
-      $("fl").onclick = () => { if (confirm("Fall und alle Daten endgültig löschen? Vorher die Unterlagen in das Vorgangsbearbeitungssystem übernehmen.")) { F = null; fallSpeichern(); neuZeichnen(); } };
+      if (!C.vorlagen) {
+        docs.forEach(d => $("d-" + d.id).onclick = () => { vibrate(); go(() => Dokument([d], d.titel)); });
+        $("fa2").onclick = () => { vibrate(); go(() => Dokument(docs, "Alle Unterlagen")); };
+      }
+      if ($("fo")) $("fo").onclick = () => { vibrate(); go(Originalformulare); };
+      $("fl").onclick = () => { if (confirm("Fall und alle Daten endgültig löschen? Vorher die Unterlagen in das Vorgangsbearbeitungssystem übernehmen.")) { F = null; fallSpeichern(); if (C.vorlagen) { VORLAGEN_ERGEBNIS = []; VORLAGEN_DATEIEN = []; KORREKTUREN = {}; } neuZeichnen(); } };
     }
   };
 }
@@ -886,14 +1003,19 @@ function feldHTML(f) {
       ${v ? `<div style="display:flex;gap:10px;align-items:center"><input type="datetime-local" data-dt="${f.id}" value="${esc(v)}"><button class="chip" data-clr="${f.id}" aria-label="Zeit entfernen">✕</button></div>`
           : `<button class="chip" data-now="${f.id}" style="color:var(--green)">${svg("clock")} Jetzt eintragen</button>`}${hint}</div>`;
   }
+  if (f.typ === "liste") {
+    return `<div class="box glass"><label class="lbl" for="i-${f.id}">${esc(f.label)} ${pf}</label>
+      <select id="i-${f.id}" data-sel="${f.id}" style="width:100%;padding:14px;border-radius:10px;border:1px solid var(--line);background:var(--glass);color:var(--text);font:inherit;font-size:17px">
+        <option value="">– bitte wählen –</option>${f.optionen.map(o => `<option ${v === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>${hint}</div>`;
+  }
   const gew = auswahl(f.id);
   return `<div class="box glass"><div class="lbl">${esc(f.label)} ${pf}${f.typ === "mehrfach" ? '<span class="small">Mehrfachauswahl</span>' : ""}</div>
     <div class="chips">${f.optionen.map(o => `<button class="chip ${gew.includes(o) ? "on" : ""}" data-chip="${f.id}" data-o="${esc(o)}">${gew.includes(o) ? svg("check", 3) : ""}${esc(o)}</button>`).join("")}</div>${hint}</div>`;
 }
 
-function Erfassung(start) {
+function Erfassung(start, nur) {
   let index = start;
-  const sch = C.fall.schritte;
+  const sch = nur ? C.fall.schritte.filter(x => nur.includes(x.id)) : C.fall.schritte;
   const view = () => {
     const s = sch[index], o = offenIn(s).length;
     return {
@@ -908,7 +1030,7 @@ function Erfassung(start) {
         <div class="platz-unten"></div>
         <div class="bottombar fest">
           ${index > 0 ? `<button class="btn glassy" id="ep" style="flex:.6">${svg("chevl", 2.2)} Zurück</button>` : ""}
-          ${index < sch.length - 1 ? `<button class="btn" id="en">Weiter ${svg("chevr", 2.2)}</button>` : `<button class="btn" id="ef" style="${farbVars(2)}">${svg("docs")} Fertig – zu den Unterlagen</button>`}
+          ${index < sch.length - 1 ? `<button class="btn" id="en">Weiter ${svg("chevr", 2.2)}</button>` : nur ? `<button class="btn" id="ez" style="${farbVars(2)}">${svg("check", 2.4)} Fertig – zurück zum Einsatz</button>` : `<button class="btn" id="ef" style="${farbVars(2)}">${svg("docs")} Fertig – zu den Unterlagen</button>`}
         </div>`,
       bind: () => {
         const cur = app.querySelector("#stp .cur"); cur && cur.scrollIntoView({ inline: "center", block: "nearest" });
@@ -916,6 +1038,7 @@ function Erfassung(start) {
         app.querySelectorAll("[data-g]").forEach(b => b.onclick = () => gehe(+b.dataset.g));
         const ep = $("ep"); if (ep) ep.onclick = () => gehe(index - 1);
         const en = $("en"); if (en) en.onclick = () => gehe(index + 1);
+        const ez = $("ez"); if (ez) ez.onclick = () => { vibrate(); zurueck(); };
         const ef = $("ef"); if (ef) ef.onclick = () => { vibrate(); stack.pop(); if (stack[stack.length - 1] !== FallUebersicht) stack.push(FallUebersicht); uebergang("back", anim => render(anim ? "enter-back" : "")); };
         verdrahten();
       }
@@ -926,7 +1049,7 @@ function Erfassung(start) {
       el.textContent = o ? `${o} Pflichtangabe${o === 1 ? "" : "n"} offen` : "Alle Pflichtangaben erfasst";
       el.style.color = o ? "var(--coral)" : "var(--ok)";
       if (struktur) { $("felder").innerHTML = sch[index].felder.filter(sichtbar).map(feldHTML).join(""); verdrahten(); }
-      app.querySelectorAll(".pflicht").forEach(p => { const f = p.closest(".field, .box")?.querySelector("[data-f],[data-dt],[data-chip],[data-now]"); const id = f && (f.dataset.f || f.dataset.dt || f.dataset.chip || f.dataset.now); if (id) p.classList.toggle("ok", !leer(id)); });
+      app.querySelectorAll(".pflicht").forEach(p => { const f = p.closest(".field, .box")?.querySelector("[data-f],[data-dt],[data-chip],[data-now],[data-sel]"); const id = f && (f.dataset.f || f.dataset.dt || f.dataset.chip || f.dataset.now || f.dataset.sel); if (id) p.classList.toggle("ok", !leer(id)); });
       const stp = app.querySelectorAll("#stp button"); sch.forEach((x, i) => { if (i !== index) stp[i].className = offenIn(x).length ? "" : "done"; });
     }
     function verdrahten() {
@@ -935,6 +1058,7 @@ function Erfassung(start) {
         if (el.tagName === "TEXTAREA") { el.style.height = "auto"; el.style.height = Math.max(96, el.scrollHeight) + "px"; }
       });
       app.querySelectorAll("[data-dt]").forEach(el => el.oninput = () => { setze(el.dataset.dt, el.value); aktualisieren(false); });
+      app.querySelectorAll("[data-sel]").forEach(el => el.onchange = () => { vibrate(); setze(el.dataset.sel, el.value); aktualisieren(true); });
       app.querySelectorAll("[data-now]").forEach(el => el.onclick = () => { vibrate(); setze(el.dataset.now, lokalISO(new Date())); aktualisieren(true); });
       app.querySelectorAll("[data-clr]").forEach(el => el.onclick = () => { vibrate(); setze(el.dataset.clr, ""); aktualisieren(true); });
       app.querySelectorAll("[data-chip]").forEach(el => el.onclick = () => {
@@ -1257,17 +1381,26 @@ function Karten() {
 }
 
 // ================= Mehr =================
-function kontakte() { if (!S.kontakte) S.kontakte = C.kontakte.map(k => ({ ...k })); return S.kontakte; }
+function kontakte() {
+  const quelle = JSON.stringify(C.kontakte);
+  if (!S.kontakte || S.kontakteQuelle !== quelle) {
+    S.kontakte = [...C.kontakte.map(k => ({ ...k })), ...(S.kontakte || []).filter(k => k.eigen)];
+    S.kontakteQuelle = quelle; save();
+  }
+  return S.kontakte;
+}
 function Mehr() {
   return {
     title: "Mehr",
     html: `<div style="display:flex;gap:16px;align-items:center;margin:4px 0 8px">
-        <span style="padding:14px;border-radius:22px;background:linear-gradient(135deg,#075c50,#003d35);display:grid">${EMBLEM(46)}</span>
+        <span style="padding:14px;border-radius:22px;background:${POL ? "#fff;border:1px solid var(--line)" : "linear-gradient(135deg,#075c50,#003d35)"};display:grid">${EMBLEM(46)}</span>
         <div><b class="rounded" style="font-size:24px">${esc(C.meta.titel)}</b><div class="small">Version ${esc(C.meta.version)} · Stand ${esc(C.meta.stand)}</div></div></div>
       <h3 class="sec">Einsatz</h3>${rowtile('id="kt"', "Wichtige Erreichbarkeiten", "Eigene Telefonliste der Dienststelle", "phone", 0)}
       <h3 class="sec">Hilfe</h3>${rowtile('id="ob"', "Einführung erneut ansehen", "", "play", 1)}
       <h3 class="sec">Über diese App</h3>
+      ${C.meta.hinweis_intern ? `<section class="prose glass reveal" style="border:1.5px solid var(--coral)"><h4 style="color:var(--coral)">Nur für den Dienstgebrauch</h4><p>${esc(C.meta.hinweis_intern)}</p></section>` : ""}
       <section class="prose glass reveal"><h4>Wichtiger Hinweis</h4><p>${esc(C.meta.hinweis)}</p></section>
+      ${C.meta.copyright ? `<section class="prose glass reveal"><h4>Urheberrecht</h4><p>${esc(C.meta.copyright)}</p></section>` : ""}
       <section class="prose glass reveal"><h4>Quellen & Rechtsstand</h4><ul>${C.quellen.map(q => `<li>${esc(q)}</li>`).join("")}</ul></section>
       <section class="prose glass reveal"><h4>Auf dem iPhone installieren</h4><p>In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Die App funktioniert danach wie eine normale App – auch offline.</p></section>`,
     bind: () => { $("kt").onclick = () => { vibrate(); go(Kontakte); }; $("ob").onclick = () => onboarding(true); }
@@ -1275,15 +1408,18 @@ function Mehr() {
 }
 function Kontakte() {
   const ks = kontakte();
+  const mail = k => ((k.rolle + " " + k.name).match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/) || [])[0];
   return {
-    title: "Erreichbarkeiten",
-    html: `${ks.map((k, i) => {
-        const tel = (k.telefon || "").replace(/[^\d+]/g, "");
-        return `<div class="rowtile glass reveal">${ico("phone", i, "sm")}<span class="txt" data-e="${i}" style="cursor:pointer"><span class="t">${esc(k.name)}</span><br><span class="s">${esc(k.rolle)}</span><br>
-          <span style="font-size:14px;font-variant-numeric:tabular-nums;color:${k.telefon ? "inherit" : "#e08600"}">${k.telefon ? esc(k.telefon) : "Nummer noch nicht hinterlegt – tippen"}</span></span>
-          ${tel ? `<a href="tel:${tel}" class="ico sm" style="background:linear-gradient(135deg,#0b8c78,#006b5c)" aria-label="${esc(k.name)} anrufen">${svg("phone")}</a>` : ""}</div>`;
-      }).join("")}
-      <p class="small">Bitte die dienstlich gültigen Nummern selbst eintragen. Die Daten bleiben ausschließlich auf diesem Gerät.</p>
+    title: C.intern ? "Kontakte" : "Erreichbarkeiten",
+    html: `${C.intern ? `<p style="margin:0 0 14px">Alle wichtigen Nummern und Postfächer für den Einsatz. <b>Antippen = anrufen bzw. E-Mail schreiben.</b></p>` : ""}
+      <div class="kontaktgrid">${ks.map((k, i) => {
+        const tel = (k.telefon || "").replace(/[^\d+]/g, ""), m = mail(k);
+        return `<div class="rowtile glass reveal"><span class="txt" data-e="${i}" style="cursor:pointer"><span class="t">${esc(k.name)}</span><br><span class="s">${esc(k.rolle)}</span><br>
+          <span style="font-size:14px;font-variant-numeric:tabular-nums;color:${k.telefon || m ? "inherit" : "#e08600"}">${k.telefon ? esc(k.telefon) : m ? "" : "Nummer noch nicht hinterlegt – tippen"}</span></span>
+          ${tel ? `<a href="tel:${tel}" class="ico sm" style="background:linear-gradient(135deg,#008444,#006751)" aria-label="${esc(k.name)} anrufen">${svg("phone")}</a>` : ""}
+          ${m ? `<a href="mailto:${esc(m)}" class="ico sm" style="background:linear-gradient(135deg,#0082c4,#002664)" aria-label="E-Mail an ${esc(m)}">${svg("share")}</a>` : ""}</div>`;
+      }).join("")}</div>
+      <p class="small">${C.intern ? "Stand der mitgelieferten Kontakte: " + esc(C.meta.stand) + ". Eigene Einträge bleiben nur auf diesem Rechner." : "Bitte die dienstlich gültigen Nummern selbst eintragen. Die Daten bleiben ausschließlich auf diesem Gerät."}</p>
       <button class="btn glassy" id="add">${svg("plus", 2.4)} Kontakt hinzufügen</button>`,
     bind: () => { app.querySelectorAll("[data-e]").forEach(el => el.onclick = () => editKontakt(+el.dataset.e)); $("add").onclick = () => editKontakt(-1); }
   };
@@ -1308,7 +1444,7 @@ function editKontakt(i) {
   m.querySelector("#ks").onclick = () => {
     const neu = { name: m.querySelector("#kn").value.trim(), rolle: m.querySelector("#kr2").value.trim(), telefon: m.querySelector("#kp").value.trim() };
     if (!neu.name) return;
-    if (i >= 0) ks[i] = neu; else ks.push(neu);
+    if (i >= 0) ks[i] = { ...neu, eigen: ks[i].eigen }; else ks.push({ ...neu, eigen: true });
     save(); close();
   };
   const d = m.querySelector("#kd");
@@ -1347,8 +1483,888 @@ function onboarding(erneut = false) {
   document.body.appendChild(m);
 }
 
+// ================= Word-Originale ausfüllen (nur lokal im Browser) =================
+// Eine .docx-Datei ist ein ZIP-Archiv. Wir lesen es, ändern word/document.xml und schreiben ein neues Archiv.
+// Die Vorlagen werden NICHT in der App gespeichert – sie werden bei jedem Fall neu ausgewählt.
+const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+const W14_NS = "http://schemas.microsoft.com/office/word/2010/wordml";
+const XML_NS = "http://www.w3.org/XML/1998/namespace";
+
+const CRC_TAB = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = u8 => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_TAB[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+const strom = (u8, trafo) => new Response(new Blob([u8]).stream().pipeThrough(trafo)).arrayBuffer().then(b => new Uint8Array(b));
+
+async function zipLesen(buf) {
+  const dv = new DataView(buf);
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 70000); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error("Keine gültige Word-Datei (.docx).");
+  const anzahl = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  const dateien = [];
+  for (let k = 0; k < anzahl; k++) {
+    const methode = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+    const nlen = dv.getUint16(p + 28, true), elen = dv.getUint16(p + 30, true), klen = dv.getUint16(p + 32, true), loff = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(new Uint8Array(buf, p + 46, nlen));
+    const start = loff + 30 + dv.getUint16(loff + 26, true) + dv.getUint16(loff + 28, true);
+    const roh = new Uint8Array(buf, start, csize);
+    const daten = methode === 0 ? roh.slice() : await strom(roh, new DecompressionStream("deflate-raw"));
+    dateien.push({ name, daten });
+    p += 46 + nlen + elen + klen;
+  }
+  return dateien;
+}
+
+async function zipSchreiben(dateien, typ) {
+  const teile = [], zentral = [];
+  const jetzt = new Date();
+  const dosZeit = (jetzt.getHours() << 11) | (jetzt.getMinutes() << 5) | (jetzt.getSeconds() >> 1);
+  const dosDatum = ((jetzt.getFullYear() - 1980) << 9) | ((jetzt.getMonth() + 1) << 5) | jetzt.getDate();
+  let off = 0;
+  for (const d of dateien) {
+    const name = new TextEncoder().encode(d.name);
+    let komp = d.daten, methode = 0;
+    if (typeof CompressionStream !== "undefined") { try { komp = await strom(d.daten, new CompressionStream("deflate-raw")); methode = 8; } catch (e) { komp = d.daten; methode = 0; } }
+    const crc = crc32(d.daten);
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, methode, true);
+    lh.setUint16(10, dosZeit, true); lh.setUint16(12, dosDatum, true); lh.setUint32(14, crc, true); lh.setUint32(18, komp.length, true); lh.setUint32(22, d.daten.length, true); lh.setUint16(26, name.length, true);
+    teile.push(new Uint8Array(lh.buffer), name, komp);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, methode, true);
+    ch.setUint16(12, dosZeit, true); ch.setUint16(14, dosDatum, true); ch.setUint32(16, crc, true); ch.setUint32(20, komp.length, true); ch.setUint32(24, d.daten.length, true); ch.setUint16(28, name.length, true); ch.setUint32(42, off, true);
+    zentral.push(new Uint8Array(ch.buffer), name);
+    off += 30 + name.length + komp.length;
+  }
+  const groesse = zentral.reduce((s, u) => s + u.length, 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, dateien.length, true); e.setUint16(10, dateien.length, true); e.setUint32(12, groesse, true); e.setUint32(16, off, true);
+  return new Blob([...teile, ...zentral, new Uint8Array(e.buffer)], { type: typ });
+}
+
+const wKinder = (el, name, ns = W_NS) => el ? Array.from(el.childNodes).filter(n => n.localName === name && n.namespaceURI === ns) : [];
+const wAttr = (el, name = "val", ns = W_NS) => el ? el.getAttributeNS(ns, name) || "" : "";
+const wText = el => Array.from(el.getElementsByTagNameNS(W_NS, "t")).map(t => t.textContent).join("");
+const norm = s => String(s || "").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]/g, "");
+
+function sdtInfo(sdt) {
+  const pr = wKinder(sdt, "sdtPr")[0];
+  const typ = pr.getElementsByTagNameNS(W14_NS, "checkbox").length ? "checkbox"
+    : (pr.getElementsByTagNameNS(W_NS, "dropDownList").length || pr.getElementsByTagNameNS(W_NS, "comboBox").length) ? "dropdown"
+    : pr.getElementsByTagNameNS(W_NS, "date").length ? "date" : "text";
+  const optionen = typ === "dropdown" ? Array.from(pr.getElementsByTagNameNS(W_NS, "listItem")).map(li => ({ text: wAttr(li, "displayText"), wert: wAttr(li, "value") })).filter(o => o.text && !/^Wählen Sie/.test(o.text)) : [];
+  return { pr, typ, alias: wAttr(wKinder(pr, "alias")[0]), optionen };
+}
+
+function laufText(sdt, text) {
+  const doc = sdt.ownerDocument, pr = wKinder(sdt, "sdtPr")[0], inhalt = wKinder(sdt, "sdtContent")[0];
+  wKinder(pr, "showingPlcHdr").forEach(n => pr.removeChild(n));
+  const erster = inhalt.getElementsByTagNameNS(W_NS, "r")[0];
+  let rPr = erster && wKinder(erster, "rPr")[0];
+  rPr = rPr ? rPr.cloneNode(true) : null;
+  if (rPr) wKinder(rPr, "rStyle").forEach(n => rPr.removeChild(n));
+  let ziel = inhalt;
+  if (!wKinder(inhalt, "r").length) {
+    const ps = Array.from(inhalt.getElementsByTagNameNS(W_NS, "p"));
+    if (ps.length) { ziel = ps[0]; ps.slice(1).forEach(p => p.parentNode.removeChild(p)); }
+  }
+  Array.from(ziel.childNodes).filter(n => n.localName === "r").forEach(n => ziel.removeChild(n));
+  const r = doc.createElementNS(W_NS, "w:r");
+  if (rPr) r.appendChild(rPr);
+  String(text).split("\n").forEach((zeile, i) => {
+    if (i) r.appendChild(doc.createElementNS(W_NS, "w:br"));
+    const t = doc.createElementNS(W_NS, "w:t");
+    t.setAttributeNS(XML_NS, "xml:space", "preserve");
+    t.textContent = zeile;
+    r.appendChild(t);
+  });
+  ziel.appendChild(r);
+}
+
+function hakenSetzen(sdt, an) {
+  const doc = sdt.ownerDocument, pr = wKinder(sdt, "sdtPr")[0];
+  const cb = pr.getElementsByTagNameNS(W14_NS, "checkbox")[0];
+  if (!cb) return false;
+  let checked = cb.getElementsByTagNameNS(W14_NS, "checked")[0];
+  if (!checked) { checked = doc.createElementNS(W14_NS, "w14:checked"); cb.insertBefore(checked, cb.firstChild); }
+  checked.setAttributeNS(W14_NS, "w14:val", an ? "1" : "0");
+  const zustand = cb.getElementsByTagNameNS(W14_NS, an ? "checkedState" : "uncheckedState")[0];
+  const code = zustand ? parseInt(zustand.getAttributeNS(W14_NS, "val"), 16) : (an ? 0x2612 : 0x2610);
+  const t = wKinder(sdt, "sdtContent")[0].getElementsByTagNameNS(W_NS, "t")[0];
+  if (t) t.textContent = String.fromCharCode(code);
+  return true;
+}
+
+function datumTeile(roh) {
+  let m = String(roh || "").match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (m) return { t: m[1].padStart(2, "0"), m: m[2].padStart(2, "0"), j: m[3] };
+  m = String(roh || "").match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return { t: m[3], m: m[2], j: m[1] };
+  return null;
+}
+
+// Passenden Listeneintrag finden: exakt, dann Anfang, dann gemeinsame ersten 4 Buchstaben (Syrien → syrisch)
+function listeTreffer(optionen, wert) {
+  const w = norm(wert);
+  if (!w) return null;
+  const exakt = optionen.find(o => norm(o.text) === w);
+  if (exakt) return exakt;
+  // Mehrdeutig (z. B. „Kurdisch“ → mehrere Dialekte): nicht raten, sondern auswählen lassen
+  const anfang = optionen.filter(o => norm(o.text).startsWith(w));
+  if (anfang.length > 1) return null;
+  return anfang[0]
+    || optionen.find(o => w.startsWith(norm(o.text)))
+    || (w.length >= 4 ? optionen.find(o => norm(o.text).includes(w)) : null)   // Syrien → Arabische Republik Syrien
+    || (w.length >= 4 ? optionen.find(o => norm(o.text).slice(0, 4) === w.slice(0, 4)) : null)
+    || null;
+}
+
+const listeAus = roh => String(roh || "").split(/\s*[,;\n]\s*|\s+und\s+/).map(s => s.trim()).filter(Boolean);
+
+function regelWert(regel) {
+  const roh = regel.wert ? wert(regel.wert).trim() : "";
+  if (regel.art === "liste") return listeAus(roh)[regel.index] || "";
+  if (regel.art === "zeile") {
+    const zeile = roh.split("\n").map(z => z.trim()).filter(Boolean)[regel.index];
+    return zeile ? (zeile.split(/\s*[,;]\s*/)[regel.spalte] || "") : "";
+  }
+  if (regel.abbildung && regel.abbildung[roh]) return regel.abbildung[roh];
+  return roh;
+}
+
+const bedingungErfuellt = w => !w || auswahl(w.feld).some(x => w.enthaelt.includes(x));
+
+// Screening-Formular: Felder über Titel (+ Vorkommen) ansprechen
+function screeningBefuellen(doc, cfg, korrekturen) {
+  const sdts = Array.from(doc.getElementsByTagNameNS(W_NS, "sdt")).map(s => ({ s, ...sdtInfo(s) }));
+  const bericht = { gesetzt: 0, offen: [], listen: {} };
+  for (const regel of cfg.regeln) {
+    const passend = sdts.filter(x => x.alias === regel.alias && (!regel.typ || x.typ === regel.typ));
+    const ziel = passend[regel.n || 0];
+    if (!ziel) continue;
+    if (regel.art === "haken" || regel.art === "haken_immer") {
+      if (regel.art === "haken_immer" || bedingungErfuellt(regel.wenn)) { hakenSetzen(ziel.s, true); bericht.gesetzt++; }
+      continue;
+    }
+    if (regel.wenn && !bedingungErfuellt(regel.wenn)) continue;
+    if (ziel.typ === "dropdown") {
+      bericht.listen[regel.alias] = ziel.optionen;
+      const gesucht = regel.art === "auswahl_fest" ? regel.suche : regelWert(regel);
+      if (!gesucht) continue;
+      const treffer = korrekturen[regel.alias] ? ziel.optionen.find(o => o.text === korrekturen[regel.alias]) : listeTreffer(ziel.optionen, gesucht);
+      if (treffer) {
+        laufText(ziel.s, treffer.text);
+        const dd = ziel.pr.getElementsByTagNameNS(W_NS, "dropDownList")[0] || ziel.pr.getElementsByTagNameNS(W_NS, "comboBox")[0];
+        if (dd) dd.setAttributeNS(W_NS, "w:lastValue", treffer.wert || treffer.text);
+        bericht.gesetzt++;
+      } else bericht.offen.push({ alias: regel.alias, wert: gesucht, optionen: ziel.optionen });
+      continue;
+    }
+    const v = regelWert(regel);
+    if (!v) continue;
+    if (ziel.typ === "date") {
+      const d = datumTeile(v);
+      if (d) {
+        const dt = ziel.pr.getElementsByTagNameNS(W_NS, "date")[0];
+        dt.setAttributeNS(W_NS, "w:fullDate", `${d.j}-${d.m}-${d.t}T00:00:00Z`);
+        laufText(ziel.s, `${d.t}.${d.m}.${d.j}`);
+      } else laufText(ziel.s, v);
+    } else laufText(ziel.s, v);
+    bericht.gesetzt++;
+  }
+  return bericht;
+}
+
+// Andere Vorlagen: Kopfdaten über Tabellenbeschriftungen, Geschlecht über Kästchen, Absätze nach Überschrift
+function zelleSetzen(tc, text, vorlageZelle) {
+  const doc = tc.ownerDocument;
+  const p = tc.getElementsByTagNameNS(W_NS, "p")[0];
+  if (!p || !text) return false;
+  const r = doc.createElementNS(W_NS, "w:r");
+  const muster = vorlageZelle && vorlageZelle.getElementsByTagNameNS(W_NS, "r")[0];
+  const rPr = (muster && wKinder(muster, "rPr")[0]) || wKinder(wKinder(p, "pPr")[0], "rPr")[0];
+  if (rPr) { const k = rPr.cloneNode(true); wKinder(k, "b").forEach(n => k.removeChild(n)); r.appendChild(k); }
+  String(text).split("\n").forEach((zeile, i) => {
+    if (i) r.appendChild(doc.createElementNS(W_NS, "w:br"));
+    const t = doc.createElementNS(W_NS, "w:t"); t.setAttributeNS(XML_NS, "xml:space", "preserve"); t.textContent = zeile; r.appendChild(t);
+  });
+  p.appendChild(r);
+  return true;
+}
+
+function kopfWert(regel) {
+  const teile = regel.wert.map(id => id === "@heute" ? new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : FELDER[id] && FELDER[id].typ === "datumzeit" && wert(id) ? new Date(wert(id)).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : wert(id).trim()).filter(Boolean);
+  return teile.join(regel.trenner || " ");
+}
+
+// Geschlecht ankreuzen: Die Kästchen stehen in allen Vorlagen in der Reihenfolge männlich – weiblich – divers
+function geschlechtAnkreuzen(sdts) {
+  const i = { "männlich": 0, "weiblich": 1, "divers": 2 }[wert("geschlecht")];
+  const kaestchen = sdts.filter(x => x.getElementsByTagNameNS(W14_NS, "checkbox").length);
+  return i !== undefined && kaestchen.length >= 3 && hakenSetzen(kaestchen[i], true);
+}
+
+function kopfdatenBefuellen(doc, cfg, opt = {}) {
+  const bericht = { gesetzt: 0, offen: [], listen: {} };
+  for (const tbl of Array.from(doc.getElementsByTagNameNS(W_NS, "tbl"))) {
+    const zeilen = wKinder(tbl, "tr");
+    zeilen.forEach((tr, zi) => {
+      const zellen = wKinder(tr, "tc");
+      zellen.forEach((tc, ci) => {
+        const beschriftung = wText(tc).replace(/\s+/g, " ").trim();
+        const kurz = beschriftung.split("|")[0].trim();   // zweisprachig: „Name | Surname“
+        const regel = cfg.kopfdaten.find(k => k.label === beschriftung || k.label === kurz);
+        if (!regel) return;   // Kopfdaten stehen oft mehrfach (z. B. Empfangsbestätigung auf Seite 2) – jede Stelle ausfüllen
+        if (regel.lage === "haken") {
+          if (geschlechtAnkreuzen(zellen.slice(ci + 1).flatMap(z => Array.from(z.getElementsByTagNameNS(W_NS, "sdt"))))) bericht.gesetzt++;
+          return;
+        }
+        const v = kopfWert(regel);
+        if (!v) return;
+        let ziel = null;
+        if (regel.lage === "rechts") ziel = zellen.slice(ci + 1).find(z => !wText(z).trim());   // erste freie Zelle (Sprachfassungen haben dazwischen die Übersetzung)
+        if (regel.lage === "oben" && zi > 0) {
+          // Die Zeile direkt über der Beschriftung ist die Schreiblinie
+          const oben = wKinder(zeilen[zi - 1], "tc")[ci];
+          ziel = oben;
+        }
+        if (ziel && !wText(ziel).trim() && zelleSetzen(ziel, v, tc)) bericht.gesetzt++;
+      });
+    });
+  }
+  // Rein fremdsprachige Kopftabelle (z. B. Fragebogen auf Arabisch): Zeilen in fester Reihenfolge
+  const pos = opt.fremd && (cfg.positionen || {})[opt.art];
+  if (pos) {
+    const tbl = doc.getElementsByTagNameNS(W_NS, "tbl")[0];
+    const zeilen = tbl ? wKinder(tbl, "tr") : [];
+    pos.forEach((id, zi) => {
+      const zellen = zeilen[zi] ? wKinder(zeilen[zi], "tc") : [];
+      if (id === "@geschlecht") { if (geschlechtAnkreuzen(Array.from(zeilen[zi] ? zeilen[zi].getElementsByTagNameNS(W_NS, "sdt") : []))) bericht.gesetzt++; return; }
+      const ziel = zellen.slice(1).find(z => !wText(z).trim());
+      const v = kopfWert({ wert: id.split("+"), trenner: ", " });
+      if (ziel && v && zelleSetzen(ziel, v, zellen[0])) bericht.gesetzt++;
+    });
+  }
+  // Ankreuzfelder in einer Tabellenzeile anhand ihres Textes (z. B. „Die Personalien beruhen auf eigenen Angaben“)
+  for (const regel of cfg.haken_zeile || []) {
+    if (!bedingungErfuellt(regel.wenn)) continue;
+    for (const tr of Array.from(doc.getElementsByTagNameNS(W_NS, "tr"))) {
+      if (!wText(tr).replace(/[☐☒]/g, "").trim().startsWith(regel.text)) continue;
+      const s = tr.getElementsByTagNameNS(W_NS, "sdt")[0];
+      if (s && hakenSetzen(s, true)) bericht.gesetzt++;
+    }
+  }
+  // Anrede: Name an den Absatz anhängen („Sehr geehrte/r Herr/Frau …“)
+  for (const regel of cfg.anrede || []) {
+    const v = regel.wert.map(id => wert(id).trim()).filter(Boolean).join(" ");
+    const p = Array.from(doc.getElementsByTagNameNS(W_NS, "p")).find(p => wText(p).trim().startsWith(regel.beginnt));
+    if (!v || !p) continue;
+    const r = doc.createElementNS(W_NS, "w:r");
+    const rPr = Array.from(p.getElementsByTagNameNS(W_NS, "rPr")).pop();
+    if (rPr) r.appendChild(rPr.cloneNode(true));
+    const t = doc.createElementNS(W_NS, "w:t"); t.setAttributeNS(XML_NS, "xml:space", "preserve"); t.textContent = (wText(p).endsWith(" ") ? "" : " ") + v + ",";
+    r.appendChild(t); p.appendChild(r); bericht.gesetzt++;
+  }
+  // Schreiblinien „Name des Minderjährigen: ______“: Unterstriche durch den Wert ersetzen.
+  // Nur die eigenen Textstücke des Absatzes (Textfelder stecken sonst verschachtelt im Anker-Absatz).
+  const eigeneT = p => Array.from(p.getElementsByTagNameNS(W_NS, "t")).filter(t => { let a = t.parentNode; while (a && a.localName !== "p") a = a.parentNode; return a === p; });
+  for (const regel of cfg.unterstriche || []) {
+    const v = regel.wert.map(id => wert(id).trim()).filter(Boolean).join(regel.trenner || " ");
+    if (!v) continue;
+    for (const p of Array.from(doc.getElementsByTagNameNS(W_NS, "p"))) {
+      const ts = eigeneT(p);
+      if (!ts.map(t => t.textContent).join("").trim().startsWith(regel.beginnt)) continue;
+      let ersetzt = false;
+      for (const t of ts) {
+        if (!t.textContent.includes("_")) continue;
+        t.textContent = ersetzt ? t.textContent.replace(/_+/g, "") : t.textContent.replace(/_+/, (m, pos, str) => (str[pos - 1] === " " ? "" : " ") + v).replace(/_+/g, "");
+        t.setAttributeNS(XML_NS, "xml:space", "preserve");
+        ersetzt = true;
+      }
+      if (ersetzt) bericht.gesetzt++;
+    }
+  }
+  // Absätze: Wert in den ersten leeren Absatz nach der Überschrift
+  const absaetze = Array.from(doc.getElementsByTagNameNS(W_NS, "p"));
+  for (const regel of cfg.absaetze || []) {
+    const v = regel.wert.map(id => wert(id).trim()).filter(Boolean).join("\n");
+    if (!v) continue;
+    const i = absaetze.findIndex(p => wText(p).trim().startsWith(regel.nach_text));
+    if (i < 0) continue;
+    const leer = absaetze.slice(i + 1, i + 6).find(p => !wText(p).trim());
+    if (leer) {
+      const r = doc.createElementNS(W_NS, "w:r");
+      v.split("\n").forEach((zeile, k) => { if (k) r.appendChild(doc.createElementNS(W_NS, "w:br")); const t = doc.createElementNS(W_NS, "w:t"); t.setAttributeNS(XML_NS, "xml:space", "preserve"); t.textContent = zeile; r.appendChild(t); });
+      leer.appendChild(r); bericht.gesetzt++;
+    }
+  }
+  return bericht;
+}
+
+// Textfelder (Word-Textboxen, z. B. Namensfeld der Belehrung): Reihenfolge im Dokument, Choice- und Fallback-Variante gemeinsam
+function textfelderBefuellen(doc, regeln, bericht) {
+  const gruppen = [];
+  for (const tb of Array.from(doc.getElementsByTagNameNS(W_NS, "txbxContent"))) {
+    const p = tb.getElementsByTagNameNS(W_NS, "p")[0];
+    const id = p ? p.getAttributeNS(W14_NS, "paraId") : "";
+    let g = gruppen.find(x => id && x.id === id);
+    if (!g) gruppen.push(g = { id, boxen: [] });
+    g.boxen.push(tb);
+  }
+  for (const regel of regeln || []) {
+    const g = gruppen[regel.index];
+    const v = regel.wert.map(id => wert(id).trim()).filter(Boolean).join(regel.trenner || " ");
+    if (!g || !v || g.boxen.some(tb => wText(tb).trim())) continue;
+    g.boxen.forEach(tb => zelleSetzen(tb, v, tb));
+    bericht.gesetzt++;
+  }
+}
+
+function vorlageErkennen(doc) {
+  const aliase = Array.from(doc.getElementsByTagNameNS(W_NS, "alias")).map(a => wAttr(a));
+  // Nur den Kopf des Dokuments auswerten – im Fließtext werden andere Formulare oft erwähnt.
+  // Gewinnt der Titel, der im Kopf am weitesten vorne steht (z. B. „Anlaufbescheinigung“ vor „… Inverwahrungnahme“).
+  const kopf = wText(doc.documentElement).slice(0, 400);
+  let bester = null;
+  for (const e of C.vorlagen.erkennung) {
+    if (e.sdt_alias) { if (aliase.includes(e.sdt_alias)) return e.id; continue; }
+    const pos = kopf.indexOf(e.text);
+    if (pos < 0 || (e.text2 && !kopf.toLowerCase().includes(e.text2))) continue;
+    if (!bester || pos < bester.pos) bester = { id: e.id, pos };
+  }
+  return bester ? bester.id : "unbekannt";
+}
+
+const ART_KURZ = { inverwahrung: "Bescheinigung_Inverwahrung_21AsylG", inverwahrung50: "Bescheinigung_Inverwahrung_50AufenthG", abschluss: "Abschlusserklaerung", abschluss_ohne: "Abschlusserklaerung_ohne_Asylgesuch", abschluss_uma: "Abschlusserklaerung_umA", belehrung48: "Belehrung_48_62_AufenthG", fragebogen: "Fragebogen", fragebogen_uma: "Fragebogen_umA", belehrung15: "Belehrung_15_20_AsylG", info11: "Information_Art11", anlauf: "Anlaufbescheinigung", unbekannt: "Formular" };
+function dateiBasis() {
+  const geb = datumTeile(wert("geburtsdatum"));
+  const teile = { azr_nummer: wert("azr_nummer") || "AZR-offen", name: wert("name") || "Name", vorname: wert("vorname") || "Vorname", geburtsdatum: geb ? `${geb.t}.${geb.m}.${geb.j}` : (wert("geburtsdatum") || "Geburtsdatum") };
+  return (C.vorlagen.dateiname_screening || ["azr_nummer", "name", "vorname", "geburtsdatum"]).map(k => dateiSicher(teile[k] ?? wert(k))).join("_");
+}
+const dateiSicher = s => String(s || "").trim().replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "_");
+
+async function vorlageBefuellen(datei, korrekturen = {}, vorgabe = null) {
+  const dateien = await zipLesen(await datei.arrayBuffer());
+  const eintrag = dateien.find(d => d.name === "word/document.xml");
+  if (!eintrag) throw new Error("In der Datei fehlt word/document.xml – ist es wirklich eine Word-Vorlage?");
+  const xml = new TextDecoder().decode(eintrag.daten);
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  if (doc.getElementsByTagName("parsererror").length) throw new Error("Word-Datei konnte nicht gelesen werden.");
+  const art = vorgabe ? vorgabe.art : vorlageErkennen(doc);
+  const fremd = !!(vorgabe && vorgabe.sprache);
+  const bericht = art === "screening" ? screeningBefuellen(doc, C.vorlagen.screening, korrekturen) : kopfdatenBefuellen(doc, C.vorlagen, { art, fremd });
+  if (art !== "screening") textfelderBefuellen(doc, (C.vorlagen.textfelder || {})[art], bericht);
+  // Kopfdaten stehen bei manchen Vorlagen (z. B. Fragebögen) in der Word-Kopfzeile
+  if (art !== "screening") for (const kz of dateien.filter(d => /^word\/header\d*\.xml$/.test(d.name))) {
+    const hdoc = new DOMParser().parseFromString(new TextDecoder().decode(kz.daten), "application/xml");
+    if (hdoc.getElementsByTagName("parsererror").length) continue;
+    const b = kopfdatenBefuellen(hdoc, { kopfdaten: C.vorlagen.kopfdaten });
+    if (!b.gesetzt) continue;
+    bericht.gesetzt += b.gesetzt;
+    let x = new XMLSerializer().serializeToString(hdoc);
+    if (!x.startsWith("<?xml")) x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n' + x;
+    kz.daten = new TextEncoder().encode(x);
+  }
+  let neu = new XMLSerializer().serializeToString(doc);
+  if (!neu.startsWith("<?xml")) neu = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n' + neu;
+  eintrag.daten = new TextEncoder().encode(neu);
+  const DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  const blob = await zipSchreiben(dateien, DOCX);
+  // Nur für die Bildschirm-Vorschau: Inhaltssteuerelemente „auspacken“ (die Vorschau zeigt sie in Tabellenzellen sonst nicht an).
+  // Die gespeicherte Word-Datei bleibt unverändert.
+  const vdoc = doc.cloneNode(true);
+  for (const sdt of Array.from(vdoc.getElementsByTagNameNS(W_NS, "sdt")).reverse()) {
+    const inhalt = wKinder(sdt, "sdtContent")[0];
+    if (inhalt) while (inhalt.firstChild) sdt.parentNode.insertBefore(inhalt.firstChild, sdt);
+    sdt.parentNode.removeChild(sdt);
+  }
+  const vorschauBlob = await zipSchreiben(dateien.map(d => d === eintrag ? { name: d.name, daten: new TextEncoder().encode(new XMLSerializer().serializeToString(vdoc)) } : d), DOCX);
+  // Dateiname nach Vorgabe: AZR-Nr_Name_Vorname_Geburtsdatum (weitere Formulare mit Zusatz der Formularart)
+  const name = dateiBasis() + (art === "screening" ? "" : "_" + dateiSicher(ART_KURZ[art] || datei.name.replace(/\.docx$/i, ""))) + (fremd ? "_" + dateiSicher(vorgabe.sprache) : "") + ".docx";
+  return { art, bericht, blob, vorschauBlob, name, original: datei.name, sprache: fremd ? vorgabe.sprache : "" };
+}
+
+function speichern(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+// Welche Dokumente braucht dieser Fall?
+function dokumenteImFall() {
+  const asyl = wert("asyl") === "Ja", uma = istUma();
+  const hatDokumente = auswahl("dokumente").some(d => !d.startsWith("Kein"));
+  const passt1 = w => w === "immer" || (w === "asyl" && asyl) || (w === "ohne_asyl" && !asyl) || (w === "uma" && uma) || (w === "erwachsen" && !uma) || (w === "dokumente" && hatDokumente) || (w === "ohne_asyl_oder_uma" && (!asyl || uma));
+  const passt = w => w.split("+").every(passt1);   // z. B. "asyl+dokumente"
+  dokumenteImFall.passt = passt;
+  return (C.dokumentauswahl || []).filter(d => passt(d.wann));
+}
+
+let VORLAGEN_ERGEBNIS = [];   // nur im Arbeitsspeicher
+let VORLAGEN_DATEIEN = [];    // von Hand geladene (neuere) Vorlagen – ersetzen die eingebauten gleicher Art
+let KORREKTUREN = {};
+let VORLAGEN_STAND = "", VORLAGEN_LAEUFT = false;
+
+// In der internen Ausgabe sind die aktuellen Vorlagen eingebaut – die App füllt sie automatisch aus
+const eingebettet = k => { const el = document.getElementById("d:" + k); return el ? el.textContent.trim() : null; };
+const formularSprache = () => wert("formularsprache").toLowerCase();
+const b64Datei = (b64, name, typ) => new File([Uint8Array.from(atob(b64), c => c.charCodeAt(0))], name, { type: typ });
+const eingebaut = () => (C.vorlagen_eingebaut || []).map(v => b64Datei(v.daten, v.name, "application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
+const beilagenImFall = () => {
+  if (!dokumenteImFall().length) return [];
+  const passt = wann => dokumenteImFall.passt ? dokumenteImFall.passt(wann) : true;
+  const liste = C.beilagen_liste || [];
+  const spr = formularSprache();
+  const aus = [];
+  for (const typ of [...new Set(liste.map(b => b.typ))]) {
+    const kand = liste.filter(b => b.typ === typ && passt(b.wann));
+    if (!kand.length) continue;
+    const wahl = (kand[0].sprache !== undefined && kand.find(b => b.sprache === spr)) || kand.find(b => b.sprache === "deutsch") || kand[0];
+    aus.push({ ...wahl, titel: wahl.titel + (wahl.sprache && wahl.sprache !== "deutsch" ? ` (${wahl.sprache})` : ""), daten: eingebettet("bl/" + wahl.name) });
+  }
+  return aus.filter(b => b.daten);
+};
+const offenGesamt = () => C.fall.schritte.reduce((n, st) => n + offenIn(st).length, 0);
+
+function Originalformulare() {
+  const liste = dokumenteImFall();
+  const noetig = new Set(liste.map(d => d.erkennung).filter(Boolean));
+  const erkannt = new Set(VORLAGEN_ERGEBNIS.map(e => e.art));
+  const fehlen = liste.filter(d => d.erkennung && !erkannt.has(d.erkennung));
+  const fertig = VORLAGEN_ERGEBNIS.filter(e => e.blob && !unnoetig(e, noetig));
+  const beilagen = beilagenImFall();
+  const asyl = wert("asyl") === "Ja", offen = F ? offenGesamt() : 0;
+  const auto = !!(C.vorlagen_eingebaut && C.vorlagen_eingebaut.length);
+  const fallText = `${asyl ? "mit Asylgesuch" : wert("asyl") === "Nein" ? "ohne Asylgesuch" : "Asylgesuch noch nicht erfasst"}${istUma() ? " · unbegleitete:r Minderjährige:r" : ""}`;
+  return {
+    title: "Alle Unterlagen",
+    html: !F ? `<div class="note glass">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span><b>Noch kein Fall angelegt.</b> Erst die Angaben erfassen – dann erstellt die App alle Unterlagen automatisch.</span></div>
+        <button class="btn" id="vNeu">${svg("plus", 2.4)} Fall anlegen</button>` : `
+      ${offen ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span><b>Noch ${offen} Pflichtangabe${offen === 1 ? "" : "n"} offen</b> – die Unterlagen sind erst vollständig, wenn alles erfasst ist.<br><button class="btn" id="vErg2" style="margin:10px 0 0;padding:12px">${svg("pencil")} Angaben ergänzen</button></span></div>`
+        : `<div class="note glass" style="border:2px solid #008444">${svg("check", 2.6).replace("<svg", '<svg style="color:#008444"')}<span><b>Alle Pflichtangaben erfasst.</b></span></div>`}
+      <div class="casehead" style="margin-bottom:14px">
+        <h4 class="rounded" style="font-size:24px">${VORLAGEN_LAEUFT ? "Unterlagen werden erstellt …" : `${fertig.length} Unterlagen fertig ausgefüllt`}</h4>
+        <div style="opacity:.9;margin-top:4px">Fall: ${esc(fallText)}</div>
+        <div class="small" style="color:rgba(255,255,255,.85);margin-top:4px;word-break:break-all">Dateiname: ${esc(dateiBasis())}.docx</div>
+        ${fertig.length ? `<button class="btn" id="vAlle">${svg("share")} Alle Unterlagen als ZIP herunterladen</button>
+        <button class="btn" id="vDruckAlle" style="margin-top:8px">${svg("print")} Alle drucken</button>` : ""}
+      </div>
+      ${C.sidas && fertig.length ? `<div class="glass" style="padding:16px;margin-bottom:12px">
+        <b>In der ZIP-Datei:</b>
+        <ul style="margin:6px 0 0;padding-left:20px">
+          <li><b>${esc(dateiBasis())}.pdf</b> – alle Unterlagen für SIDAS in einer PDF → per E-Mail an Referat 2</li>
+          <li>die Word-Dateien zum Ausdrucken${beilagen.length ? " und das Merkblatt" : ""}</li>
+        </ul>
+        <p class="small" style="margin:8px 0 0">${esc(C.sidas.hinweis)}</p>
+        ${C.sidas.mail ? `<a class="btn glassy" href="${esc(mailLink(C.sidas.mail))}" style="text-decoration:none;margin-bottom:0">${svg("share")} ${esc(C.sidas.mail.knopf)} (PDF anhängen)</a>` : ""}
+      </div>` : ""}
+      ${!auto && !VORLAGEN_ERGEBNIS.length ? `<div class="glass" style="padding:16px;margin-bottom:12px"><b>Word-Vorlagen auswählen</b> (aktuelles LDS-Paket) – alle auf einmal markieren. Die App erkennt jede Vorlage selbst.</div>` : ""}
+      ${VORLAGEN_ERGEBNIS.length && fehlen.length ? `<div class="note glass" style="border:1.5px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span><b>Es fehlt noch ${fehlen.length === 1 ? "eine Vorlage" : fehlen.length + " Vorlagen"}:</b> ${fehlen.map(d => esc(d.name)).join(" · ")}</span></div>` : ""}
+      <h3 class="sec">Für diesen Fall <small>${fertig.length + beilagen.length}</small></h3>
+      <div id="vErg">${VORLAGEN_ERGEBNIS.map((e, i) => [e, i]).filter(([e]) => !unnoetig(e, noetig)).map(([e, i]) => ergebnisKarte(e, i, noetig)).join("")}</div>
+      ${beilagen.map((bl, k) => `<div class="glass" style="padding:16px;margin-bottom:12px"><div style="display:flex;gap:12px;align-items:center">${ico("doc", 4, "sm")}<div style="flex:1;min-width:0"><b>${esc(bl.titel)}</b><div class="small">Merkblatt (PDF) – ausdrucken und aushändigen</div></div></div>
+        <div class="small" style="margin-top:8px">${svg("check", 2.4).replace("<svg", '<svg style="width:14px;height:14px;color:#008444;vertical-align:-2px"')} In der ZIP-Datei enthalten</div></div>`).join("")}
+      ${istUma() ? umaKarte(false) : ""}
+      <h3 class="sec">Checkliste Unterlagen <small>${liste.length}</small></h3>
+      ${liste.map(d => { const ok = d.erkennung ? erkannt.has(d.erkennung) : beilagen.length > 0; return `<div class="rowtile glass" style="cursor:default">
+          <span class="ico sm" style="background:${ok ? "linear-gradient(135deg,#008444,#006751)" : "var(--line)"};color:${ok ? "#fff" : "var(--muted)"}">${svg(ok ? "check" : "doc", 2.2)}</span>
+          <span class="txt"><span class="t">${esc(d.name)}</span><br><span class="s" style="color:${d.aushaendigen ? "var(--muted)" : "var(--coral)"};font-weight:${d.aushaendigen ? 400 : 700}">${d.aushaendigen ? "aushändigen" : "NICHT aushändigen – zum Vorgang"}${ok ? " · erstellt" : !d.erkennung ? " · Merkblätter aus dem LDS-Paket drucken" : ""}</span></span></div>`; }).join("")}
+      ${VORLAGEN_ERGEBNIS.some(e => unnoetig(e, noetig)) ? `<details class="glass" style="padding:14px;margin:10px 0"><summary style="cursor:pointer;font-weight:700">Weitere Vorlagen – in diesem Fall NICHT verwenden (${VORLAGEN_ERGEBNIS.filter(e => unnoetig(e, noetig)).length})</summary>
+        ${VORLAGEN_ERGEBNIS.map((e, i) => [e, i]).filter(([e]) => unnoetig(e, noetig)).map(([e, i]) => ergebnisKarte(e, i, noetig)).join("")}</details>` : ""}
+      <details class="glass" style="padding:14px;margin:14px 0" ${auto ? "" : "open"}><summary style="cursor:pointer;font-weight:700">${auto ? "Neuere Vorlagen laden (nur bei neuem LDS-Paket)" : "Vorlagen"}</summary>
+        <p class="small">${auto ? `Eingebaute Vorlagen: Stand ${esc(C.vorlagen_stand || "")}. Gibt das LDS neue Fassungen heraus, hier auswählen – sie ersetzen die eingebauten für diesen Fall.` : "Die Vorlagen bleiben auf diesem Rechner."} ${esc(C.vorlagen.screening.hinweis)}</p>
+        <label class="btn glassy" for="vd" style="cursor:pointer;margin-bottom:0">${svg("docs")} Word-Vorlagen auswählen …</label>
+        <input type="file" id="vd" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" multiple hidden>
+        ${VORLAGEN_DATEIEN.length ? `<p class="small" style="margin:8px 0 0">Geladen: ${VORLAGEN_DATEIEN.map(f => esc(f.name)).join(", ")}</p>` : ""}
+      </details>`,
+    bind: () => {
+      if (!F) { $("vNeu").onclick = () => { vibrate(); F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()) } }; fallSpeichern(); go(Erfassung(0)); }; return; }
+      const e2 = $("vErg2"); if (e2) e2.onclick = () => { vibrate(); const i = C.fall.schritte.findIndex(st => offenIn(st).length); go(Erfassung(i < 0 ? 0 : i)); };
+      $("vd").onchange = async e => { VORLAGEN_DATEIEN = Array.from(e.target.files || []); VORLAGEN_STAND = ""; await vorlagenVerarbeiten(); };
+      const alle = $("vAlle");
+      if (alle) alle.onclick = async () => {
+        vibrate();
+        alle.disabled = true;
+        const inhalt = await Promise.all(fertig.map(async x => ({ name: x.name, daten: new Uint8Array(await x.blob.arrayBuffer()) })));
+        for (const bl of beilagen) inhalt.push({ name: bl.name, daten: Uint8Array.from(atob(bl.daten), c => c.charCodeAt(0)) });
+        try {
+          const pdf = await sidasPdf(fertig, t => { alle.textContent = t; });
+          if (pdf) inhalt.unshift({ name: `${dateiBasis()}.pdf`, daten: new Uint8Array(await pdf.arrayBuffer()) });
+        } catch (err) { alert("Die PDF-Datei für SIDAS konnte nicht erstellt werden (" + err.message + "). Die Word-Dateien werden trotzdem gespeichert."); }
+        speichern(await zipSchreiben(inhalt, "application/zip"), `${dateiBasis()}_Unterlagen.zip`);
+        alle.disabled = false;
+        alle.innerHTML = svg("check") + " Gespeichert – ZIP entpacken";
+      };
+      const dr = $("vDruckAlle"); if (dr) dr.onclick = () => { vibrate(); allesDrucken(fertig, dr); };
+      ergebnisBinden();
+      // Automatisch (neu) erstellen, sobald sich Angaben, Auswahl oder Vorlagen geändert haben
+      const stand = JSON.stringify([F.werte, KORREKTUREN, VORLAGEN_DATEIEN.map(f => f.name + f.size)]);
+      if ((auto || VORLAGEN_DATEIEN.length) && stand !== VORLAGEN_STAND && !VORLAGEN_LAEUFT) { VORLAGEN_STAND = stand; vorlagenVerarbeiten(); }
+    }
+  };
+}
+
+async function vorlagenVerarbeiten() {
+  VORLAGEN_LAEUFT = true;
+  const ergebnis = [];
+  const quellen = [...eingebaut().map(d => ({ d, von: "eingebaut" })), ...VORLAGEN_DATEIEN.map(d => ({ d, von: "geladen" }))];
+  for (const { d, von } of quellen) {
+    try { ergebnis.push({ ...(await vorlageBefuellen(d, KORREKTUREN)), von }); }
+    catch (err) { ergebnis.push({ fehler: err.message, original: d.name, von }); }
+  }
+  // Von Hand geladene (neuere) Vorlagen ersetzen die eingebauten gleicher Art
+  const geladen = new Set(ergebnis.filter(e => e.von === "geladen" && e.art && e.art !== "unbekannt").map(e => e.art));
+  VORLAGEN_ERGEBNIS = ergebnis.filter(e => !(e.von === "eingebaut" && geladen.has(e.art)));
+  // Sprachfassungen zum Aushändigen – nur für die in diesem Fall benötigten Formulare
+  const spr = formularSprache(), noetig = new Set(dokumenteImFall().map(d => d.erkennung));
+  if (spr && spr !== "deutsch") for (const [art, sprachen] of Object.entries(C.sprachen_formulare || {})) {
+    if (!noetig.has(art) || !sprachen.includes(spr)) continue;
+    const b64 = eingebettet(`sp/${art}/${spr}`);
+    if (!b64) continue;
+    try { VORLAGEN_ERGEBNIS.push({ ...(await vorlageBefuellen(b64Datei(b64, `${art}_${spr}.docx`, "application/vnd.openxmlformats-officedocument.wordprocessingml.document"), KORREKTUREN, { art, sprache: spr })), von: "sprache" }); }
+    catch (err) { VORLAGEN_ERGEBNIS.push({ fehler: err.message, original: `${art} (${spr})`, von: "sprache" }); }
+  }
+  const rang = art => { const i = (C.dokumentauswahl || []).findIndex(d => d.erkennung === art); return i < 0 ? 99 : i; };
+  VORLAGEN_ERGEBNIS.sort((x, y) => rang(x.art) - rang(y.art) || (x.sprache ? 1 : 0) - (y.sprache ? 1 : 0));
+  VORLAGEN_LAEUFT = false;
+  neuZeichnen();
+}
+
+// ================= SIDAS-PDF: alle nötigen Unterlagen in einer PDF-Datei =================
+// Die ausgefüllten Word-Dateien werden unsichtbar gerendert, Seite für Seite als Bild erfasst und zu einer PDF zusammengesetzt.
+async function seitenBilder(liste, fortschritt) {
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;left:-30000px;top:0;width:1000px;background:#fff";
+  document.body.appendChild(box);
+  const seiten = [];
+  try {
+    for (const [k, e] of liste.entries()) {
+      fortschritt && fortschritt(`Seite wird erstellt … (${k + 1}/${liste.length})`);
+      const div = document.createElement("div"); box.appendChild(div);
+      await docx.renderAsync(e.vorschauBlob || e.blob, div, null, { className: "docx", inWrapper: true, breakPages: true, ignoreLastRenderedPageBreak: false, renderHeaders: true, renderFooters: true, experimental: true, useBase64URL: true });
+      for (const sec of div.querySelectorAll("section.docx")) {
+        sec.style.margin = "0"; sec.style.boxShadow = "none";
+        const cv = await html2canvas(sec, { scale: 1.5, backgroundColor: "#ffffff", logging: false, useCORS: true });
+        // Nicht umbrochene, überlange Abschnitte in A4-Seiten zerlegen
+        const a4 = Math.round(cv.width * 297 / 210);
+        const stuecke = cv.height > a4 * 1.08 ? Math.ceil(cv.height / a4) : 1;
+        for (let k = 0; k < stuecke; k++) {
+          let teil = cv;
+          if (stuecke > 1) {
+            teil = document.createElement("canvas"); teil.width = cv.width; teil.height = a4;
+            const g = teil.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, teil.width, teil.height);
+            g.drawImage(cv, 0, k * a4, cv.width, Math.min(a4, cv.height - k * a4), 0, 0, cv.width, Math.min(a4, cv.height - k * a4));
+          }
+          const b64 = teil.toDataURL("image/jpeg", 0.82).split(",")[1];
+          seiten.push({ jpeg: Uint8Array.from(atob(b64), c => c.charCodeAt(0)), w: teil.width, h: teil.height });
+        }
+      }
+      div.remove();
+    }
+  } finally { box.remove(); }
+  return seiten;
+}
+
+function pdfAusBildern(seiten, titel) {
+  const enc = new TextEncoder(), teile = [], offs = [];
+  let laenge = 0;
+  const add = x => { const u = typeof x === "string" ? enc.encode(x) : x; teile.push(u); laenge += u.length; };
+  const obj = (n, kopf, strom) => { offs[n] = laenge; add(`${n} 0 obj\n${kopf}\n`); if (strom) { add("stream\n"); add(strom); add("\nendstream\n"); } add("endobj\n"); };
+  add("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  const kids = seiten.map((_, i) => `${3 + i * 3} 0 R`).join(" ");
+  obj(1, `<< /Type /Catalog /Pages 2 0 R >>`);
+  obj(2, `<< /Type /Pages /Kids [${kids}] /Count ${seiten.length} >>`);
+  seiten.forEach((s, i) => {
+    const n = 3 + i * 3, breit = s.w > s.h ? 841.89 : 595.28, hoch = +(breit * s.h / s.w).toFixed(2);
+    const inhalt = enc.encode(`q ${breit} 0 0 ${hoch} 0 0 cm /Im${i} Do Q`);
+    obj(n, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${breit} ${hoch}] /Resources << /XObject << /Im${i} ${n + 2} 0 R >> >> /Contents ${n + 1} 0 R >>`);
+    obj(n + 1, `<< /Length ${inhalt.length} >>`, inhalt);
+    obj(n + 2, `<< /Type /XObject /Subtype /Image /Width ${s.w} /Height ${s.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${s.jpeg.length} >>`, s.jpeg);
+  });
+  const anzahl = 3 + seiten.length * 3, xref = laenge;
+  const titelHex = Array.from(titel).map(c => c.charCodeAt(0).toString(16).padStart(4, "0")).join("");
+  offs[anzahl] = laenge; add(`${anzahl} 0 obj\n<< /Title <FEFF${titelHex}> /Producer (GEAS Hilfe) >>\nendobj\n`);
+  add(`xref\n0 ${anzahl + 1}\n0000000000 65535 f \n`);
+  for (let k = 1; k <= anzahl; k++) add(String(offs[k]).padStart(10, "0") + " 00000 n \n");
+  add(`trailer\n<< /Size ${anzahl + 1} /Root 1 0 R /Info ${anzahl} 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  return new Blob(teile, { type: "application/pdf" });
+}
+
+async function sidasPdf(ergebnisse, fortschritt) {
+  if (typeof html2canvas === "undefined" || typeof docx === "undefined" || !C.sidas) return null;
+  const arten = C.sidas.arten;
+  const liste = ergebnisse.filter(e => arten.includes(e.art) && !e.sprache).sort((a, b) => arten.indexOf(a.art) - arten.indexOf(b.art));
+  if (!liste.length) return null;
+  return pdfAusBildern(await seitenBilder(liste, fortschritt), dateiBasis());
+}
+
+// Alle Unterlagen in einem Druckauftrag (Bildschirmvorschau; für exakten Druck die Word-Dateien nutzen)
+async function allesDrucken(liste, knopf) {
+  if (typeof docx === "undefined") { alert("Drucken aus der App ist hier nicht möglich – bitte „Alle speichern“ und in Word drucken."); return; }
+  const alt = knopf.innerHTML; knopf.innerHTML = "Druck wird vorbereitet …"; knopf.disabled = true;
+  const d = document.getElementById("druck");
+  d.innerHTML = ""; d.classList.add("docxdruck");
+  for (const e of liste) { const div = document.createElement("div"); d.appendChild(div); await docx.renderAsync(e.vorschauBlob || e.blob, div, null, { className: "docx", inWrapper: true, breakPages: true, ignoreLastRenderedPageBreak: false, renderHeaders: true, renderFooters: true, experimental: true, useBase64URL: true }); }
+  knopf.innerHTML = alt; knopf.disabled = false;
+  window.print();
+  setTimeout(() => d.classList.remove("docxdruck"), 1000);
+}
+
+const ART_NAMEN = { screening: "Screening-Formular", inverwahrung: "Bescheinigung Inverwahrung § 21 AsylG", inverwahrung50: "Bescheinigung Inverwahrung § 50 AufenthG", abschluss: "Abschlusserklärung (mit Asylgesuch)", abschluss_ohne: "Abschlusserklärung ohne Asylgesuch", abschluss_uma: "Abschlusserklärung umA (uM)", belehrung48: "Belehrung § 48/§ 62 AufenthG", fragebogen: "Fragebogen AMMVO", fragebogen_uma: "Fragebogen unbegleitete Minderjährige (uM)", belehrung15: "Belehrung § 15/§ 20 AsylG", info11: "Information Art. 11", anlauf: "Anlaufbescheinigung", unbekannt: "Unbekannte Vorlage – nur Kopfdaten" };
+
+const unnoetig = (e, noetig) => !e.fehler && noetig && noetig.size > 0 && e.art !== "unbekannt" && !noetig.has(e.art);
+
+function ergebnisKarte(e, i, noetig) {
+  if (e.fehler) return `<div class="note glass">${svg("alert").replace("<svg", '<svg style="color:var(--coral)"')}<span><b>${esc(e.original)}</b><br>${esc(e.fehler)}</span></div>`;
+  const weg = unnoetig(e, noetig);
+  const hand = (C.vorlagen.manuell || {})[e.art] || [];
+  return `<div class="glass" style="padding:16px;margin-bottom:12px${weg ? ";opacity:.75" : ""}">
+    <div style="display:flex;gap:12px;align-items:center">${ico(e.art === "screening" ? "shieldcheck" : "doc", e.art === "screening" ? 2 : 0, "sm")}
+      <div style="flex:1;min-width:0"><b>${esc(ART_NAMEN[e.art] || e.art)}</b>${e.sprache ? ` <span class="badge" style="background:#0082c4;color:#fff">${esc(e.sprache)} – aushändigen</span>` : ""}<div class="small" style="word-break:break-all">${esc(e.name)}</div>
+      <div class="small">${e.bericht.gesetzt ? `${e.bericht.gesetzt} Einträge gesetzt` : "Keine Eingabefelder – unverändert drucken"}${e.bericht.offen.length ? ` · <b style="color:#e08600">${e.bericht.offen.length} bitte auswählen</b>` : ""}</div></div></div>
+    ${weg ? `<div class="note" style="margin:10px 0 0;background:rgba(200,16,46,.08)">${svg("alert").replace("<svg", '<svg style="color:var(--coral)"')}<span class="small"><b style="color:var(--coral)">Wird in diesem Fall nicht benötigt</b> – bitte prüfen (Asylgesuch ja/nein, Alter, Dokumente).</span></div>` : ""}
+    ${e.bericht.offen.map((o, k) => `<div style="margin-top:10px"><label class="small" for="k-${i}-${k}"><b>${esc(o.alias)}</b> – „${esc(o.wert)}“ bitte aus der Liste wählen:</label>
+      <select id="k-${i}-${k}" data-alias="${esc(o.alias)}" style="width:100%;margin-top:4px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--glass);color:var(--text);font:inherit">
+        <option value="">– bitte wählen (oder später in Word) –</option>${o.optionen.map(x => `<option>${esc(x.text)}</option>`).join("")}</select></div>`).join("")}
+    ${hand.length ? `<div style="margin-top:10px"><div class="small"><b>Von Hand noch erledigen:</b></div><ul style="margin:4px 0 0;padding-left:20px">${hand.map(h => `<li class="small" style="color:var(--text)">${esc(h)}</li>`).join("")}</ul></div>` : ""}
+    <button class="btn glassy" data-vs="${i}" style="margin:12px 0 0">${svg("doc")} Ansehen</button></div>`;
+}
+
+function ergebnisBinden() {
+  app.querySelectorAll("[data-vs]").forEach(b => b.onclick = () => { vibrate(); go(() => Vorschau(+b.dataset.vs)); });
+  app.querySelectorAll("select[data-alias]").forEach(s => s.onchange = async () => { if (s.value) { KORREKTUREN[s.dataset.alias] = s.value; await vorlagenVerarbeiten(); } });
+}
+
+// Originalgetreue Vorschau des ausgefüllten Word-Dokuments (docx-preview, im Browser)
+function Vorschau(i) {
+  const e = VORLAGEN_ERGEBNIS[i];
+  if (!e) return Originalformulare();
+  return {
+    title: ART_NAMEN[e.art] || "Vorschau",
+    html: `<p class="small" style="margin:0 0 10px">${esc(e.name)} – so sieht das ausgefüllte Original aus. Die Word-Datei ist in der <b>ZIP-Datei</b> enthalten (auf der Seite „Alle Unterlagen“ → „Alle speichern (ZIP)“).</p>
+      <button class="btn glassy" id="vDr" style="margin:0 0 12px">${svg("print")} Dieses Formular drucken</button>
+      <div id="vBlatt" style="overflow:hidden;border-radius:10px;background:#8a8f98;padding:8px 0"><p class="small" style="color:#fff;text-align:center">Vorschau wird erstellt …</p></div>`,
+    bind: async () => {
+      const ziel = $("vBlatt");
+      if (typeof docx === "undefined" || !docx.renderAsync) { ziel.innerHTML = `<p class="small" style="color:#fff;padding:12px">Vorschau in dieser Ausgabe nicht verfügbar – bitte speichern und in Word öffnen.</p>`; return; }
+      try {
+        ziel.innerHTML = "";
+        const innen = document.createElement("div"); ziel.appendChild(innen);
+        await docx.renderAsync(e.vorschauBlob || e.blob, innen, null, { className: "docx", inWrapper: true, breakPages: true, ignoreLastRenderedPageBreak: false, renderHeaders: true, renderFooters: true, experimental: true, useBase64URL: true });
+        const passen = () => { const seite = innen.querySelector("section.docx"); if (!seite) return; innen.style.zoom = ""; const z = Math.min(1, (ziel.clientWidth - 4) / (seite.offsetWidth + 20)); innen.style.zoom = z; };
+        passen(); window.addEventListener("resize", passen, { passive: true });
+      } catch (err) { ziel.innerHTML = `<p class="small" style="color:#fff;padding:12px">Vorschau nicht möglich (${esc(err.message)}) – bitte speichern und in Word öffnen.</p>`; }
+      $("vDr").onclick = () => {
+        vibrate();
+        const d = document.getElementById("druck");
+        d.innerHTML = ""; const k = ziel.firstElementChild.cloneNode(true); k.style.zoom = ""; d.appendChild(k); d.classList.add("docxdruck");
+        window.print();
+        setTimeout(() => d.classList.remove("docxdruck"), 1000);
+      };
+    }
+  };
+}
+
+// ================= Geführter Einsatz (interne Ausgabe) =================
+// Ein Schritt pro Bildschirm: erst prüfen (Screening ja/nein), dann abarbeiten bis zur Übermittlung.
+const ES = () => (S.einsatz ||= { i: 0, haken: {}, pruefung: null, ergebnis: "" });
+const einsatzSchritte = () => (C.einsatz ? C.einsatz.schritte : []);
+
+function einsatzErgebnis(antwort, titel, nurMerken) {
+  const e = ES();
+  if (e.pruefung === antwort && e.ergebnis === titel && nurMerken) return;
+  e.pruefung = antwort; e.ergebnis = titel; save();
+  if (nurMerken) return;
+  const i = einsatzSchritte().findIndex(x => x.id === "pruefung");
+  e.i = i + 1; save();
+  stack.pop();   // Prüfung verlassen
+  uebergang("fwd", anim => { stack.pop(); stack.push(() => Einsatz(e.i)); render(anim ? "enter-fwd" : ""); });
+}
+
+function Einsatz(nr) {
+  const liste = einsatzSchritte(), e = ES();
+  nr = Math.max(0, Math.min(nr, liste.length - 1));
+  e.i = nr; save();
+  const st = liste[nr], haken = new Set(e.haken[st.id] || []);
+  const a = aufgriff();
+  const offenSchritt = (st.erfassen || []).reduce((n, id) => { const x = C.fall.schritte.find(y => y.id === id); return n + (x && F ? offenIn(x).length : 0); }, 0);
+  const phasen = [...new Set(liste.map(x => x.phase))];
+  const mailAblauf = st.mail_aus_ablauf ? (C.ablauf || []).find(x => x.nr === st.mail_aus_ablauf) : null;
+  const nachPruefung = liste.findIndex(x => x.id === "pruefung") < nr;
+  return {
+    title: `Schritt ${nr + 1} von ${liste.length}`,
+    html: `${bar((nr + 1) / liste.length)}
+      <div class="stepper">${phasen.map(ph => `<button class="${ph === st.phase ? "cur" : ""}" data-ph="${esc(ph)}">${esc(ph)}</button>`).join("")}</div>
+      ${nachPruefung && e.pruefung === "nein" ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span>Die Prüfung ergab <b>kein Screening</b> („${esc(e.ergebnis)}“). Diese Schritte gelten nur bei einem Screening.</span></div>` : ""}
+      ${nachPruefung && !e.pruefung ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span>Die Prüfung „Screening ja oder nein?“ wurde noch nicht gemacht.</span></div>` : ""}
+      <div class="small" style="margin:10px 2px 0;font-weight:700;color:var(--green)">${esc(st.phase)}</div>
+      <h2 class="rounded" style="font-size:30px;margin:2px 0 8px;line-height:1.15">${esc(st.titel)}</h2>
+      <p style="margin:0 0 14px;font-size:17px">${esc(st.kurz)}</p>
+      ${a && nachPruefung && e.pruefung !== "nein" ? `<div class="fristen2" style="margin:0 0 14px"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b></div>
+        <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
+      ${(st.info || []).map(t => `<div class="note glass">${svg("info").replace("<svg", '<svg style="color:#0082c4"')}<span class="small" style="color:var(--text)">${esc(t)}</span></div>`).join("")}
+      ${st.punkte.length ? `<h3 class="sec" style="margin-top:18px">Das machst du jetzt <small>${haken.size}/${st.punkte.length}</small></h3>
+        ${st.punkte.map((p, i) => `<button class="step glass press check ${haken.has(i) ? "on" : ""}" data-eh="${i}" role="checkbox" aria-checked="${haken.has(i)}">
+          <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">ⓘ ${esc(p.hinweis)}</span>` : ""}</span></button>`).join("")}` : ""}
+      ${st.aktion === "pruefung" ? `<button class="btn" id="eP" style="font-size:19px;padding:20px">${svg("shieldcheck")} ${e.pruefung ? "Prüfung erneut durchführen" : "Prüfung starten"}</button>
+        ${e.pruefung ? `<div class="note glass" style="border:2px solid ${e.pruefung === "ja" ? "#e75113" : "#008444"}"><span><b>Ergebnis:</b> ${esc(e.ergebnis)}</span></div>` : ""}` : ""}
+      ${st.erfassen ? `<button class="btn" id="eF" style="font-size:18px;padding:18px">${svg("pencil")} ${F ? "Angaben erfassen" : "Fall anlegen und erfassen"}${F ? ` <span style="font-weight:600;opacity:.85">(${offenSchritt ? offenSchritt + " offen" : "vollständig ✓"})</span>` : ""}</button>` : ""}
+      ${mailAblauf && mailAblauf.mail ? `<a class="btn glassy" href="${esc(mailLink(mailAblauf.mail))}" style="text-decoration:none">${svg("share")} ${esc(mailAblauf.mail.knopf)}</a>` : ""}
+      ${st.aktion === "unterlagen" ? `<button class="btn" id="eU" style="font-size:19px;padding:20px">${svg("docs")} Alle Unterlagen erstellen</button>` : ""}
+      ${st.aktion === "meldung" && C.sidas && C.sidas.mail ? `<a class="btn" href="${esc(mailLink(C.sidas.mail))}" style="text-decoration:none">${svg("share")} ${esc(C.sidas.mail.knopf)} (PDF anhängen)</a>
+        <button class="btn glassy" id="eU">${svg("docs")} Unterlagen / ZIP noch einmal öffnen</button>` : ""}
+      ${st.aktion === "ende" ? `<button class="btn glassy danger" id="eL">${svg("trash")} Fall löschen und Einsatz beenden</button>` : ""}
+      ${st.uma ? umaKarte(istUma()) : ""}
+      <div class="platz-unten"></div>
+      <div class="bottombar fest">
+        ${nr > 0 ? `<button class="btn glassy" id="eZ" style="flex:.6">${svg("chevl", 2.2)} Zurück</button>` : ""}
+        ${nr < liste.length - 1 ? `<button class="btn" id="eW">Weiter ${svg("chevr", 2.2)}</button>` : `<button class="btn" id="eS" style="${farbVars(2)}">${svg("home")} Zur Startseite</button>`}
+      </div>`,
+    bind: () => {
+      const gehe = z => { vibrate(); const r = z > nr ? "fwd" : "back"; uebergang(r, anim => { stack[stack.length - 1] = () => Einsatz(z); render(anim ? (r === "fwd" ? "enter-fwd" : "enter-back") : ""); window.scrollTo(0, 0); }); };
+      app.querySelectorAll("[data-eh]").forEach(el => el.onclick = () => {
+        vibrate(); const i = +el.dataset.eh; haken.has(i) ? haken.delete(i) : haken.add(i);
+        e.haken[st.id] = [...haken]; save();
+        el.classList.toggle("on", haken.has(i)); el.setAttribute("aria-checked", haken.has(i));
+        const h = app.querySelector("h3.sec small"); if (h) h.textContent = `${haken.size}/${st.punkte.length}`;
+      });
+      app.querySelectorAll("[data-ph]").forEach(b => b.onclick = () => gehe(liste.findIndex(x => x.phase === b.dataset.ph)));
+      const eZ = $("eZ"); if (eZ) eZ.onclick = () => gehe(nr - 1);
+      const eW = $("eW"); if (eW) eW.onclick = () => gehe(nr + 1);
+      const eS = $("eS"); if (eS) eS.onclick = () => { vibrate(); zeigeTab("start"); };
+      const eP = $("eP"); if (eP) eP.onclick = () => { vibrate(); go(ScreeningWizard(einsatzErgebnis)); };
+      const eF = $("eF"); if (eF) eF.onclick = () => {
+        vibrate();
+        if (!F) { F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()) } }; fallSpeichern(); }
+        go(Erfassung(0, st.erfassen));
+      };
+      app.querySelectorAll("#eU").forEach(b => b.onclick = () => { vibrate(); go(Originalformulare); });
+      const eL = $("eL"); if (eL) eL.onclick = () => {
+        if (!confirm("Fall und alle Daten endgültig löschen? Vorher die Unterlagen im Vorgang ablegen.")) return;
+        F = null; fallSpeichern(); VORLAGEN_ERGEBNIS = []; VORLAGEN_DATEIEN = []; KORREKTUREN = {}; VORLAGEN_STAND = "";
+        S.einsatz = null; if (C.ablauf) C.ablauf.forEach(x => delete S.checklisten["ablauf-" + x.nr]); save();
+        zeigeTab("start");
+      };
+    }
+  };
+}
+
+// Neue interne Startseite: ein großer Knopf für den Einsatz, daneben der direkte Weg für Geübte
+function EinsatzStart() {
+  const liste = einsatzSchritte(), e = S.einsatz, laeuft = e && (e.i > 0 || F);
+  const a = aufgriff();
+  return {
+    title: C.meta.titel, hero: true,
+    html: hero("", `<h2 class="rounded" style="font-size:32px">Person ohne Aufenthalts&shy;recht angetroffen?</h2><p class="sub">Die App führt dich Schritt für Schritt – von der Prüfung bis zu den fertigen Unterlagen.</p>`) + `
+      <div class="content overlap">
+        <button class="herocard glass press reveal" id="sE" style="${farbVars(0)};border:2px solid #002664">
+          <div style="display:flex;gap:14px;align-items:center">${ico("shieldcheck", 0, "lg")}<h4 style="flex:1">${laeuft ? "Einsatz fortsetzen" : "Einsatz starten"}</h4></div>
+          <p>${laeuft ? `Weiter bei Schritt ${e.i + 1} von ${liste.length}: <b>${esc(liste[e.i].titel)}</b>` : "Erst prüfen, ob ein Screening nötig ist – dann alles abarbeiten. Du musst nichts auswendig wissen."}</p>
+          <span class="cta">${laeuft ? "Weiter" : "Los geht's"} ${svg("arrowr", 2.4)}</span></button>
+        ${laeuft ? `<button class="btn glassy" id="sN" style="margin-top:0">${svg("plus", 2.4)} Neuen Einsatz beginnen</button>` : ""}
+        ${F ? `<div style="margin-top:14px">${fallKarte()}</div>` : ""}
+        ${a && e && e.pruefung !== "nein" ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b></div>
+          <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
+        ${istUma() ? umaKarte(true) : ""}
+        <h3 class="sec">Für Geübte</h3>
+        ${rowtile('id="sD"', "Direkt zum Dokumenten-Assistenten", "Angaben erfassen und alle Unterlagen erstellen – ohne Führung", "docs", 2)}
+        ${rowtile('id="sP"', "Nur prüfen: Screening ja oder nein?", "Die Prüffragen ohne den übrigen Einsatz", "shieldcheck", 4)}
+        ${rowtile('id="sC"', "Gesamt-Checkliste zum Abhaken", "Alle Schritte der Checkliste Streifendienst auf einer Seite", "list", 5)}
+        ${istUma() ? "" : umaKarte(false)}
+        <div class="note glass" style="margin-top:14px">${svg("lock").replace("<svg", '<svg style="color:var(--coral)"')}<span class="small"><b style="color:var(--coral)">Nur für den Dienstgebrauch.</b> ${esc(C.meta.hinweis_intern || "")}</span></div>
+        ${C.meta.copyright ? `<p class="small" style="text-align:center;margin:18px 0 0">${esc(C.meta.copyright)}</p>` : ""}
+      </div>`,
+    bind: () => {
+      $("sE").onclick = () => { vibrate(); go(() => Einsatz(laeuft ? e.i : 0)); };
+      const sN = $("sN"); if (sN) sN.onclick = () => {
+        if (!confirm("Neuen Einsatz beginnen? Die Haken werden zurückgesetzt." + (F ? " Der gespeicherte Fall wird gelöscht – vorher die Unterlagen im Vorgang ablegen." : ""))) return;
+        F = null; fallSpeichern(); VORLAGEN_ERGEBNIS = []; VORLAGEN_DATEIEN = []; KORREKTUREN = {}; VORLAGEN_STAND = "";
+        S.einsatz = null; save(); neuZeichnen();
+      };
+      $("sD").onclick = () => { vibrate(); go(FallUebersicht); };
+      $("sP").onclick = () => { vibrate(); go(ScreeningWizard()); };
+      $("sC").onclick = () => { vibrate(); go(Ablauf); };
+      const fk = $("fk"); if (fk) fk.onclick = () => { vibrate(); go(FallUebersicht); };
+    }
+  };
+}
+
+// umA-Hinweise (interne Ausgabe): aufgeklappt und hervorgehoben, sobald der Fall einen umA betrifft
+function umaKarte(offen) {
+  const u = C.uma_hilfe;
+  if (!u) return "";
+  const tel = t => `<a href="tel:${t.replace(/[^0-9+]/g, "")}" style="font-weight:700;white-space:nowrap">${esc(t)}</a>`;
+  return `<details class="glass reveal" ${offen ? "open" : ""} style="padding:16px;margin-top:14px;${offen ? "border:2px solid #e75113" : ""}">
+    <summary style="cursor:pointer;display:flex;gap:10px;align-items:center;list-style:none">${ico("figure.child", 3, "sm")}<b style="font-size:18px;flex:1">${esc(u.titel)}</b>${offen ? `<span class="badge" style="background:#e75113;color:#fff">dieser Fall</span>` : ""}</summary>
+    <ul style="margin:12px 0 0;padding-left:20px">${u.punkte.map(p => `<li style="margin-bottom:6px">${inline(p)}</li>`).join("")}</ul>
+    <h4 style="margin:14px 0 6px">Welches Jugendamt?</h4>
+    ${u.jugendaemter.map(j => `<div class="rowtile" style="cursor:default;background:var(--bg);margin-bottom:8px;align-items:flex-start"><span class="txt"><span class="t">${esc(j.name)}</span><br><span class="s" style="color:var(--text)">${esc(j.text)}</span>${j.tel ? `<br>${tel(j.tel)}` : ""}</span></div>`).join("")}
+  </details>`;
+}
+
+
+// ================= Interne Startseite: Einsatz-Ablauf =================
+function mailLink(m) {
+  const fuell = t => t.replace(/\{\{(\w+)\}\}/g, (_, id) => platzhalter(id));
+  return `mailto:${m.an}?subject=${encodeURIComponent(fuell(m.betreff))}&body=${encodeURIComponent(fuell(m.text))}`;
+}
+
+function Ablauf() {
+  const a = aufgriff();
+  return {
+    title: "Einsatz-Ablauf", hero: true,
+    html: hero("", `${POL ? "" : EMBLEM(52)}<h2 class="rounded" style="font-size:34px">${esc(C.meta.titel)}</h2><p class="sub">Screening Schritt für Schritt</p>`) + `
+      <div class="content overlap">
+        <div class="note glass" style="border:1.5px solid var(--coral)">${svg("lock").replace("<svg", '<svg style="color:var(--coral)"')}<span class="small"><b style="color:var(--coral)">Nur für den Dienstgebrauch.</b> ${esc(C.meta.hinweis_intern || "")}</span></div>
+        ${fallKarte()}
+        ${istUma() ? umaKarte(true) : ""}
+        ${a ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b></div>
+          <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
+        ${C.ablauf.map(s => {
+          const set = new Set(S.checklisten["ablauf-" + s.nr] || []);
+          const fertig = s.punkte.length && set.size === s.punkte.length;
+          return `<div class="glass reveal" style="padding:16px;margin-top:14px">
+            <div style="display:flex;gap:12px;align-items:center">
+              <span class="num rounded" style="width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:${fertig ? (POL ? "#008444" : "linear-gradient(135deg,#0b8c78,#006b5c)") : (POL ? "#002664" : "linear-gradient(135deg,#3a8ff0,#1f66cf)")}">${fertig ? "✓" : esc(s.nr)}</span>
+              <b style="font-size:19px;flex:1">${esc(s.titel)}</b>${s.punkte.length ? `<span class="small">${set.size}/${s.punkte.length}</span>` : ""}</div>
+            ${(s.info || []).map(t => `<p class="small" style="margin:10px 0 0">ⓘ ${esc(t)}</p>`).join("")}
+            ${s.punkte.map((p, i) => `<button class="step press check ${set.has(i) ? "on" : ""}" data-ab="${esc(s.nr)}" data-i="${i}" style="margin:10px 0 0;background:transparent;padding:6px 0">
+              <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">${esc(p.hinweis)}</span>` : ""}</span></button>`).join("")}
+            ${s.aktion === "pruefung" ? `<button class="btn" data-akt="pruefung" style="margin-bottom:0">${svg("shieldcheck")} Screening-Prüfung starten</button>` : ""}
+            ${s.aktion === "fall" ? `<button class="btn" data-akt="fall" style="margin-bottom:0">${svg("pencil")} ${F ? "Angaben erfassen" : "Fall anlegen"}</button>` : ""}
+            ${s.aktion === "vorlagen" ? `<button class="btn" data-akt="vorlagen" style="margin-bottom:0;${farbVars(2)}">${svg("docs")} Alle Unterlagen erstellen</button>` : ""}
+            ${s.mail ? `<a class="btn glassy" href="${esc(mailLink(s.mail))}" style="text-decoration:none;margin-bottom:0">${svg("share")} ${esc(s.mail.knopf)}</a>` : ""}
+          </div>`;
+        }).join("")}
+        ${istUma() ? "" : umaKarte(false)}
+        <button class="btn glassy" id="abReset" style="margin-top:18px">${svg("rotate")} Haken zurücksetzen (neuer Einsatz)</button>
+      </div>`,
+    bind: () => {
+      app.querySelectorAll("[data-ab]").forEach(el => el.onclick = () => {
+        vibrate();
+        const k = "ablauf-" + el.dataset.ab, i = +el.dataset.i, set = new Set(S.checklisten[k] || []);
+        set.has(i) ? set.delete(i) : set.add(i);
+        S.checklisten[k] = [...set]; save(); neuZeichnen();
+      });
+      app.querySelectorAll("[data-akt]").forEach(b => b.onclick = () => {
+        vibrate();
+        const akt = b.dataset.akt;
+        if (akt === "pruefung") go(ScreeningWizard());
+        if (akt === "fall") { if (!F) { F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()) } }; fallSpeichern(); } go(FallUebersicht); }
+        if (akt === "vorlagen") go(Originalformulare);
+      });
+      const fk = $("fk"); if (fk) fk.onclick = () => { vibrate(); go(FallUebersicht); };
+      $("abReset").onclick = () => { if (confirm("Alle Haken im Ablauf entfernen?")) { C.ablauf.forEach(s => delete S.checklisten["ablauf-" + s.nr]); save(); neuZeichnen(); } };
+    }
+  };
+}
+
+
 // ================= Start =================
-const ROOT = { start: Start, fall: FallUebersicht, wissen: Wissen, lernen: Lernen, mehr: Mehr };
+const ROOT = { start: C.intern ? (C.einsatz ? EinsatzStart : Ablauf) : Start, fall: FallUebersicht, kontakte: Kontakte, wissen: Wissen, lernen: Lernen, mehr: Mehr };
 renderTabs();
 stack = [ROOT.start];
 render("enter-fade");

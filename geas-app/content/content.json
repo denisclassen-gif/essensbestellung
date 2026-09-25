@@ -2,7 +2,7 @@
   "meta": {
     "titel": "GEAS & Rückführung",
     "untertitel": "Einsatz- und Lernhilfe für den Polizeivollzugsdienst – Zuschnitt Polizei Sachsen / PD Leipzig",
-    "version": "2.1.0",
+    "version": "2.9.0",
     "stand": "September 2026",
     "hinweis": "Diese App ist eine inoffizielle Arbeits- und Lernhilfe. Sie ersetzt weder Gesetzestext, Erlasse, Dienstanweisungen der Polizei Sachsen noch die Weisung der zuständigen Ausländerbehörde oder der Führung im Einsatz. Rechtsstand: GEAS-Reform (EU) und GEAS-Anpassungsgesetz, in Kraft seit 12.06.2026. Paragraphenangaben zum neuen nationalen Recht vor dienstlicher Verwendung stets gegen die aktuelle Gesetzesfassung und die Erlasslage des SMI prüfen. Personenbezogene Daten nur im Unterlagen-Assistenten und nur auf dienstlich zugelassenen Geräten erfassen; erzeugte Unterlagen sind Entwürfe, maßgeblich sind die amtlichen Vordrucke."
   },
@@ -53,6 +53,10 @@
         {
           "titel": "Dauer und Rechtsgrundlagen (national)",
           "text": "• Außengrenze: höchstens **7 Tage** – § 14a AufenthG (Zuständigkeit an Flug- und Seehäfen i. d. R. Bundespolizei)\n• Inland: höchstens **3 Tage** – § 15b AufenthG\n• Die Person ist zur Durchführung **festzuhalten** und an einen geeigneten Ort zu **verbringen**, wenn die Überprüfung sonst nicht oder nur unter erheblichen Schwierigkeiten möglich ist.\n• **Freilassen**, wenn nicht **bis zum Ende des Tages nach dem Ergreifen** eine **richterliche Entscheidung** über die Fortdauer vorliegt (Art. 104 GG).\n• Zuständigkeit: § 71 Abs. 4a AufenthG – Polizeien der Länder sowie weitere nach Landesrecht bestimmte Behörden (z. B. Ausländerbehörden, Aufnahmeeinrichtungen). **Die sächsische Aufgabenverteilung (Zuständigkeitsverordnung/Erlass SMI) beachten.**"
+        },
+        {
+          "titel": "Information, Mitwirkung, Minderjährige",
+          "text": "• **Information (Art. 11):** Die Person ist in einer Sprache, die sie versteht, zu informieren über Zweck, Dauer und Ablauf des Screenings, ihre Rechte und Pflichten, das Recht, Asyl zu beantragen, Einreise- und Rückkehrregeln sowie den Datenschutz.\n• **Mitwirkung (Art. 9):** Die Person muss erreichbar bleiben, mitwirken, wahrheitsgemäße Angaben machen und die Aufnahme biometrischer Daten dulden. Fehlende Mitwirkung wird im Formular mit Begründung vermerkt.\n• **Minderjährige (Art. 13):** Kindeswohl vorrangig; kindgerechte Durchführung; bei unbegleiteten Minderjährigen ist unverzüglich eine Vertretung zu bestellen (Jugendamt).\n• **Überprüfungsformular (Art. 17):** Personalien, Sprachen, Wohnsitzstaaten, Gründe der Einreise, Reiseweg mit Ausgangs- und Transitstaaten, Hinweise auf Schleusung, Dokumente, Familienangehörige in der EU, Asylantrag und Mitwirkung. Ergebnisse der Sicherheitskontrolle gehören nicht in die Unterlagen für die Person."
         },
         {
           "titel": "Ergebnis des Screenings",
@@ -302,7 +306,7 @@
         },
         {
           "titel": "Einrichtungen",
-          "text": "• **Erstaufnahmeeinrichtungen** der LDS (u. a. in Leipzig, Dresden, Chemnitz)\n• **Sekundärmigrationszentrum Dresden** – seit 01.07.2026\n• **Abschiebungshaft/Ausreisegewahrsam Dresden**\n• **Flughafen Leipzig/Halle** – Sammel- und Einzelrückführungen, Übergabe an die Bundespolizei"
+          "text": "• **Erstaufnahmeeinrichtungen** der LDS (aktuelle Standorte und Zuweisung laut Erlasslage)\n• **Sekundärmigrationszentrum Dresden** – seit 01.07.2026\n• **Abschiebungshaft/Ausreisegewahrsam Dresden**\n• **Flughafen Leipzig/Halle** – Sammel- und Einzelrückführungen, Übergabe an die Bundespolizei"
         },
         {
           "titel": "Rechtsgrundlagen Sachsen",
@@ -357,7 +361,8 @@
           "hinweis": "Fristenrechner im Reiter Screening"
         },
         {
-          "text": "Belehrung in verständlicher Sprache (Dolmetscher)"
+          "text": "Information nach Art. 11 Screening-VO in verständlicher Sprache erteilt",
+          "hinweis": "Zweck, Dauer, Rechte, Pflichten, Asylrecht, Datenschutz"
         },
         {
           "text": "Minderjährigkeit/Vulnerabilität geprüft, ggf. Jugendamt informiert"
@@ -380,6 +385,12 @@
         },
         {
           "text": "Vulnerabilität dokumentiert"
+        },
+        {
+          "text": "Mitwirkung (Art. 9) bewertet; bei Verweigerung Begründung notiert"
+        },
+        {
+          "text": "Sicherheitsergebnisse nur in der internen Anlage – nicht an die Person aushändigen"
         },
         {
           "text": "Screening-Formular vollständig ausgefüllt"
@@ -991,6 +1002,30 @@
     }
   ],
   "quiz": [
+    {
+      "kapitel": "screening",
+      "frage": "Wohin gehören die Ergebnisse der Sicherheitskontrolle (Datenbanktreffer)?",
+      "antworten": [
+        "In das Formular, das die Person erhält",
+        "In eine interne Anlage, die der Person nicht ausgehändigt wird",
+        "Nirgendwohin – sie werden nicht dokumentiert",
+        "In die Belehrung"
+      ],
+      "richtig": 1,
+      "erklaerung": "Datenbanktreffer sind polizeiliche Erkenntnisse; sie werden getrennt dokumentiert."
+    },
+    {
+      "kapitel": "screening",
+      "frage": "Worüber muss die Person nach Art. 11 Screening-VO informiert werden?",
+      "antworten": [
+        "Nur über die Dauer",
+        "Zweck, Dauer, Ablauf, Rechte und Pflichten, Asylrecht, Einreise-/Rückkehrregeln, Datenschutz",
+        "Nur über das Asylrecht",
+        "Gar nicht, erst die LDS informiert"
+      ],
+      "richtig": 1,
+      "erklaerung": "Art. 11 verlangt eine umfassende Information in einer verständlichen Sprache."
+    },
     {
       "kapitel": "screening",
       "frage": "Eine vietnamesische Frau reiste mit einem Schengen-Besuchsvisum über Prag ein. Sie ist seit fünf Monaten in Leipzig. Screening?",
@@ -2468,6 +2503,11 @@
             "platzhalter": "z. B. aus dem Vorgangsbearbeitungssystem"
           },
           {
+            "id": "azr_nummer",
+            "label": "AZR-Nummer (falls vorhanden)",
+            "typ": "text"
+          },
+          {
             "id": "dienststelle",
             "label": "Dienststelle",
             "typ": "text",
@@ -2577,6 +2617,12 @@
             "pflicht": true
           },
           {
+            "id": "wohnsitzlaender",
+            "label": "Wohnsitzstaaten vor der Ankunft",
+            "typ": "text",
+            "pflicht": true
+          },
+          {
             "id": "dolmetscher",
             "label": "Sprachmittlung (Name, Sprache, Art)",
             "typ": "text",
@@ -2599,6 +2645,17 @@
             "id": "dokument_details",
             "label": "Dokumentenangaben (Art, Nummer, Aussteller, Gültigkeit)",
             "typ": "mehrzeilig"
+          },
+          {
+            "id": "angaben_quelle",
+            "label": "Die Personalien beruhen auf …",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Dokumenten (belegt)",
+              "eigenen Angaben der Person",
+              "teils Dokumenten, teils Angaben"
+            ]
           }
         ]
       },
@@ -2606,7 +2663,7 @@
         "id": "reise",
         "titel": "Reiseweg",
         "icon": "map",
-        "beschreibung": "Angaben der Person zu Einreise und Reiseweg (Art. 17 Screening-VO).",
+        "beschreibung": "Angaben zu Einreise und Reiseweg nach Art. 17 Screening-VO.",
         "felder": [
           {
             "id": "einreise_datum",
@@ -2619,10 +2676,46 @@
             "typ": "text"
           },
           {
+            "id": "ausgangsstaat",
+            "label": "Ausgangsstaat der Reise",
+            "typ": "text",
+            "pflicht": true
+          },
+          {
             "id": "reiseweg",
             "label": "Reiseweg, Transitstaaten, frühere Aufenthaltsorte",
             "typ": "mehrzeilig",
             "pflicht": true
+          },
+          {
+            "id": "asyl_drittstaaten",
+            "label": "Drittstaaten, in denen möglicherweise Schutz beantragt oder gewährt wurde",
+            "typ": "text"
+          },
+          {
+            "id": "ziel_eu",
+            "label": "Beabsichtigtes Ziel in der EU",
+            "typ": "text"
+          },
+          {
+            "id": "familie_eu",
+            "label": "Familienangehörige in einem EU-Mitgliedstaat?",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Ja",
+              "Nein",
+              "Unbekannt"
+            ]
+          },
+          {
+            "id": "familie_eu_details",
+            "label": "Wer, in welchem Staat?",
+            "typ": "mehrzeilig",
+            "bedingung": {
+              "feld": "familie_eu",
+              "wert": "Ja"
+            }
           },
           {
             "id": "grund",
@@ -2655,7 +2748,7 @@
         "id": "abfragen",
         "titel": "Abfragen",
         "icon": "magnifyingglass",
-        "beschreibung": "Identitäts- und Sicherheitsprüfung – Ergebnis jeder Abfrage festhalten.",
+        "beschreibung": "Identitätsprüfung und Sicherheitskontrolle (Art. 14, 15 Screening-VO). Die Ergebnisse gehören in eine interne Anlage, nicht in die Unterlagen für die Person.",
         "felder": [
           {
             "id": "abfrage_inpol",
@@ -2702,6 +2795,28 @@
             ]
           },
           {
+            "id": "abfrage_ees",
+            "label": "EES (Einreise-/Ausreisesystem)",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Kein Treffer",
+              "Treffer",
+              "Nicht durchgeführt"
+            ]
+          },
+          {
+            "id": "abfrage_vis",
+            "label": "VIS (Visa-Informationssystem)",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Kein Treffer",
+              "Treffer",
+              "Nicht durchgeführt"
+            ]
+          },
+          {
             "id": "abfrage_weitere",
             "label": "Weitere Abfragen (z. B. Europol/Interpol über zuständige Stelle)",
             "typ": "text"
@@ -2711,6 +2826,17 @@
             "label": "Treffer und sicherheitsrelevante Erkenntnisse",
             "typ": "mehrzeilig",
             "hinweis": "Bei „Treffer“ immer ausfüllen."
+          },
+          {
+            "id": "sicherheit_anhaltspunkte",
+            "label": "Anhaltspunkte, dass von der Person eine Gefahr für die innere Sicherheit ausgeht?",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Ja",
+              "Nein"
+            ],
+            "hinweis": "Nur nach Auswertung aller Abfragen beantworten."
           }
         ]
       },
@@ -2946,6 +3072,36 @@
             ]
           },
           {
+            "id": "info_art11",
+            "label": "Information nach Art. 11 Screening-VO erteilt (in verständlicher Sprache)",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Ja",
+              "Nein"
+            ]
+          },
+          {
+            "id": "mitwirkung",
+            "label": "Ist die Person ihrer Mitwirkungspflicht (Art. 9 Screening-VO) nachgekommen?",
+            "typ": "auswahl",
+            "pflicht": true,
+            "optionen": [
+              "Ja",
+              "Nein"
+            ]
+          },
+          {
+            "id": "mitwirkung_begruendung",
+            "label": "Begründung (fehlende Mitwirkung)",
+            "typ": "mehrzeilig",
+            "pflicht": true,
+            "bedingung": {
+              "feld": "mitwirkung",
+              "wert": "Nein"
+            }
+          },
+          {
             "id": "uebergabe_an",
             "label": "Übergeben an (Stelle, Name)",
             "typ": "text",
@@ -2975,9 +3131,9 @@
     {
       "id": "formular",
       "titel": "Überprüfungsformular",
-      "untertitel": "Art. 17 Screening-VO – Arbeitsentwurf",
+      "untertitel": "Angaben nach Art. 17 Screening-VO – Arbeitsentwurf",
       "icon": "doc.text.fill",
-      "beschreibung": "Alle Angaben des Screenings in einem Dokument.",
+      "beschreibung": "Alle Angaben nach Art. 17 Screening-VO, gegliedert wie die Verordnung. Maßgeblich ist das amtliche Formular.",
       "pflichtfelder": [
         "vorgang",
         "dienststelle",
@@ -2990,74 +3146,96 @@
         "geschlecht",
         "staatsangehoerigkeit",
         "sprachen",
+        "wohnsitzlaender",
+        "angaben_quelle",
         "dokumente",
+        "ausgangsstaat",
         "reiseweg",
         "grund",
         "schleusung",
-        "abfrage_inpol",
-        "abfrage_azr",
-        "abfrage_sis",
-        "abfrage_eurodac",
+        "familie_eu",
         "ed",
         "eurodac",
         "gesundheitsbehoerde",
         "vulnerabilitaet",
         "asyl",
+        "mitwirkung",
         "weiterleitung"
       ],
       "abschnitte": [
         {
           "titel": "",
-          "text": "**Hinweis:** Arbeitsentwurf auf Grundlage von Art. 17 VO (EU) 2024/1356. Maßgeblich ist der amtliche Vordruck bzw. die Maske im Vorgangsbearbeitungssystem.\n\n| Vorgangsnummer | {{vorgang}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})"
+          "text": "**Hinweis:** Arbeitsentwurf zur Vorbereitung. Maßgeblich sind das amtliche Überprüfungsformular und die Vorgaben der Dienststelle zur Befüllung und Übermittlung. Ergebnisse der Sicherheitskontrolle stehen in der separaten internen Anlage.\n\n| Vorgangsnummer | {{vorgang}}\n| AZR-Nummer | {{azr_nummer}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})"
         },
         {
-          "titel": "1. Aufgriff",
+          "titel": "1. Angaben zur Überprüfung",
           "text": "| Zeitpunkt | {{aufgriff_zeit}}\n| Ort | {{aufgriff_ort}}\n| Anlass | {{anlass}}\n| Rechtsgrundlage | Art. 7 VO (EU) 2024/1356, § 15b AufenthG"
         },
         {
-          "titel": "2. Personalien",
-          "text": "| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}\n| Geburtsort | {{geburtsort}}\n| Weitere Personalien / Aliase | {{alias}}\n| Sprachen | {{sprachen}}\n| Sprachmittlung | {{dolmetscher}}\n| Dokumente | {{dokumente}}\n| Dokumentenangaben | {{dokument_details}}"
+          "titel": "2. Angaben zur Person (Art. 17 Abs. 1 Buchst. a, b)",
+          "text": "| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}\n| Geburtsort | {{geburtsort}}\n| Weitere Personalien / Aliase | {{alias}}\n| Sprachkenntnisse | {{sprachen}}\n| Wohnsitzstaaten vor der Ankunft | {{wohnsitzlaender}}\n| Angaben beruhen auf | {{angaben_quelle}}"
         },
         {
-          "titel": "3. Einreise und Reiseweg",
-          "text": "| Einreise (ca.) | {{einreise_datum}}\n| Ort des Grenzübertritts | {{einreise_ort}}\n| Reiseweg / Transit | {{reiseweg}}\n| Grund für Einreise/Aufenthalt | {{grund}}\n| Hinweise auf Schleusung | {{schleusung}}\n| Einzelheiten | {{schleusung_details}}"
+          "titel": "3. Vorläufige Gesundheits- und Vulnerabilitätsprüfung (Art. 12)",
+          "text": "| Gesundheitsbehörde | {{gesundheitsbehoerde}}\n| Informiert am | {{gesundheit_zeit}}\n| Beobachtungen | {{beschwerden}}\n| Hinweise auf Schutzbedürftigkeit | {{vulnerabilitaet}}\n| Beobachtungen | {{vulnerabilitaet_details}}\n| Jugendamt | {{jugendamt}}"
         },
         {
-          "titel": "4. Identitäts- und Sicherheitsprüfung",
-          "text": "| INPOL | {{abfrage_inpol}}\n| AZR | {{abfrage_azr}}\n| SIS | {{abfrage_sis}}\n| Eurodac / Fast-ID | {{abfrage_eurodac}}\n| Weitere Abfragen | {{abfrage_weitere}}\n| Erkenntnisse | {{treffer_details}}"
+          "titel": "4. Weitere verfahrensrelevante Angaben",
+          "text": "| Antrag auf internationalen Schutz | {{asyl}}\n| Wortlaut | {{asyl_wortlaut}}\n| Familienangehörige in einem Mitgliedstaat | {{familie_eu}}\n| Einzelheiten | {{familie_eu_details}}\n| Mitwirkung (Art. 9) erfüllt | {{mitwirkung}}\n| Begründung | {{mitwirkung_begruendung}}\n| Information nach Art. 11 erteilt | {{info_art11}}\n| Sprachmittlung | {{dolmetscher}}"
         },
         {
-          "titel": "5. Biometrische Daten",
-          "text": "| ED-Behandlung | {{ed}}\n| Eurodac | {{eurodac}}\n| Zeitpunkt | {{biometrie_zeit}}\n| Bemerkungen | {{biometrie_bemerkung}}"
+          "titel": "5. Einreise und Reiseweg (Art. 17 Abs. 1 Buchst. c, d, e)",
+          "text": "| Gründe für Ankunft / unerlaubte Einreise | {{grund}}\n| Einreise (ca.) | {{einreise_datum}}\n| Ort des Grenzübertritts | {{einreise_ort}}\n| Ausgangsstaat | {{ausgangsstaat}}\n| Reiseweg, Transitstaaten | {{reiseweg}}\n| Hinweise auf Schleusung | {{schleusung}}\n| Einzelheiten | {{schleusung_details}}"
         },
         {
-          "titel": "6. Vorläufige Gesundheitskontrolle",
-          "text": "| Gesundheitsbehörde | {{gesundheitsbehoerde}}\n| Informiert am | {{gesundheit_zeit}}\n| Beobachtungen | {{beschwerden}}"
+          "titel": "6. Ergänzende Angaben",
+          "text": "| Drittstaaten mit möglichem Schutzantrag / Schutz | {{asyl_drittstaaten}}\n| Beabsichtigtes Ziel in der EU | {{ziel_eu}}\n| Mitgeführte Reise- und Identitätsdokumente | {{dokumente}}\n| Dokumentenangaben (Art, Nummer, Staat) | {{dokument_details}}"
         },
         {
-          "titel": "7. Vorläufige Vulnerabilitätsprüfung",
-          "text": "| Hinweise | {{vulnerabilitaet}}\n| Beobachtungen | {{vulnerabilitaet_details}}\n| Jugendamt | {{jugendamt}}"
+          "titel": "7. Biometrie und Ergebnis",
+          "text": "| ED-Behandlung | {{ed}}\n| Eurodac | {{eurodac}}\n| Zeitpunkt | {{biometrie_zeit}}\n| Festgehalten | {{festgehalten}}\n| Weiterleitung | {{weiterleitung}}\n| Übergeben an | {{uebergabe_an}}\n| Zeitpunkt | {{uebergabe_zeit}}\n| Screening endet spätestens | {{frist_screening}}\n| Bemerkungen | {{bemerkungen}}\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
+        }
+      ]
+    },
+    {
+      "id": "sicherheit",
+      "titel": "Anlage: Sicherheitskontrolle",
+      "untertitel": "Art. 15 Screening-VO – nur für den Dienstgebrauch, nicht aushändigen",
+      "icon": "lock.shield",
+      "beschreibung": "Ergebnisse der Datenbankabfragen. Getrennt vom Formular, damit sie nicht an die Person gelangen.",
+      "pflichtfelder": [
+        "vorgang",
+        "name",
+        "vorname",
+        "abfrage_inpol",
+        "abfrage_azr",
+        "abfrage_sis",
+        "abfrage_eurodac",
+        "abfrage_ees",
+        "abfrage_vis",
+        "sicherheit_anhaltspunkte"
+      ],
+      "abschnitte": [
+        {
+          "titel": "",
+          "text": "**Diese Anlage darf der Person nicht ausgehändigt werden.**\n\n| Vorgangsnummer | {{vorgang}}\n| AZR-Nummer | {{azr_nummer}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})\n| Person | {{name}}, {{vorname}}, geb. {{geburtsdatum}}"
         },
         {
-          "titel": "8. Antrag auf internationalen Schutz",
-          "text": "| Schutzersuchen | {{asyl}}\n| Wortlaut | {{asyl_wortlaut}}\n| Zeitpunkt | {{asyl_zeit}}"
+          "titel": "Abfragen",
+          "text": "| INPOL | {{abfrage_inpol}}\n| AZR | {{abfrage_azr}}\n| SIS | {{abfrage_sis}}\n| Eurodac / Fast-ID | {{abfrage_eurodac}}\n| EES | {{abfrage_ees}}\n| VIS | {{abfrage_vis}}\n| Weitere Abfragen | {{abfrage_weitere}}"
         },
         {
-          "titel": "9. Festhalten",
-          "text": "| Festgehalten | {{festgehalten}}\n| Beginn | {{festhalten_beginn}}\n| Ort | {{unterbringung}}\n| Richterliche Entscheidung spätestens | {{frist_richter}}"
-        },
-        {
-          "titel": "10. Ergebnis und Weiterleitung",
-          "text": "| Weiterleitung | {{weiterleitung}}\n| Übergeben an | {{uebergabe_an}}\n| Zeitpunkt | {{uebergabe_zeit}}\n| Screening endet spätestens | {{frist_screening}}\n| Sichergestellte Gegenstände | {{sichergestellt}}\n| Bemerkungen | {{bemerkungen}}\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
+          "titel": "Ergebnis",
+          "text": "| Treffer und Erkenntnisse | {{treffer_details}}\n| Anhaltspunkte für eine Gefahr für die innere Sicherheit | {{sicherheit_anhaltspunkte}}\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
         }
       ]
     },
     {
       "id": "belehrung",
-      "titel": "Belehrung",
-      "untertitel": "Deutsch / English – zum Aushändigen",
+      "titel": "Information zur Überprüfung",
+      "untertitel": "Art. 11 Screening-VO – Deutsch / English, zum Aushändigen",
       "icon": "text.bubble.fill",
-      "beschreibung": "Information der Person über das Screening, zweisprachig mit Unterschriftsfeldern.",
+      "beschreibung": "Information der Person nach Art. 11 Screening-VO und Hinweis auf die Mitwirkungspflicht (Art. 9), zweisprachig.",
       "pflichtfelder": [
         "name",
         "vorname",
@@ -3071,15 +3249,15 @@
         },
         {
           "titel": "Deutsch",
-          "text": "Sie werden nach Art. 7 der Verordnung (EU) 2024/1356 und § 15b Aufenthaltsgesetz überprüft (Screening). Die Überprüfung dauert höchstens drei Tage.\n\nDabei geschieht Folgendes:\n• Ihre Identität wird festgestellt.\n• Es wird eine Sicherheitsüberprüfung in Datenbanken durchgeführt.\n• Ihre Fingerabdrücke und ein Gesichtsbild werden aufgenommen und in Eurodac gespeichert.\n• Eine Gesundheitsbehörde führt eine vorläufige Gesundheitskontrolle durch.\n• Es wird geprüft, ob Sie besonderen Schutz benötigen.\n\nSie sind verpflichtet, mitzuwirken und wahrheitsgemäße Angaben zu machen.\n\nSie können **jederzeit internationalen Schutz (Asyl) beantragen**. Wenn Sie festgehalten werden, entscheidet ein Gericht spätestens bis zum Ende des folgenden Tages. Sie haben das Recht, einen Rechtsbeistand und auf Wunsch Ihr Konsulat zu benachrichtigen."
+          "text": "**Zweck und Dauer.** Sie werden nach Art. 7 der Verordnung (EU) 2024/1356 und § 15b Aufenthaltsgesetz überprüft (Screening). Damit wird festgestellt, wer Sie sind und welches Verfahren für Sie gilt. Die Überprüfung dauert höchstens drei Tage.\n\n**Ablauf.** Ihre Identität wird festgestellt; Ihre Angaben und Dokumente werden mit Datenbanken abgeglichen (Sicherheitskontrolle). Ihre Fingerabdrücke und ein Gesichtsbild werden aufgenommen und in Eurodac gespeichert. Eine Gesundheitsbehörde führt eine vorläufige Gesundheitskontrolle durch. Es wird geprüft, ob Sie besonderen Schutz oder besondere Unterstützung benötigen.\n\n**Ihre Pflichten.** Sie müssen während der Überprüfung für die Behörden erreichbar bleiben, mitwirken, wahrheitsgemäße Angaben machen und die Aufnahme Ihrer biometrischen Daten dulden (Art. 9 Screening-VO).\n\n**Ihre Rechte.** Sie können **jederzeit einen Antrag auf internationalen Schutz (Asyl)** stellen. Wenn Sie festgehalten werden, entscheidet ein Gericht spätestens bis zum Ende des folgenden Tages. Sie können einen Rechtsbeistand und auf Wunsch Ihr Konsulat benachrichtigen. Sie können Angaben im Überprüfungsformular widersprechen.\n\n**Nach der Überprüfung.** Sie werden an die zuständige Stelle weitergeleitet: in ein Asylverfahren, wenn Sie Schutz beantragen, oder in ein Rückkehrverfahren, wenn Sie kein Recht auf Aufenthalt haben. Wer die Voraussetzungen für Einreise und Aufenthalt nicht erfüllt, ist zur Ausreise verpflichtet.\n\n**Datenschutz.** Ihre Daten werden für die Überprüfung und die anschließenden Verfahren verarbeitet. Sie haben das Recht auf Auskunft, Berichtigung und Löschung nach den geltenden Datenschutzvorschriften."
         },
         {
           "titel": "English",
-          "text": "You are being screened under Article 7 of Regulation (EU) 2024/1356 and Section 15b of the German Residence Act. The screening lasts no longer than three days.\n\nThe screening includes:\n• identification of your person,\n• a security check in databases,\n• taking your fingerprints and a facial image and storing them in Eurodac,\n• a preliminary health check carried out by a health authority,\n• a check whether you have special needs.\n\nYou are obliged to cooperate and to provide truthful information.\n\nYou may **apply for international protection (asylum) at any time**. If you are held, a court will decide by the end of the following day at the latest. You have the right to contact a lawyer and, if you wish, your consulate."
+          "text": "**Purpose and duration.** You are being screened under Article 7 of Regulation (EU) 2024/1356 and Section 15b of the German Residence Act. The screening establishes your identity and the procedure that applies to you. It lasts no longer than three days.\n\n**Steps.** Your identity is established; your data and documents are checked against databases (security check). Your fingerprints and a facial image are taken and stored in Eurodac. A health authority carries out a preliminary health check. It is checked whether you need special protection or support.\n\n**Your obligations.** During the screening you must remain available to the authorities, cooperate, provide truthful information and allow your biometric data to be taken (Article 9 of the Screening Regulation).\n\n**Your rights.** You may **apply for international protection (asylum) at any time**. If you are held, a court will decide by the end of the following day at the latest. You may contact a lawyer and, if you wish, your consulate. You may object to information in the screening form.\n\n**After the screening.** You will be referred to the competent authority: to an asylum procedure if you apply for protection, or to a return procedure if you have no right to stay. Anyone who does not fulfil the conditions for entry and stay is obliged to leave.\n\n**Data protection.** Your data are processed for the screening and the subsequent procedures. You have the right of access, rectification and erasure under the applicable data protection rules."
         },
         {
           "titel": "Bestätigung / Confirmation",
-          "text": "Die Belehrung wurde mir in einer Sprache erläutert, die ich verstehe. / This information was explained to me in a language I understand.\n\nSprache / Language: {{sprachen}}\n\n\n______________________________          ______________________________\nUnterschrift / Signature                           Sprachmittler:in / Interpreter\n\n\n______________________________\nBelehrende:r Beamt:in ({{sachbearbeiter}}), {{heute}}\n\nUnterschrift verweigert: ☐"
+          "text": "Die Information wurde mir in einer Sprache erläutert, die ich verstehe. / This information was explained to me in a language I understand.\n\nSprache / Language: {{sprachen}}\n\n\n______________________________          ______________________________\nUnterschrift / Signature                           Sprachmittler:in / Interpreter\n\n\n______________________________\nInformierende:r Beamt:in ({{sachbearbeiter}}), {{heute}}\n\nUnterschrift verweigert: ☐"
         }
       ]
     },

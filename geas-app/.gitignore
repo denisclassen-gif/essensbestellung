@@ -1,2 +1,9 @@
 ios/GEASHilfe.xcodeproj/
 ios/build/
+
+# Interne Ausgabe (dienstinterne Inhalte) – niemals veröffentlichen
+content/intern.json
+content/intern/
+web/intern/
+*.docx
+*.msg
