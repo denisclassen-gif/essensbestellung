@@ -540,21 +540,132 @@ async function renderPageToCanvas(doc, pageNum, scale) {
   canvas.height = viewport.height;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   await page.render({ canvasContext: ctx, viewport }).promise;
-  const content = await page.getTextContent();
-  const items = content.items.map(it => ({
-    str: it.str,
-    x: it.transform[4] * scale,
-    y: viewport.height - it.transform[5] * scale,
-    width: it.width * scale,
-    height: it.height * scale,
-  }));
+  const items = await getViewportTextItems(page, viewport);
   return { ctx, items };
 }
 
-function findGeschlechtPair(pt, fromIdx) {
-  const m = fuzzyFind(pt, 'männl.', fromIdx);
+/* Textpositionen in Bildschirm-/Canvas-Koordinaten (y nach unten). Über die
+   Viewport-Transformation statt direkt aus transform[4]/[5], damit auch
+   gedreht abgespeicherte Scans (/Rotate 90/270 — Text läuft dort entlang
+   der PDF-y-Achse) korrekt liegen; bei ungedrehten Seiten identisch. */
+async function getViewportTextItems(page, viewport) {
+  const content = await page.getTextContent();
+  const scale = viewport.scale;
+  return content.items.map(it => {
+    const tx = pdfjsLib.Util.transform(viewport.transform, it.transform);
+    return { str: it.str, x: tx[4], y: tx[5], width: it.width * scale, height: it.height * scale };
+  });
+}
+
+/* Manche Scans (OCR-Textebene, z.B. vom Kopierer) liefern über pdf.js jedes
+   Zeichen als eigenes Textstück — der verflachte Text lautet dann
+   "F a m i l i e n n a m e M U S E", Wortgrenzen sind verloren und die
+   Seitenleiste (Ansprechpartner, Bankverbindung) steht teils zeilenweise
+   mitten in der Personalien-Tabelle. Für solche Dokumente wird der Text aus
+   den Zeichenpositionen neu zusammengesetzt: Zeilen nach y, Wortabstände
+   nach x-Lücke, große Lücken trennen Spalten ("Segmente"), und die rechte
+   Seitenleiste wird separat hinten angehängt. */
+function looksCharSpaced(text) {
+  const toks = text.split(' ').filter(Boolean);
+  return toks.length > 200 && toks.filter(t => t.length === 1).length / toks.length > 0.6;
+}
+
+/* Schräg eingezogene Scans: eine optische Zeile "wandert" in y, zerfiele
+   sonst in mehrere Bruchstücke. Neigung aus direkt aufeinanderfolgenden
+   Zeichen (OCR liefert sie in Lesereihenfolge) schätzen (Median dy/dx)
+   und die y-Werte vor der Zeilenbildung entsprechend begradigen. */
+function deskewItems(items) {
+  const slopes = [];
+  for (let i = 1; i < items.length; i++) {
+    const a = items[i - 1], b = items[i];
+    const h = b.height || 10;
+    const dx = b.x - a.x, dy = b.y - a.y;
+    if (dx > 0 && dx < 1.5 * h && Math.abs(dy) < 0.5 * h) slopes.push(dy / dx);
+  }
+  if (slopes.length < 50) return items;
+  slopes.sort((p, q) => p - q);
+  const slope = slopes[Math.floor(slopes.length / 2)];
+  if (Math.abs(slope) < 0.004) return items;
+  return items.map(it => ({ ...it, y: it.y - slope * it.x }));
+}
+
+function buildLineSegments(items, splitX) {
+  const sorted = items.filter(it => it.str.trim()).sort((a, b) => a.y - b.y || a.x - b.x);
+  const lines = [];
+  for (const it of sorted) {
+    const h = it.height || 10;
+    const line = lines[lines.length - 1];
+    if (line && Math.abs(line.y - it.y) <= Math.max(2, 0.4 * h)) line.items.push(it);
+    else lines.push({ y: it.y, items: [it] });
+  }
+  const segments = [];
+  for (const line of lines) {
+    line.items.sort((a, b) => a.x - b.x);
+    let seg = null, prev = null;
+    for (const it of line.items) {
+      const h = it.height || 10;
+      const gap = prev ? it.x - (prev.x + prev.width) : 0;
+      const crossesSplit = prev && splitX != null && prev.x < splitX && it.x >= splitX;
+      if (!seg || gap > 2.5 * h || crossesSplit) {
+        seg = { text: '', x: it.x, y: line.y, h, sidebar: splitX != null && it.x >= splitX };
+        segments.push(seg);
+      } else if (gap > 0.15 * h && !/\s$/.test(seg.text) && !/^\s/.test(it.str)) {
+        seg.text += ' ';
+      }
+      seg.text += it.str;
+      prev = it;
+    }
+  }
+  for (const s of segments) s.text = s.text.replace(/\s+/g, ' ').trim();
+  // Einzelzeichen und reine Satz-/Rahmenzeichen sind bei Scans fast immer
+  // als Text erkannte Tabellenlinien ("—", "I", "=") — verwerfen.
+  return segments.filter(s => s.text.length > 1 && /[A-Za-zÄÖÜäöüß0-9]/.test(s.text));
+}
+
+async function extractSegmentsFromDoc(doc) {
+  const pages = [];
+  for (let p = 1; p <= doc.numPages; p++) {
+    const page = await doc.getPage(p);
+    let items = deskewItems(await getViewportTextItems(page, page.getViewport({ scale: 1 })));
+    // Der senkrechte Barcode am linken Rand wird von der OCR als sehr hohe
+    // "Zeichen" erkannt, die sonst an die Tabellen-Labels angeklebt würden.
+    const hs = items.filter(it => it.str.trim()).map(it => it.height).sort((p, q) => p - q);
+    const medianH = hs.length ? hs[Math.floor(hs.length / 2)] : 0;
+    if (medianH) items = items.filter(it => it.height <= 2.5 * medianH);
+    const anchors = buildLineSegments(items, null)
+      .filter(s => /Ansprechpartner|Postanschrift|Bankverbindung|Besucheranschrift/i.test(s.text));
+    const splitX = anchors.length ? Math.min(...anchors.map(s => s.x)) - 3 : null;
+    pages.push(buildLineSegments(items, splitX));
+  }
+  return pages;
+}
+
+function segmentsToText(pages) {
+  return pages.map(segs => [...segs.filter(s => !s.sidebar), ...segs.filter(s => s.sidebar)]
+    .map(s => s.text).join(' ')).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+// Wie fuzzyFind, aber mit frei vorgegebenem Regex-Quelltext — für
+// OCR-Textebenen, in denen z.B. "männl." als "männi." erkannt wurde.
+function fuzzyFindRe(pt, reSource, fromIdx) {
+  const searchText = fromIdx ? pt.text.slice(fromIdx) : pt.text;
+  const m = searchText.match(new RegExp(reSource, 'i'));
   if (!m) return null;
-  const w = fuzzyFind(pt, 'weibl.', m.nextIdx);
+  const startIdx = (fromIdx || 0) + m.index;
+  const endIdx = startIdx + m[0].length - 1;
+  const startItem = pt.items[pt.map[startIdx]];
+  const endItem = pt.items[pt.map[endIdx]];
+  return {
+    startIdx, nextIdx: endIdx + 1,
+    x0: startItem.x, x1: endItem.x + endItem.width,
+    y: startItem.y, h: startItem.height || 18,
+  };
+}
+
+function findGeschlechtPair(pt, fromIdx) {
+  const m = fuzzyFind(pt, 'männl.', fromIdx) || fuzzyFindRe(pt, 'm\\s*ä\\s*n\\s*n\\s*[l1iI|]\\s*\\.', fromIdx);
+  if (!m) return null;
+  const w = fuzzyFind(pt, 'weibl.', m.nextIdx) || fuzzyFindRe(pt, 'w\\s*e\\s*i\\s*b\\s*[l1iI|]\\s*\\.', m.nextIdx);
   if (!w) return null;
   return { boxM: m, boxW: w };
 }
@@ -896,6 +1007,10 @@ function parsePolizeiauftrag(text) {
 /* "polizeiauftrag" erkannt (Marker "Durchführung einer"), aber intern     */
 /* über isBotschaftsvorfuehrung() abgezweigt.                              */
 /* ---------------------------------------------------------------------- */
+function assignDefined(target, src) {
+  for (const [k, v] of Object.entries(src)) if (v != null && v !== '') target[k] = v;
+}
+
 function isBotschaftsvorfuehrung(text) {
   return new RegExp(fuzzy('Ort und Zeitpunkt der Vorführung'), 'i').test(text) ||
     new RegExp(fuzzy('Vorführung vor Vertretern'), 'i').test(text);
@@ -909,30 +1024,47 @@ function parseGermanWrittenDate(s) {
   return `${String(m[1]).padStart(2, '0')}.${String(monthNum).padStart(2, '0')}.${m[3]}`;
 }
 
+// Zwischen Tabellen-Label und nächstem Label stehen bei Scans oft noch als
+// Text erkannte Rahmenlinien ("—", "I", "=") — nur echte Namensbestandteile
+// (mind. 2 Buchstaben) behalten.
+function cleanOcrName(s) {
+  return (s || '').split(/\s+/)
+    .map(t => t.replace(/^[^A-Za-zÄÖÜäöüß]+|[^A-Za-zÄÖÜäöüß'\-]+$/g, ''))
+    .filter(t => /^[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß'\-]+$/.test(t))
+    .join(' ');
+}
+
 function parseBotschaftsvorfuehrungText(text) {
   const result = { kinder: [], istBotschaftsvorfuehrung: true };
   let m;
 
-  m = text.match(/ZAB[\s-]*(\d{4,8})/);
+  // Varianten: "ZAB 210637" (Tabellenzeile) oder "unser Aktenzeichen:ZAB-"
+  // mit der Nummer in der Wertspalte — beim Scan steht die Nummer dann im
+  // Text VOR dem umbrochenen Rest des Labels ("unser Aktenzei- 209274 chen:ZAB-").
+  m = text.match(new RegExp(fuzzy('unser Aktenzei') + '[\\s\\S]{0,20}?(\\d{5,8})', 'i')) || text.match(/ZAB[\s:-]*(\d{4,8})/);
   if (m) result.zabNummer = m[1];
 
   m = text.match(/\bAZR\b\s*:?\s*(\d{6,15})/i);
   if (m) result.azrNummer = m[1];
 
   const familiennameLabel = 'F\\s*a\\s*m\\s*i\\s*l\\s*i\\s*e\\s*n?\\s*n\\s*a\\s*m\\s*e';
-  m = text.match(new RegExp(familiennameLabel + '\\s+([A-ZÄÖÜ][A-ZÄÖÜ\\s\\-]*?)\\s+' + fuzzy('Vorname'), 'i'));
-  if (m) result.hauptFamilienname = cleanVal(m[1]);
+  const vornameLabel = fuzzy('Vorname') + '\\s*\\(?\\s*n\\s*\\)?';
+  m = text.match(new RegExp(familiennameLabel + '\\s+(.{2,60}?)\\s*' + vornameLabel, 'i'));
+  if (m) result.hauptFamilienname = cleanOcrName(m[1]).toUpperCase() || undefined;
 
   // Hier folgt auf den Vornamen "Geburtsdatum" statt "Geschlecht" (anders
   // als beim regulären Polizeiauftrag) — es gibt keine eigene Geburtsort-Spalte.
-  m = text.match(new RegExp(fuzzy('Vorname') + '\\(n\\)\\s+([A-ZÄÖÜa-zäöüß\\-]+(?:\\s[A-ZÄÖÜa-zäöüß\\-]+)*?)\\s+' + fuzzy('Geburtsdatum'), 'i'));
-  if (m) result.hauptVorname = cleanVal(m[1]);
+  m = text.match(new RegExp(vornameLabel + '\\s+(.{2,60}?)\\s+' + fuzzy('Geburtsdatum'), 'i'));
+  if (m) result.hauptVorname = cleanOcrName(m[1]) || undefined;
 
-  m = text.match(new RegExp(fuzzy('Geburtsdatum') + '\\s+(\\d{2}\\.\\d{2}\\.\\d{4})\\s+' + fuzzy('Geschlecht'), 'i'));
+  m = text.match(new RegExp(fuzzy('Geburtsdatum') + '\\D{0,15}?(\\d{2}\\.\\d{2}\\.\\d{4})', 'i'));
   if (m) result.hauptGeburtsdatum = m[1];
 
-  m = text.match(new RegExp(fuzzy('Staatsangehörigkeit') + '\\s+([A-ZÄÖÜ][\\wÀ-ÿ\\-]*)\\s+' + fuzzy('ZAB'), 'i'));
-  if (m) result.staatsangehoerigkeit = m[1];
+  m = text.match(new RegExp(fuzzy('Staatsangehörigkeit') + '\\s+(.{2,40}?)\\s+(?:' + fuzzy('unser Akt') + '|ZAB\\b)', 'i'));
+  if (m) {
+    const val = cleanOcrName(m[1]).replace(/^ermutlich\b/i, 'vermutlich');
+    if (val) result.staatsangehoerigkeit = val;
+  }
 
   m = text.match(new RegExp(fuzzy('Ansprechpartner') + '[\\/\\-\\s\\w]*\\s+([A-ZÄÖÜ][\\wäöüß\\-]+\\s[A-ZÄÖÜ][\\wäöüß\\-]+)\\s+' + fuzzy('Durchwahl'), 'i'));
   if (m) result.sachbearbeiter = cleanVal(m[1]);
@@ -952,6 +1084,81 @@ function parseBotschaftsvorfuehrungText(text) {
   }
 
   return result;
+}
+
+/* Variante ohne Tabelle (u.a. bei eingescannten Aufträgen): unter "Ort und
+   Zeitpunkt der Vorführung:" steht eine Zeile Datum/Uhrzeit (auch numerisch,
+   "17.11.2026, 10:00 Uhr"), darunter die Anschrift als einfache Zeilen bis
+   zum nächsten Absatz ("Ein Mitarbeiter von der ZAB ..."). Oberste
+   Anschriftzeile = Zielort, übrige Zeilen = Flughafen/Grenzübergang. */
+function extractOrtZeitFromSegments(pages) {
+  const dateRe = /(\d{1,2}\.\d{1,2}\.\d{4})|(\d{1,2}\.\s*[A-ZÄÖÜa-zäöüß]+\s+\d{4})/;
+  const timeRe = /(\d{1,2})[:.](\d{2})\s*Uhr/i;
+  const headRe = new RegExp(fuzzy('Zeitpunkt der Vorführung'), 'i');
+  const stopRe = /Mitarbeiter|nachfolgende|Verwaltungsakt|Bescheid|[☐☒]/i;
+  for (const segs of pages) {
+    const main = segs.filter(s => !s.sidebar);
+    const i0 = main.findIndex(s => headRe.test(s.text));
+    if (i0 < 0) continue;
+    const result = {};
+    const takeDateTime = t => {
+      const dm = t.match(dateRe);
+      if (dm && !result.abschiebedatum) {
+        result.abschiebedatum = dm[1]
+          ? dm[1].split('.').map((p, i) => i < 2 ? p.padStart(2, '0') : p).join('.')
+          : parseGermanWrittenDate(dm[2]);
+      }
+      const tm = t.match(timeRe);
+      if (tm && !result.abflugzeit) result.abflugzeit = `${tm[1].padStart(2, '0')}:${tm[2]} Uhr`;
+      return !!(dm || tm);
+    };
+    takeDateTime(main[i0].text.replace(/^.*?Vorführung\s*:?/i, ''));
+    const address = [];
+    let prev = main[i0];
+    for (let j = i0 + 1; j < main.length && address.length < 6; j++) {
+      const s = main[j];
+      // Vor der ersten Anschriftzeile darf eine Leerzeile stehen, innerhalb
+      // der Anschrift nicht (dort beginnt der nächste Absatz).
+      const maxGap = (address.length ? 2 : 3.5) * s.h;
+      if (s.y - prev.y > maxGap || stopRe.test(s.text)) break;
+      prev = s;
+      if (!address.length && takeDateTime(s.text)) continue;
+      address.push(s.text);
+    }
+    if (address.length) {
+      result.zielort = address[0];
+      result.flughafen = address.slice(1).join(', ');
+    }
+    return result;
+  }
+  return null;
+}
+
+/* "auf freiem Fuß / letzte bekannte Anschrift" — die Adresse steht in der
+   linken Tabellenspalte darunter (Straße, dann "PLZ Ort"); die rechte
+   Spalte ("weitere Anschriften bekannt:") wird über die x-Position
+   ausgeschlossen. Erfasst auch Straßen mit Abkürzung ("Werkstr. 20") und
+   mehrteilige Orte ("Brandis OT Beucha"). */
+function extractAufenthaltFromSegments(pages) {
+  for (const segs of pages) {
+    const main = segs.filter(s => !s.sidebar);
+    const i0 = main.findIndex(s => /auf\s*freiem\s*Fu/i.test(s.text));
+    if (i0 < 0) continue;
+    const head = main[i0];
+    const col = [];
+    for (let j = i0 + 1; j < main.length && col.length < 4; j++) {
+      const s = main[j];
+      if (Math.abs(s.x - head.x) > 40) continue;
+      if (s.y - head.y > 12 * s.h) break;
+      col.push(s);
+      const pm = s.text.match(/^(\d{5})\s+(.+)$/);
+      if (pm) {
+        const street = col.length > 1 ? col[col.length - 2].text : '';
+        return { strasse: street || undefined, plz: pm[1], ort: pm[2] };
+      }
+    }
+  }
+  return null;
 }
 
 /* Die Tabelle "Ort und Zeitpunkt der Vorführung" (Datum/Uhrzeit | Anschrift)
@@ -1786,14 +1993,24 @@ async function processFile(file, kind) {
     } else {
       const buf = await file.arrayBuffer();
       const doc = await loadPdfDoc(buf.slice(0));
-      const text = await extractFlatTextFromDoc(doc);
+      let text = await extractFlatTextFromDoc(doc);
+      let segPages = null;
+      const charSpaced = looksCharSpaced(text);
+      if (charSpaced) {
+        segPages = await extractSegmentsFromDoc(doc);
+        text = segmentsToText(segPages);
+      }
       const docType = detectDocType(text);
       entry.type = docType;
       if (docType === 'polizeiauftrag') {
         if (isBotschaftsvorfuehrung(text)) {
           entry.polizei = parseBotschaftsvorfuehrungText(text);
-          const ortZeit = await extractVorfuehrungOrtZeit(doc);
-          if (ortZeit) Object.assign(entry.polizei, ortZeit);
+          if (!segPages) segPages = await extractSegmentsFromDoc(doc);
+          const tableOrtZeit = await extractVorfuehrungOrtZeit(doc);
+          const ortZeit = tableOrtZeit && tableOrtZeit.zielort ? tableOrtZeit : extractOrtZeitFromSegments(segPages);
+          if (ortZeit) assignDefined(entry.polizei, ortZeit);
+          const aufenthalt = extractAufenthaltFromSegments(segPages);
+          if (aufenthalt && (charSpaced || !entry.polizei.plz)) assignDefined(entry.polizei, aufenthalt);
         } else {
           entry.polizei = parsePolizeiauftrag(text);
         }
