@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>TauschRevier Clip</title>
+<style>
+  @font-face { font-family: "Inter"; src: url("../fonts/inter.woff2") format("woff2"); font-weight: 100 900; }
+  :root {
+    --ink: #1d1d1f; --gray: #6e6e73; --navy: #13294a; --gold: #efc85b; --gold-text: #ffd68a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #10224a; }
+  body {
+    font-family: "Inter", sans-serif; font-feature-settings: "cv11", "ss03";
+    -webkit-font-smoothing: antialiased; color: #fff;
+  }
+  .abs { position: absolute; }
+  .c { position: absolute; transform-origin: 50% 50%; }
+
+  /* Hintergrund im Stil von macOS Tahoe */
+  #wall { position: absolute; inset: -240px; background: #1a2f73; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; }
+  #veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,18,40,.10), rgba(8,18,40,0) 30%, rgba(8,18,40,.18)); }
+
+  /* Liquid Glass */
+  .glass {
+    background: rgba(255,255,255,.14);
+    backdrop-filter: blur(18px) saturate(1.7) brightness(1.06);
+    box-shadow:
+      inset 1.5px 1.5px 0 rgba(255,255,255,.75),
+      inset -1px -1px 0 rgba(255,255,255,.28),
+      inset 0 0 22px rgba(255,255,255,.10),
+      0 10px 30px rgba(0,0,0,.12);
+  }
+  .glass.regular {
+    background: rgba(255,255,255,.74);
+    backdrop-filter: blur(30px) saturate(1.8);
+  }
+
+  .t-white { color: #fff; text-shadow: 0 2px 24px rgba(8,18,40,.28); }
+  .h-xl { font-size: 124px; font-weight: 760; letter-spacing: -.035em; line-height: 1; white-space: nowrap; }
+  .h-l  { font-size: 76px; font-weight: 740; letter-spacing: -.03em; line-height: 1.05; white-space: nowrap; }
+  .cap  { font-size: 46px; font-weight: 640; letter-spacing: -.02em; line-height: 1.22; text-align: center; white-space: nowrap; }
+
+  /* Marke */
+  #icon { border-radius: 22.5%; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,.28), 0 0 0 1.5px rgba(255,255,255,.35); }
+  #icon img { width: 100%; height: 100%; display: block; }
+  #word { font-size: 104px; font-weight: 720; letter-spacing: -.03em; white-space: nowrap; }
+
+  /* Chip */
+  .chip { display: flex; align-items: center; gap: 16px; padding: 0 34px; height: 84px; border-radius: 42px;
+          font-size: 36px; font-weight: 640; letter-spacing: -.015em; white-space: nowrap; color: #fff; }
+
+  /* App-Kachel wie in TauschRevier */
+  .card { width: 880px; height: 420px; border-radius: 70px; padding: 26px; }
+  .card-h { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px;
+            font-size: 26px; font-weight: 720; letter-spacing: .12em; text-transform: uppercase; }
+  .card-h .r { letter-spacing: 0; text-transform: none; font-weight: 600; font-size: 26px; color: rgba(255,255,255,.8); }
+  .tile { position: relative; width: 828px; height: 304px; border-radius: 44px; overflow: hidden; background: #4f1830;
+          box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.16); }
+  .tile .g { position: absolute; inset: 0; background: #1d5847; clip-path: polygon(0 0, 56% 0, 44% 100%, 0 100%); }
+  .tile .lbl { position: absolute; top: 30px; font-size: 26px; font-weight: 700; letter-spacing: .14em; color: rgba(255,255,255,.72); }
+  .tile .nm { position: absolute; bottom: 36px; font-size: 44px; font-weight: 700; letter-spacing: -.01em; }
+  .tile .wp { position: absolute; top: 82px; height: 108px; width: auto; }
+  .tile .arrow { position: absolute; left: 50%; top: 50%; width: 112px; height: 112px; margin: -56px 0 0 -56px; border-radius: 50%;
+                 background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 2px rgba(255,255,255,.45); display: grid; place-items: center; }
+
+  #swapc { width: 136px; height: 136px; border-radius: 50%; background: var(--gold); display: grid; place-items: center;
+           box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+
+  /* Dynamic Island */
+  #island { background: #000; overflow: hidden; }
+  #islandC { position: absolute; inset: 0; display: flex; align-items: center; gap: 28px; padding: 0 36px; }
+  #islandC img { width: 132px; height: 132px; border-radius: 30px; flex: none; }
+  .is-t { font-size: 46px; font-weight: 720; letter-spacing: -.02em; white-space: nowrap; }
+  .is-s { font-size: 30px; font-weight: 500; color: #aeaeb2; margin-top: 6px; white-space: nowrap; }
+  .is-dot { margin-left: auto; width: 76px; height: 76px; border-radius: 50%; background: var(--gold); display: grid; place-items: center; flex: none; }
+
+  /* Ringtausch */
+  .node { width: 236px; height: 236px; border-radius: 50%; display: grid; place-items: center; }
+  .node img { height: 116px; width: auto; }
+  .node-l { font-size: 38px; font-weight: 680; letter-spacing: -.015em; white-space: nowrap; }
+  #ringsvg { position: absolute; left: 0; top: 0; overflow: visible; }
+
+  /* Funktionen */
+  .row { width: 900px; height: 150px; border-radius: 44px; }
+  .row-c { position: absolute; inset: 0; display: flex; align-items: center; gap: 30px; padding: 0 31px; }
+  .ri { width: 88px; height: 88px; border-radius: 50%; background: var(--navy); display: grid; place-items: center; flex: none; }
+  .rt { font-size: 42px; font-weight: 660; letter-spacing: -.02em; color: var(--ink); white-space: nowrap; }
+  .rs { font-size: 29px; font-weight: 450; color: var(--gray); margin-top: 4px; white-space: nowrap; }
+
+  /* Morph-Element: Zeile -> Kostenlos-Karte -> iPhone */
+  #M { overflow: hidden; }
+  .mc { position: absolute; }
+  #freeC { position: absolute; left: 0; top: 0; width: 900px; height: 700px; }
+  .gift { width: 150px; height: 150px; border-radius: 50%; background: var(--gold); display: grid; place-items: center; }
+  #phoneC { position: absolute; }
+  #phoneC img { display: block; width: 100%; }
+  #pIsland { position: absolute; background: #000; border-radius: 999px; }
+
+  #qr { background: #fff; border-radius: 30px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  #qr img { width: 142px; height: 142px; display: block; }
+  #badge img { height: 100px; width: auto; display: block; }
+  .tnum { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div id="wall">
+  <div class="blob" id="b1"></div><div class="blob" id="b2"></div><div class="blob" id="b3"></div>
+  <div class="blob" id="b4"></div><div class="blob" id="b5"></div><div class="blob" id="b6"></div>
+</div>
+<div id="veil"></div>
+
+<!-- Szene 2: Überschrift -->
+<div class="c t-white h-xl" id="hl1">Versetzung</div>
+<div class="c t-white h-xl" id="hl2">gesucht?</div>
+<div class="c h-xl" id="hl3" style="color:var(--gold-text);text-shadow:0 2px 24px rgba(8,18,40,.28)">Finde deinen</div>
+<div class="c h-xl" id="hl4" style="color:var(--gold-text);text-shadow:0 2px 24px rgba(8,18,40,.28)">Tauschpartner.</div>
+
+<!-- Szene 3/4: Direkttausch -->
+<div class="c glass chip" id="chipD">
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13"/><path d="M13 4l4 4-4 4"/><path d="M20 16H7"/><path d="M11 12l-4 4 4 4"/></svg>
+  Direkttausch
+</div>
+<div class="c glass card" id="cardA">
+  <div class="card-h" style="color:var(--gold-text)">Dein Gesuch<span class="r">Tausch sofort</span></div>
+  <div class="tile"><div class="g"></div>
+    <div class="lbl" style="left:40px">VON</div><img class="wp" src="../assets/wappen-sachsen.png" style="left:40px"><div class="nm" style="left:40px">Sachsen</div>
+    <div class="lbl" style="right:40px">NACH</div><img class="wp" src="../assets/wappen-bremen.png" style="right:40px"><div class="nm" style="right:40px">Bremen</div>
+    <div class="arrow"><svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>
+  </div>
+</div>
+<div class="c glass card" id="cardB">
+  <div class="card-h" style="color:#fff">Passendes Gesuch<span class="r">verifiziert</span></div>
+  <div class="tile"><div class="g"></div>
+    <div class="lbl" style="left:40px">VON</div><img class="wp" src="../assets/wappen-bremen.png" style="left:40px"><div class="nm" style="left:40px">Bremen</div>
+    <div class="lbl" style="right:40px">NACH</div><img class="wp" src="../assets/wappen-sachsen.png" style="right:40px"><div class="nm" style="right:40px">Sachsen</div>
+    <div class="arrow"><svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></div>
+  </div>
+</div>
+<div class="c" id="swapc"><svg id="swapi" width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="#13294a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v13"/><path d="M3 13l4 4 4-4"/><path d="M17 20V7"/><path d="M21 11l-4-4-4 4"/></svg></div>
+<div class="c t-white cap" id="capD">Direkter Match – sofort per Push.</div>
+
+<!-- Ringtausch -->
+<div class="c glass chip" id="chipR">
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2"/><path d="M3 12a9 9 0 0 1 15.5-6.2"/><path d="M18 2v4h-4"/><path d="M6 22v-4h4"/></svg>
+  Ringtausch
+</div>
+<svg id="ringsvg" width="1080" height="1920">
+  <g fill="none" stroke="#ffd68a" stroke-width="9" stroke-linecap="round">
+    <path id="arc0"/><path id="arc1"/><path id="arc2"/>
+  </g>
+  <g fill="#ffd68a"><path id="head0"/><path id="head1"/><path id="head2"/></g>
+</svg>
+<div class="c glass node" id="n0"><img src="../assets/wappen-sachsen.png"></div>
+<div class="c glass node" id="n1"><img src="../assets/wappen-bremen.png"></div>
+<div class="c glass node" id="n2"><img src="../assets/wappen-thueringen.png"></div>
+<div class="c t-white node-l" id="l0">Sachsen</div>
+<div class="c t-white node-l" id="l1">Bremen</div>
+<div class="c t-white node-l" id="l2">Thüringen</div>
+<div class="c glass chip" id="chainOk" style="height:76px;font-size:32px">
+  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+  Tauschkette gefunden
+</div>
+<div class="c t-white cap" id="capR">Findet Tauschketten,<br>die niemand von Hand findet.</div>
+
+<!-- Funktionen -->
+<div class="c t-white h-l" id="hF">Alles drin.</div>
+<div class="c glass regular row" id="r1"><div class="row-c" id="r1c">
+  <div class="ri"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg></div>
+  <div><div class="rt">Integrierter Chat</div><div class="rs">ohne öffentliche Telefonnummer</div></div></div></div>
+<div class="c glass regular row" id="r2"><div class="row-c" id="r2c">
+  <div class="ri"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+  <div><div class="rt">Verifizierte Gesuche</div><div class="rs">per dienstlicher E-Mail bestätigt</div></div></div></div>
+<div class="c glass regular row" id="r3"><div class="row-c" id="r3c">
+  <div class="ri"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7"/><path d="M9 11h5"/></svg></div>
+  <div><div class="rt">Tauschregularien</div><div class="rs">fast aller Bundesländer</div></div></div></div>
+<div class="c glass regular row" id="r4"><div class="row-c" id="r4c">
+  <div class="ri"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+  <div><div class="rt">Auch landesintern</div><div class="rs">Wechsel im eigenen Bundesland</div></div></div></div>
+
+<!-- Morph: Kostenlos-Karte -> iPhone -->
+<div class="c glass regular" id="M">
+  <div id="freeC">
+    <div class="c gift" id="fGift"><svg width="76" height="76" viewBox="0 0 24 24" fill="none" stroke="#13294a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13"/><path d="M3 12h18"/><path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8c3 0 6-.5 6-1.5S14 4 12 8z"/></svg></div>
+    <div class="c" id="fT" style="font-size:84px;font-weight:760;letter-spacing:-.035em;color:var(--ink);white-space:nowrap">Komplett kostenlos</div>
+    <div class="c tnum" id="fD" style="font-size:62px;font-weight:720;letter-spacing:-.02em;color:#b8862b;white-space:nowrap">bis 31.12.2026</div>
+    <div class="c" id="fS" style="font-size:36px;font-weight:500;color:var(--gray);white-space:nowrap">Alle Funktionen inklusive.</div>
+  </div>
+  <div id="phoneC"><img src="../assets/screen-main.png"><div id="pIsland"></div></div>
+</div>
+
+<!-- Endkarte -->
+<div class="c t-white h-l" id="hE">Jetzt kostenlos laden.</div>
+<div class="c" id="qr"><img src="../qr.svg"></div>
+<div class="c" id="badge"><img src="../assets/app-store-badge.svg"></div>
+<div class="c" id="url" style="font-size:30px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap">apps.apple.com/app/id6799975765</div>
+
+<!-- Marke (durchgehend) -->
+<div class="c" id="icon"><img src="../assets/logo.png"></div>
+<div class="c t-white" id="word">TauschRevier</div>
+<div class="c t-white" id="tag" style="font-size:44px;font-weight:560;opacity:.9;white-space:nowrap">Versetzung per Tausch.</div>
+
+<!-- Dynamic Island: das einzige rein schwarze Element -->
+<div class="c" id="island"><div id="islandC">
+  <img src="../assets/logo.png">
+  <div><div class="is-t">Neuer Match!</div><div class="is-s">Bremen ⇄ Sachsen · Direkttausch</div></div>
+  <div class="is-dot"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#13294a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+</div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+let T = 0;
+
+// Apple-Feder (geschlossene Sprungantwort), response in s, damping = Dämpfungsgrad
+function spr(dt, response = 0.45, damping = 0.86) {
+  if (dt <= 0) return 0;
+  const w = 2 * Math.PI / response;
+  if (damping >= 1) return 1 - Math.exp(-w * dt) * (1 + w * dt);
+  const wd = w * Math.sqrt(1 - damping * damping);
+  return 1 - Math.exp(-damping * w * dt) * (Math.cos(wd * dt) + damping * w / wd * Math.sin(wd * dt));
+}
+// Wert mit mehreren Zielen: Summe einer Feder pro Zielwechsel -> reine Funktion der Zeit
+function chain(keys, response = 0.45, damping = 0.86) {
+  let v = keys[0][1];
+  for (let i = 1; i < keys.length; i++) v += (keys[i][1] - keys[i - 1][1]) * spr(T - keys[i][0], response, damping);
+  return v;
+}
+// Inhalt ein-/ausblenden: Eintritt per Feder, Austritt 120 ms mit Blur 6px und Skalierung 0.96
+function vis(tin, tout = 1e9, dy = 34, response = 0.42) {
+  const p = spr(T - tin, response, 0.9);
+  const q = clamp((T - tout) / 0.12);
+  return {
+    o: clamp(p) * (1 - q),
+    blur: (1 - clamp(p)) * 14 + q * 6,
+    s: lerp(0.96, 1, clamp(p)) * (1 - 0.04 * q),
+    dy: (1 - p) * dy,
+  };
+}
+// Element über Mittelpunkt setzen
+function put(el, cx, cy, o = {}) {
+  const s = o.s ?? 1, op = o.o ?? 1, blur = o.blur ?? 0;
+  el.style.left = cx + 'px'; el.style.top = cy + 'px';
+  el.style.transform = `translate(-50%,-50%) translate(${o.dx ?? 0}px,${o.dy ?? 0}px) scale(${s}) rotate(${o.rot ?? 0}deg)`;
+  el.style.opacity = op;
+  el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : 'none';
+  el.style.visibility = op < 0.002 ? 'hidden' : 'visible';
+}
+function box(el, cx, cy, w, h, r) {
+  el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.borderRadius = r + 'px';
+}
+
+// ---------------------------------------------------------------- Hintergrund
+const BLOBS = [
+  ['b1', '#1B3A8C', 2000, 300, 500, 0.00],
+  ['b2', '#2BB3B1', 1500, 1450, 850, 1.30],
+  ['b3', '#7B5CFF', 1700, 250, 1650, 2.10],
+  ['b4', '#FFB38A', 1100, 1350, 2250, 3.40],
+  ['b5', '#2BB3B1', 1100, 350, 2500, 4.20],
+  ['b6', '#7B5CFF', 1200, 1400, 150, 5.00],
+];
+function wall() {
+  for (const [id, col, size, x, y, ph] of BLOBS) {
+    const el = $(id);
+    el.style.width = el.style.height = size + 'px';
+    el.style.background = `radial-gradient(circle at 50% 50%, ${col}f2 0%, ${col}b0 30%, ${col}40 55%, ${col}00 72%)`;
+    const dx = Math.sin(T * 0.35 + ph) * 46, dy = Math.cos(T * 0.28 + ph * 1.3) * 40;
+    el.style.left = (x - size / 2 + dx) + 'px'; el.style.top = (y - size / 2 + dy) + 'px';
+  }
+  $('wall').style.transform = `translate(${Math.sin(T * 0.12) * 18}px, ${-T * 3}px) scale(${1.02 + T * 0.0012})`;
+}
+
+// ---------------------------------------------------------------- Ringtausch-Geometrie
+const NODES = [[540, 760], [800, 1175], [280, 1175]];
+const CENT = [540, 1037];
+const ARCS = [];
+function initRing() {
+  for (let i = 0; i < 3; i++) {
+    const a = NODES[i], b = NODES[(i + 1) % 3];
+    const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+    const ux = dx / L, uy = dy / L, R = 142;
+    const sx = a[0] + ux * R, sy = a[1] + uy * R, ex = b[0] - ux * (R + 18), ey = b[1] - uy * (R + 18);
+    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+    let px = mx - CENT[0], py = my - CENT[1]; const pl = Math.hypot(px, py); px /= pl; py /= pl;
+    const cx = mx + px * 90, cy = my + py * 90;
+    const path = $('arc' + i);
+    path.setAttribute('d', `M${sx},${sy} Q${cx},${cy} ${ex},${ey}`);
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len;
+    // Pfeilspitze in Tangentenrichtung
+    const tx = ex - cx, ty = ey - cy, tl = Math.hypot(tx, ty), hx = tx / tl, hy = ty / tl;
+    const tipx = ex + hx * 22, tipy = ey + hy * 22, bx = ex - hx * 8, by = ey - hy * 8;
+    $('head' + i).setAttribute('d', `M${tipx},${tipy} L${bx - hy * 20},${by + hx * 20} L${bx + hy * 20},${by - hx * 20} Z`);
+    ARCS.push(len);
+  }
+}
+
+// ---------------------------------------------------------------- Messungen
+let WORD_W = 0;
+function init() {
+  WORD_W = $('word').getBoundingClientRect().width;
+  initRing();
+}
+
+// ---------------------------------------------------------------- Frame
+function seek(t) {
+  T = t;
+  wall();
+
+  // ---------- Marke: Intro (Mitte) -> Leiste unten -> Endkarte oben
+  const row = (size, sc, gap) => {
+    const total = size + gap + WORD_W * sc, left = 540 - total / 2;
+    return { ix: left + size / 2, wx: left + size + gap + WORD_W * sc / 2 };
+  };
+  const BARL = row(70, 0.36, 18), ENDL = row(104, 0.52, 22);
+  const late = T >= 15.9;
+  const bOut = late ? 0 : clamp((T - 15.72) / 0.12), bIn = late ? clamp(spr(T - 16.25, 0.42, 0.9)) : 1;
+  const bO = (1 - bOut) * bIn, bB = bOut * 6 + (1 - bIn) * 12, bS = (1 - 0.04 * bOut) * lerp(0.96, 1, bIn);
+  const iconS = late ? 104 : chain([[0, 250], [1.8, 70]]);
+  const iconX = late ? ENDL.ix : chain([[0, 540], [1.8, BARL.ix]]);
+  const iconY = late ? 205 : chain([[0, 760], [1.8, 1772]]);
+  const icon = $('icon');
+  icon.style.width = icon.style.height = iconS + 'px';
+  const iv = vis(0.12, 1e9, 0, 0.5);
+  put(icon, iconX, iconY, { o: iv.o * bO, blur: iv.blur + bB, s: lerp(0.72, 1, clamp(spr(T - 0.12, 0.5, 0.86))) * bS });
+
+  const wS = late ? 0.52 : chain([[0, 1], [1.8, 0.36]]);
+  const wX = late ? ENDL.wx : chain([[0, 540], [1.8, BARL.wx]]);
+  const wY = late ? 205 : chain([[0, 968], [1.8, 1772]]);
+  const wv = vis(0.6);
+  put($('word'), wX, wY, { o: wv.o * bO, blur: wv.blur + bB, s: wS * wv.s * bS, dy: wv.dy });
+  const tv = vis(1.05, 1.72);
+  put($('tag'), 540, 1068, tv);
+
+  // ---------- Überschrift
+  const OUT = 5.72;
+  [['hl1', 2.0, 700], ['hl2', 2.5, 830], ['hl3', 4.0, 1010], ['hl4', 4.5, 1140]].forEach(([id, tin, y], i) => {
+    put($(id), 540, y, vis(tin, OUT + i * 0.04, 46));
+  });
+
+  // ---------- Direkttausch + Match
+  put($('chipD'), 540, 430, vis(5.95, 9.72));
+  const slideA = spr(T - 6.0, 0.55, 0.9), slideB = spr(T - 6.25, 0.55, 0.9);
+  const closeP = spr(T - 7.0, 0.45, 0.86);
+  const lift = spr(T - 8.0, 0.25, 0.72) - spr(T - 8.3, 0.45, 0.86); // Druck: anheben und zurück
+  const exA = clamp((T - 9.72) / 0.12);
+  ['cardA', 'cardB'].forEach((id, k) => {
+    const sl = k ? slideB : slideA;
+    const x = k ? lerp(1700, 540, sl) : lerp(-620, 540, sl);
+    const y = k ? lerp(1190, 1156, closeP) : lerp(720, 754, closeP);
+    put($(id), x, y, { o: clamp(sl * 3) * (1 - exA), blur: exA * 6 + (1 - clamp(sl)) * 8, s: (1 + 0.035 * lift) * (1 - 0.04 * exA) });
+  });
+  const sw = spr(T - 7.0, 0.3, 0.8);
+  put($('swapc'), 540, 955, { s: clamp(sw, 0, 1.03) * (1 + 0.08 * lift) * (1 - 0.04 * exA), o: clamp(sw * 2) * (1 - exA), blur: exA * 6 });
+  $('swapi').style.transform = `rotate(${180 * spr(T - 7.2, 0.5, 0.9)}deg)`;
+  put($('capD'), 540, 1480, vis(8.5, 9.72));
+
+  // Dynamic Island
+  const iw = chain([[0, 250], [8.0, 980], [9.55, 250]], 0.45, 0.86);
+  const ih = chain([[0, 74], [8.0, 232], [9.55, 74]], 0.45, 0.86);
+  const iy = chain([[0, -80], [7.45, 88], [8.0, 172], [9.55, 88], [9.85, -80]], 0.45, 0.86);
+  const isl = $('island');
+  box(isl, 0, 0, iw, ih, Math.min(ih / 2, 74));
+  put(isl, 540, iy, { o: 1 });
+  const icv = vis(8.06, 9.5, 0, 0.4);
+  const ic = $('islandC');
+  ic.style.opacity = icv.o; ic.style.filter = icv.blur > 0.05 ? `blur(${icv.blur}px)` : 'none';
+  ic.style.transform = `scale(${icv.s})`;
+
+  // ---------- Ringtausch
+  put($('chipR'), 540, 430, vis(9.9, 11.78));
+  const RIN = [9.95, 10.05, 10.15];
+  for (let i = 0; i < 3; i++) {
+    const v = vis(RIN[i], 11.78 + i * 0.03, 0, 0.45);
+    const pulse = spr(T - (10.4 + i * 0.5), 0.25, 0.72) - spr(T - (10.62 + i * 0.5), 0.45, 0.86);
+    put($('n' + i), NODES[i][0], NODES[i][1], { o: v.o, blur: v.blur, s: lerp(0.7, 1, clamp(spr(T - RIN[i], 0.45, 0.86))) * (1 + 0.06 * pulse) * (1 - 0.04 * clamp((T - 11.78) / 0.12)) });
+    const lv = vis(RIN[i] + 0.1, 11.78, 20);
+    put($('l' + i), NODES[i][0], NODES[i][1] + (i === 0 ? -164 : 168), lv);
+    const dp = clamp(spr(T - (10.0 + i * 0.5), 0.42, 1.0));
+    const out = 1 - clamp((T - 11.78) / 0.12);
+    const arc = $('arc' + i);
+    arc.style.strokeDashoffset = ARCS[i] * (1 - dp);
+    arc.style.opacity = (dp > 0.01 ? 1 : 0) * out;
+    $('head' + i).style.opacity = clamp((dp - 0.85) / 0.12) * out;
+  }
+  put($('chainOk'), 540, 1615, vis(11.3, 11.78, 16));
+  put($('capR'), 540, 1480, vis(10.25, 11.78));
+
+  // ---------- Funktionen: Zeilen auf den Schlag, dann Morph zur Kostenlos-Karte
+  put($('hF'), 540, 430, vis(11.95, 13.85));
+  const ROWY = [620, 800, 980, 1160];
+  const RT = [12.0, 12.5, 13.0, 13.5];
+  const FREE = { x: 540, y: 1000, w: 900, h: 700, r: 72 };
+  const PHONE = { x: 540, y: 1010, w: 470, h: 983, r: 78 };
+  for (let i = 0; i < 4; i++) {
+    const el = $('r' + (i + 1));
+    const p = spr(T - RT[i], 0.45, 0.86);
+    const m = spr(T - 13.9, 0.45, 0.86);
+    const y = lerp(ROWY[i], FREE.y, m), h = lerp(150, FREE.h, m), r = lerp(44, FREE.r, m);
+    box(el, 0, 0, 900, h, r);
+    const fadeMorph = i === 0 ? clamp((T - 14.12) / 0.06) : clamp((T - 13.9) / 0.22);
+    put(el, 540, y, { o: clamp(p * 1.6) * (1 - fadeMorph), dx: (1 - p) * 90, blur: (1 - clamp(p)) * 10 });
+    const cv = vis(RT[i] + 0.04, 13.85, 0);
+    const c = $('r' + (i + 1) + 'c');
+    c.style.opacity = cv.o; c.style.filter = cv.blur > 0.05 ? `blur(${cv.blur}px)` : 'none';
+    c.style.top = (h - 150) / 2 + 'px'; c.style.bottom = 'auto'; c.style.height = '150px';
+  }
+  // Morph-Element übernimmt ab 14.1 die Form der ersten Zeile
+  const Mel = $('M');
+  const mOn = T >= 14.12 ? 1 : 0;
+  const m1 = spr(T - 13.9, 0.45, 0.86), m2 = spr(T - 15.78, 0.5, 0.88);
+  const mx = FREE.x, my = lerp(lerp(ROWY[0], FREE.y, m1), PHONE.y, m2);
+  const mw = lerp(900, PHONE.w, m2), mh = lerp(lerp(150, FREE.h, m1), PHONE.h, m2), mr = lerp(lerp(44, FREE.r, m1), PHONE.r, m2);
+  box(Mel, 0, 0, mw, mh, mr);
+  const toPhone = clamp(m2 * 1.15);
+  Mel.style.background = `rgba(${Math.round(lerp(255, 29, toPhone))},${Math.round(lerp(255, 29, toPhone))},${Math.round(lerp(255, 31, toPhone))},${lerp(0.74, 1, toPhone)})`;
+  Mel.style.boxShadow = `inset 1.5px 1.5px 0 rgba(255,255,255,${lerp(0.75, 0.22, toPhone)}), inset -1px -1px 0 rgba(255,255,255,.2), 0 ${lerp(10, 40, toPhone)}px ${lerp(30, 80, toPhone)}px rgba(0,0,0,${lerp(0.12, 0.35, toPhone)})`;
+  put(Mel, mx, my, { o: mOn });
+  // Inhalt Kostenlos-Karte
+  const fc = $('freeC');
+  fc.style.left = (mw - 900) / 2 + 'px'; fc.style.top = (mh - 700) / 2 + 'px';
+  put($('fGift'), 450, 175, vis(14.05, 15.72, 20));
+  put($('fT'), 450, 345, vis(14.1, 15.72, 30));
+  put($('fD'), 450, 450, vis(14.5, 15.72, 30));
+  put($('fS'), 450, 540, vis(15.0, 15.72, 24));
+  // Inhalt iPhone
+  const pc = $('phoneC'), pad = 15 * (mw / PHONE.w);
+  pc.style.left = pad + 'px'; pc.style.top = pad + 'px'; pc.style.width = (mw - 2 * pad) + 'px';
+  pc.style.height = (mh - 2 * pad) + 'px'; pc.style.borderRadius = (mr - pad) + 'px'; pc.style.overflow = 'hidden';
+  const pv = vis(15.96, 1e9, 0, 0.45);
+  pc.style.opacity = pv.o; pc.style.filter = pv.blur > 0.05 ? `blur(${pv.blur}px)` : 'none';
+  const pi = $('pIsland'), sw2 = mw - 2 * pad;
+  pi.style.width = sw2 * 0.3 + 'px'; pi.style.height = sw2 * 0.088 + 'px';
+  pi.style.left = sw2 * 0.35 + 'px'; pi.style.top = sw2 * 0.03 + 'px';
+
+  // ---------- Endkarte
+  put($('hE'), 540, 360, vis(16.5, 1e9, 30));
+  put($('badge'), 540 + 90, 1640, vis(17.0, 1e9, 26));
+  put($('qr'), 540 - 180, 1640, vis(17.5, 1e9, 26));
+  put($('url'), 540, 1790, vis(18.0, 1e9, 16));
+}
+window.seek = seek;
+window.ready = document.fonts.ready.then(() => Promise.all([...document.images].map(i => i.decode().catch(() => {})))).then(() => { init(); seek(0); return true; });
+</script>
+</body>
+</html>
