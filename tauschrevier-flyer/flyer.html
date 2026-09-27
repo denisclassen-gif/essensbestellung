@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Tauschrevier Flyer</title>
+<style>
+  @font-face {
+    font-family: "PJS";
+    src: url("fonts/pjs.woff2") format("woff2");
+    font-weight: 200 800;
+  }
+  :root {
+    --navy: #0b2545;
+    --navy2: #13315c;
+    --blue: #1f6feb;
+    --sky: #8ecaff;
+    --gold: #ffc93c;
+    --white: #ffffff;
+    --soft: rgba(255,255,255,.72);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: var(--h); overflow: hidden; }
+  body {
+    font-family: "PJS", sans-serif;
+    color: var(--white);
+    background:
+      radial-gradient(900px 700px at 100% 0%, rgba(31,111,235,.55), transparent 60%),
+      radial-gradient(700px 600px at 0% 100%, rgba(142,202,255,.22), transparent 60%),
+      linear-gradient(160deg, var(--navy2), var(--navy) 60%);
+    position: relative;
+  }
+  body.feed  { --h: 1350px; }
+  body.story { --h: 1920px; }
+
+  /* dotted map texture */
+  .dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.10) 2px, transparent 2.5px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,.15) 70%);
+  }
+
+  .wrap {
+    position: relative; height: 100%;
+    display: flex; flex-direction: column;
+    padding: 72px 80px 64px;
+  }
+  .story .wrap { padding: 130px 80px 130px; justify-content: space-between; gap: 48px; }
+
+  /* top brand row */
+  .brand { display: flex; align-items: center; gap: 22px; }
+  .logo {
+    width: 92px; height: 92px; border-radius: 24px;
+    background: linear-gradient(145deg, #2f86ff, #1453c4);
+    display: grid; place-items: center;
+    box-shadow: 0 14px 34px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .brand-name { font-size: 46px; font-weight: 800; letter-spacing: -.5px; line-height: 1; }
+  .brand-sub { font-size: 22px; font-weight: 600; color: var(--sky); letter-spacing: 3px; text-transform: uppercase; margin-top: 8px; }
+  .new {
+    margin-left: auto;
+    background: var(--gold); color: var(--navy);
+    font-weight: 800; font-size: 24px; letter-spacing: 2px;
+    padding: 12px 22px; border-radius: 999px;
+    transform: rotate(4deg);
+    box-shadow: 0 10px 24px rgba(0,0,0,.3);
+  }
+
+  h1 {
+    margin-top: 50px;
+    font-size: 80px; line-height: 1.04; font-weight: 800; letter-spacing: -2.5px;
+  }
+  h1 .hl { color: var(--gold); }
+  .lead {
+    margin-top: 24px; max-width: 900px;
+    font-size: 30px; line-height: 1.4; font-weight: 500; color: var(--soft);
+  }
+  .story h1 { margin-top: 80px; font-size: 88px; }
+  .story .lead { font-size: 36px; margin-top: 32px; }
+
+  /* swap illustration */
+  .swap {
+    margin-top: 40px;
+    display: grid; grid-template-columns: 1fr 96px 1fr; align-items: center; gap: 20px;
+  }
+  .story .swap { margin-top: 0; }
+  .card {
+    background: rgba(255,255,255,.08);
+    border: 1.5px solid rgba(255,255,255,.16);
+    border-radius: 28px; padding: 22px 28px;
+    backdrop-filter: blur(6px);
+  }
+  .card .who { font-size: 20px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--sky); }
+  .card .route { margin-top: 12px; font-size: 32px; font-weight: 800; line-height: 1.25; }
+  .card .route span { display: block; font-size: 22px; font-weight: 600; color: var(--soft); margin: 2px 0; }
+  .card.me   { border-color: rgba(142,202,255,.45); }
+  .card.you  { border-color: rgba(255,201,60,.55); }
+  .card.you .who { color: var(--gold); }
+  .swap-icon {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: var(--gold); display: grid; place-items: center;
+    box-shadow: 0 0 0 12px rgba(255,201,60,.16), 0 12px 28px rgba(0,0,0,.35);
+  }
+
+  /* bottom: steps + QR */
+  .bottom {
+    margin-top: auto;
+    display: grid; grid-template-columns: 1fr 290px; gap: 40px; align-items: end;
+  }
+  .story .bottom { margin-top: 0; grid-template-columns: 1fr; gap: 72px; }
+  .steps { list-style: none; display: grid; gap: 20px; }
+  .steps li { display: flex; align-items: center; gap: 20px; font-size: 29px; font-weight: 700; }
+  .num {
+    flex: none; width: 54px; height: 54px; border-radius: 16px;
+    background: rgba(142,202,255,.16); color: var(--sky);
+    display: grid; place-items: center; font-size: 26px; font-weight: 800;
+  }
+  .best {
+    margin-top: 28px; display: inline-flex; align-items: center; gap: 14px;
+    font-size: 26px; font-weight: 700; color: var(--gold);
+  }
+  .stars { letter-spacing: 4px; font-size: 28px; }
+
+  .qr-card {
+    background: var(--white); color: var(--navy);
+    border-radius: 30px; padding: 26px 26px 20px;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,.4);
+  }
+  .qr-card img { width: 230px; height: 230px; display: block; margin: 0 auto; }
+  .qr-cta { margin-top: 18px; font-size: 26px; font-weight: 800; }
+  .qr-sub { font-size: 19px; font-weight: 600; color: #4a5a70; margin-top: 4px; }
+
+  .story .qr-row { display: grid; grid-template-columns: 380px 1fr; gap: 50px; align-items: center; }
+  .story .qr-card img { width: 320px; height: 320px; }
+  .store {
+    display: inline-flex; align-items: center; gap: 16px;
+    background: #000; color: #fff; border: 2px solid rgba(255,255,255,.35);
+    border-radius: 18px; padding: 16px 28px;
+  }
+  .store small { display: block; font-size: 18px; font-weight: 600; opacity: .85; }
+  .store b { display: block; font-size: 32px; font-weight: 800; line-height: 1.1; }
+
+  .url {
+    margin-top: 14px; line-height: 1.35; font-size: 22px; font-weight: 600; color: var(--soft);
+  }
+  .url strong { color: var(--white); font-weight: 700; }
+  .story .url { font-size: 26px; margin-top: 22px; }
+
+  .only-story { display: none; }
+  .story .only-story { display: block; }
+  .story .only-feed { display: none; }
+</style>
+</head>
+<body>
+<div class="dots"></div>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">
+      <div class="logo">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 8h13"/><path d="M13 4l4 4-4 4"/>
+          <path d="M20 16H7"/><path d="M11 12l-4 4 4 4"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Tauschrevier</div>
+        <div class="brand-sub">Versetzung per Tausch</div>
+      </div>
+      <div class="new">NEU</div>
+    </div>
+
+    <h1>Versetzung gesucht?<br><span class="hl">Finde deinen Tauschpartner.</span></h1>
+    <p class="lead">Jemand will genau dahin, wo du bist – und ist genau da, wo du hinwillst. Tauschrevier bringt euch zusammen.</p>
+  </div>
+
+  <div class="swap">
+    <div class="card me">
+      <div class="who">Du</div>
+      <div class="route">Hamburg <span>möchte nach</span> München</div>
+    </div>
+    <div class="swap-icon">
+      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#0b2545" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 8h13"/><path d="M13 4l4 4-4 4"/>
+        <path d="M20 16H7"/><path d="M11 12l-4 4 4 4"/>
+      </svg>
+    </div>
+    <div class="card you">
+      <div class="who">Dein Match</div>
+      <div class="route">München <span>möchte nach</span> Hamburg</div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div>
+      <ul class="steps">
+        <li><span class="num">1</span>App laden &amp; Gesuch anlegen</li>
+        <li><span class="num">2</span>Passende Tauschpartner finden</li>
+        <li><span class="num">3</span>Kontakt aufnehmen &amp; tauschen</li>
+      </ul>
+      <div class="best only-feed"><span class="stars">★★★★★</span> Die beste App für deinen Tausch</div>
+      <div class="url only-feed">Jetzt im App Store:<br><strong>apps.apple.com/app/id6799975765</strong></div>
+    </div>
+
+    <div class="only-feed">
+      <div class="qr-card">
+        <img src="qr.svg" alt="QR-Code zum App Store">
+        <div class="qr-cta">Scannen &amp; laden</div>
+        <div class="qr-sub">im App Store</div>
+      </div>
+    </div>
+
+    <div class="only-story">
+      <div class="qr-row">
+        <div class="qr-card">
+          <img src="qr.svg" alt="QR-Code zum App Store">
+          <div class="qr-cta">Scannen &amp; laden</div>
+          <div class="qr-sub">im App Store</div>
+        </div>
+        <div>
+          <div class="best" style="margin-top:0"><span class="stars">★★★★★</span></div>
+          <div style="font-size:40px;font-weight:800;line-height:1.2;margin-top:10px">Die beste App für deinen Tausch.</div>
+          <div style="margin-top:28px" class="store">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+            <div><small>Jetzt laden im</small><b>App Store</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="url">Link: <strong>apps.apple.com/app/id6799975765</strong></div>
+    </div>
+  </div>
+
+</div>
+<script>
+  document.body.className = new URLSearchParams(location.search).get('v') || 'feed';
+</script>
+</body>
+</html>
