@@ -2,19 +2,19 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<title>Tauschrevier Flyer</title>
+<title>TauschRevier Flyer</title>
 <style>
   @font-face {
     font-family: "PJS";
     src: url("fonts/pjs.woff2") format("woff2");
     font-weight: 200 800;
   }
+  /* Farben aus der App übernommen */
   :root {
-    --navy: #0b2545;
-    --navy2: #13315c;
-    --blue: #1f6feb;
-    --sky: #8ecaff;
-    --gold: #ffc93c;
+    --navy: #0c2036;
+    --navy2: #13294a;
+    --sky: #9cc6f0;
+    --gold: #efc85b;
     --white: #ffffff;
     --soft: rgba(255,255,255,.72);
   }
@@ -24,40 +24,33 @@
     font-family: "PJS", sans-serif;
     color: var(--white);
     background:
-      radial-gradient(900px 700px at 100% 0%, rgba(31,111,235,.55), transparent 60%),
-      radial-gradient(700px 600px at 0% 100%, rgba(142,202,255,.22), transparent 60%),
-      linear-gradient(160deg, var(--navy2), var(--navy) 60%);
+      radial-gradient(900px 700px at 100% 0%, rgba(40,90,160,.45), transparent 60%),
+      linear-gradient(180deg, var(--navy2), var(--navy) 55%, #1d3a55);
     position: relative;
   }
   body.feed  { --h: 1350px; }
   body.story { --h: 1920px; }
 
-  /* dotted map texture */
-  .dots {
-    position: absolute; inset: 0;
-    background-image: radial-gradient(rgba(255,255,255,.10) 2px, transparent 2.5px);
-    background-size: 36px 36px;
-    mask-image: linear-gradient(180deg, rgba(0,0,0,.9), rgba(0,0,0,.15) 70%);
-  }
+  /* goldene Wellen wie im Startbildschirm der App */
+  .waves { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 60%; opacity: .55; }
 
   .wrap {
     position: relative; height: 100%;
     display: flex; flex-direction: column; justify-content: space-between;
-    padding: 64px 80px 60px;
+    padding: 60px 80px 58px;
   }
-  .story .wrap { padding: 120px 80px 120px; }
+  .story .wrap { padding: 100px 80px 100px; }
 
-  /* top brand row */
+  /* Kopfzeile mit offiziellem Logo */
   .brand { display: flex; align-items: center; gap: 22px; }
   .logo {
-    width: 92px; height: 92px; border-radius: 24px; overflow: hidden; flex: none;
-    background: linear-gradient(145deg, #2f86ff, #1453c4);
-    display: grid; place-items: center;
-    box-shadow: 0 14px 34px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35);
+    width: 96px; height: 96px; border-radius: 24px; overflow: hidden; flex: none;
+    border: 2px solid rgba(239,200,91,.35);
+    box-shadow: 0 14px 34px rgba(0,0,0,.4);
   }
   .logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .brand-name { font-size: 46px; font-weight: 800; letter-spacing: -.5px; line-height: 1; }
-  .brand-sub { font-size: 22px; font-weight: 600; color: var(--sky); letter-spacing: 3px; text-transform: uppercase; margin-top: 8px; }
+  .brand-name { font-size: 48px; font-weight: 800; letter-spacing: -.5px; line-height: 1; }
+  .brand-sub { font-size: 21px; font-weight: 700; color: var(--gold); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 9px; }
   .new {
     margin-left: auto;
     background: var(--gold); color: var(--navy);
@@ -68,133 +61,117 @@
   }
 
   h1 {
-    margin-top: 40px;
-    font-size: 74px; line-height: 1.04; font-weight: 800; letter-spacing: -2px;
+    margin-top: 34px;
+    font-size: 64px; line-height: 1.06; font-weight: 800; letter-spacing: -1.8px;
   }
   h1 .hl { color: var(--gold); }
-  .story h1 { margin-top: 64px; font-size: 88px; }
+  .story h1 { margin-top: 48px; font-size: 72px; }
+  .tagline { display: none; }
+  .story .tagline { display: block; margin-top: 20px; font-size: 28px; font-weight: 600; color: var(--soft); line-height: 1.35; }
 
-  /* free banner */
+  /* Kostenlos-Band */
   .free {
     display: flex; align-items: center; gap: 24px;
     background: var(--gold); color: var(--navy);
-    border-radius: 26px; padding: 20px 30px;
+    border-radius: 24px; padding: 18px 28px;
     box-shadow: 0 16px 40px rgba(0,0,0,.35);
   }
   .free-icon {
-    flex: none; width: 64px; height: 64px; border-radius: 18px;
+    flex: none; width: 60px; height: 60px; border-radius: 16px;
     background: var(--navy); display: grid; place-items: center;
   }
-  .free-big { font-size: 40px; font-weight: 800; letter-spacing: -.5px; line-height: 1.05; }
-  .free-small { font-size: 24px; font-weight: 700; margin-top: 4px; opacity: .85; }
-  .story .free { padding: 26px 34px; }
-  .story .free-big { font-size: 46px; }
-  .story .free-small { font-size: 27px; }
+  .free-big { font-size: 38px; font-weight: 800; letter-spacing: -.5px; line-height: 1.05; }
+  .free-small { font-size: 23px; font-weight: 700; margin-top: 4px; opacity: .85; }
+  .story .free { padding: 24px 32px; }
+  .story .free-big { font-size: 44px; }
+  .story .free-small { font-size: 26px; }
 
-  /* swap illustration (story only) */
-  .swap { display: grid; grid-template-columns: 1fr 96px 1fr; align-items: center; gap: 20px; }
-  .card {
-    background: rgba(255,255,255,.08);
-    border: 1.5px solid rgba(255,255,255,.16);
-    border-radius: 28px; padding: 22px 28px;
-  }
-  .card .who { font-size: 20px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--sky); }
-  .card .route { margin-top: 12px; font-size: 32px; font-weight: 800; line-height: 1.25; }
-  .card .route span { display: block; font-size: 22px; font-weight: 600; color: var(--soft); margin: 2px 0; }
-  .card.me   { border-color: rgba(142,202,255,.45); }
-  .card.you  { border-color: rgba(255,201,60,.55); }
-  .card.you .who { color: var(--gold); }
-  .swap-icon {
-    width: 96px; height: 96px; border-radius: 50%;
-    background: var(--gold); display: grid; place-items: center;
-    box-shadow: 0 0 0 12px rgba(255,201,60,.16), 0 12px 28px rgba(0,0,0,.35);
-  }
+  /* Mitte: echte Tauschkachel + Funktionen */
+  .mid { display: grid; grid-template-columns: 540px 1fr; gap: 36px; align-items: center; }
+  .story .mid { grid-template-columns: 1fr; gap: 52px; }
 
-  /* features */
-  .features {
-    list-style: none;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  .gesuch {
+    background: var(--navy);
+    border: 1.5px solid rgba(255,255,255,.14);
+    border-radius: 32px; padding: 22px;
+    box-shadow: 0 26px 60px rgba(0,0,0,.45);
   }
-  .features li {
-    display: flex; align-items: center; gap: 18px;
-    background: rgba(255,255,255,.07);
-    border: 1.5px solid rgba(255,255,255,.13);
-    border-radius: 22px; padding: 16px 20px;
+  .gesuch-label {
+    font-size: 19px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold); margin: 2px 4px 14px;
   }
-  .features li.wide { grid-column: 1 / -1; }
+  .gesuch img { display: block; width: 100%; }
+  .gesuch .tags { margin-top: 12px; }
+  .story .gesuch { width: 720px; margin: 0 auto; padding: 24px; }
+  .story .gesuch-label { font-size: 22px; }
+
+  .features { list-style: none; display: grid; gap: 14px; }
+  .features li { display: flex; align-items: center; gap: 16px; }
   .fi {
-    flex: none; width: 56px; height: 56px; border-radius: 16px;
-    background: rgba(142,202,255,.16);
+    flex: none; width: 50px; height: 50px; border-radius: 14px;
+    background: rgba(239,200,91,.14);
     display: grid; place-items: center;
   }
-  .ft { font-size: 25px; font-weight: 800; line-height: 1.2; }
-  .ft small { display: block; font-size: 20px; font-weight: 600; color: var(--soft); margin-top: 2px; }
-  .story .features { gap: 18px; }
-  .story .features li { padding: 20px 22px; }
-  .story .ft { font-size: 27px; }
-  .story .ft small { font-size: 21px; }
+  .ft { font-size: 23px; font-weight: 800; line-height: 1.15; }
+  .ft small { display: block; font-size: 18px; font-weight: 600; color: var(--soft); margin-top: 2px; }
+  .story .features { grid-template-columns: 1fr 1fr; gap: 22px 28px; }
+  .story .ft { font-size: 25px; }
+  .story .ft small { font-size: 19px; }
 
-  /* bottom: QR + CTA */
+  /* Unten: QR + Aufruf */
   .cta { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
   .qr-card {
     background: var(--white); color: var(--navy);
-    border-radius: 28px; padding: 22px 22px 16px;
+    border-radius: 26px; padding: 20px 20px 14px;
     text-align: center;
     box-shadow: 0 24px 60px rgba(0,0,0,.4);
   }
-  .qr-card img { width: 196px; height: 196px; display: block; margin: 0 auto; }
-  .qr-cta { margin-top: 12px; font-size: 22px; font-weight: 800; }
-  .story .qr-card { padding: 28px 28px 20px; border-radius: 32px; }
-  .story .qr-card img { width: 290px; height: 290px; }
-  .story .qr-cta { font-size: 27px; margin-top: 16px; }
+  .qr-card img { width: 180px; height: 180px; display: block; margin: 0 auto; }
+  .qr-cta { margin-top: 10px; font-size: 21px; font-weight: 800; }
+  .story .qr-card { padding: 24px 24px 16px; border-radius: 30px; }
+  .story .qr-card img { width: 220px; height: 220px; }
+  .story .qr-cta { font-size: 25px; margin-top: 12px; }
 
-  .best { display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 700; color: var(--gold); }
-  .stars { letter-spacing: 4px; font-size: 26px; }
-  .cta-title { font-size: 38px; font-weight: 800; line-height: 1.15; margin-top: 10px; }
+  .stars { color: var(--gold); letter-spacing: 4px; font-size: 26px; }
+  .cta-title { font-size: 38px; font-weight: 800; line-height: 1.15; margin-top: 8px; }
   .store {
-    margin-top: 20px;
+    margin-top: 18px;
     display: inline-flex; align-items: center; gap: 16px;
     background: #000; color: #fff; border: 2px solid rgba(255,255,255,.35);
-    border-radius: 16px; padding: 12px 24px;
+    border-radius: 16px; padding: 11px 24px;
   }
   .store small { display: block; font-size: 16px; font-weight: 600; opacity: .85; }
   .store b { display: block; font-size: 28px; font-weight: 800; line-height: 1.1; }
-  .url { margin-top: 16px; font-size: 21px; font-weight: 600; color: var(--soft); line-height: 1.35; }
-  .url strong { color: var(--white); font-weight: 700; }
+  .url { margin-top: 14px; font-size: 21px; font-weight: 700; color: var(--white); }
   .story .cta-title { font-size: 44px; }
   .story .url { font-size: 24px; }
-
-  .only-story { display: none; }
-  .story .only-story { display: grid; }
 </style>
 </head>
 <body>
-<div class="dots"></div>
+<svg class="waves" viewBox="0 0 1080 800" preserveAspectRatio="none" fill="none">
+  <path d="M0 260 C 180 120, 300 520, 520 380 S 860 120, 1080 300 L1080 800 L0 800Z" fill="rgba(239,200,91,.07)" stroke="rgba(239,200,91,.35)" stroke-width="2"/>
+  <path d="M0 420 C 220 220, 380 640, 620 420 S 940 260, 1080 440 L1080 800 L0 800Z" fill="rgba(239,200,91,.06)" stroke="rgba(239,200,91,.28)" stroke-width="2"/>
+  <path d="M0 200 C 260 420, 420 80, 700 300 S 980 520, 1080 200" stroke="rgba(239,200,91,.22)" stroke-width="2"/>
+</svg>
 <div class="wrap">
 
   <div class="top">
     <div class="brand">
-      <div class="logo">
-        <!-- Offizielles Logo: tauschrevier-flyer/assets/logo.png (fällt sonst auf das Symbol zurück) -->
-        <img src="assets/logo.png" alt="" onerror="this.remove()">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 8h13"/><path d="M13 4l4 4-4 4"/>
-          <path d="M20 16H7"/><path d="M11 12l-4 4 4 4"/>
-        </svg>
-      </div>
+      <div class="logo"><img src="assets/logo.png" alt="TauschRevier Logo"></div>
       <div>
-        <div class="brand-name">Tauschrevier</div>
-        <div class="brand-sub">Versetzung per Tausch</div>
+        <div class="brand-name">TauschRevier</div>
+        <div class="brand-sub">Direkttausch &amp; Ringtausch</div>
       </div>
       <div class="new">NEU</div>
     </div>
 
     <h1>Versetzung gesucht?<br><span class="hl">Finde deinen Tauschpartner.</span></h1>
+    <p class="tagline">Findet Tauschketten, die niemand von Hand findet.</p>
   </div>
 
   <div class="free">
     <div class="free-icon">
-      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#ffc93c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#efc85b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13"/><path d="M3 12h18"/>
         <path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8c3 0 6-.5 6-1.5S14 4 12 8z"/>
       </svg>
@@ -205,45 +182,40 @@
     </div>
   </div>
 
-  <div class="swap only-story">
-    <div class="card me">
-      <div class="who">Du</div>
-      <div class="route">Hamburg <span>möchte nach</span> München</div>
+  <div class="mid">
+    <div class="gesuch">
+      <div class="gesuch-label">So sieht dein Gesuch aus</div>
+      <img src="assets/kachel.png" alt="Tauschkachel: von Sachsen nach Bremen oder Thüringen">
+      <img class="tags" src="assets/kachel-tags.png" alt="g. D. · LG 2.1, Schutzpolizei, Ring möglich">
     </div>
-    <div class="swap-icon">
-      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#0b2545" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 8h13"/><path d="M13 4l4 4-4 4"/>
-        <path d="M20 16H7"/><path d="M11 12l-4 4 4 4"/>
-      </svg>
-    </div>
-    <div class="card you">
-      <div class="who">Dein Match</div>
-      <div class="route">München <span>möchte nach</span> Hamburg</div>
-    </div>
-  </div>
 
-  <ul class="features">
-    <li>
-      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
-      <span class="ft">Direkter Match<small>per Push-Nachricht</small></span>
-    </li>
-    <li>
-      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg></span>
-      <span class="ft">Integrierter Chat<small>direkt in der App</small></span>
-    </li>
-    <li>
-      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-      <span class="ft">Auch innerhalb<small>deines Bundeslandes</small></span>
-    </li>
-    <li>
-      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7"/><path d="M9 11h5"/></svg></span>
-      <span class="ft">Tauschregularien<small>fast aller Bundesländer</small></span>
-    </li>
-    <li class="wide">
-      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>
-      <span class="ft">Verifizierte Gesuche<small>bestätigt über deine dienstliche E-Mail-Adresse</small></span>
-    </li>
-  </ul>
+    <ul class="features">
+      <li>
+        <span class="fi"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#efc85b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+        <span class="ft">Direkter Match<small>per Push-Nachricht</small></span>
+      </li>
+      <li>
+        <span class="fi"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#efc85b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg></span>
+        <span class="ft">Integrierter Chat<small>ohne öffentliche Telefonnummer</small></span>
+      </li>
+      <li>
+        <span class="fi"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#efc85b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2"/><path d="M3 12a9 9 0 0 1 15.5-6.2"/><path d="M18 2v4h-4"/><path d="M6 22v-4h4"/></svg></span>
+        <span class="ft">Direkt- &amp; Ringtausch<small>findet auch Tauschketten</small></span>
+      </li>
+      <li>
+        <span class="fi"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#efc85b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+        <span class="ft">Auch innerhalb<small>deines Bundeslandes</small></span>
+      </li>
+      <li>
+        <span class="fi"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#efc85b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7"/><path d="M9 11h5"/></svg></span>
+        <span class="ft">Tauschregularien<small>fast aller Bundesländer</small></span>
+      </li>
+      <li>
+        <span class="fi"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#efc85b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        <span class="ft">Verifizierte Gesuche<small>per dienstlicher E-Mail bestätigt</small></span>
+      </li>
+    </ul>
+  </div>
 
   <div class="cta">
     <div class="qr-card">
@@ -251,13 +223,13 @@
       <div class="qr-cta">Scannen &amp; laden</div>
     </div>
     <div>
-      <div class="best"><span class="stars">★★★★★</span></div>
+      <div class="stars">★★★★★</div>
       <div class="cta-title">Die beste App für deinen Tausch.</div>
       <div class="store">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
         <div><small>Jetzt laden im</small><b>App Store</b></div>
       </div>
-      <div class="url"><strong>apps.apple.com/app/id6799975765</strong></div>
+      <div class="url">apps.apple.com/app/id6799975765</div>
     </div>
   </div>
 </div>
