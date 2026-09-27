@@ -42,19 +42,20 @@
 
   .wrap {
     position: relative; height: 100%;
-    display: flex; flex-direction: column;
-    padding: 72px 80px 64px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 64px 80px 60px;
   }
-  .story .wrap { padding: 130px 80px 130px; justify-content: space-between; gap: 48px; }
+  .story .wrap { padding: 120px 80px 120px; }
 
   /* top brand row */
   .brand { display: flex; align-items: center; gap: 22px; }
   .logo {
-    width: 92px; height: 92px; border-radius: 24px;
+    width: 92px; height: 92px; border-radius: 24px; overflow: hidden; flex: none;
     background: linear-gradient(145deg, #2f86ff, #1453c4);
     display: grid; place-items: center;
     box-shadow: 0 14px 34px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35);
   }
+  .logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .brand-name { font-size: 46px; font-weight: 800; letter-spacing: -.5px; line-height: 1; }
   .brand-sub { font-size: 22px; font-weight: 600; color: var(--sky); letter-spacing: 3px; text-transform: uppercase; margin-top: 8px; }
   .new {
@@ -67,28 +68,35 @@
   }
 
   h1 {
-    margin-top: 50px;
-    font-size: 80px; line-height: 1.04; font-weight: 800; letter-spacing: -2.5px;
+    margin-top: 40px;
+    font-size: 74px; line-height: 1.04; font-weight: 800; letter-spacing: -2px;
   }
   h1 .hl { color: var(--gold); }
-  .lead {
-    margin-top: 24px; max-width: 900px;
-    font-size: 30px; line-height: 1.4; font-weight: 500; color: var(--soft);
-  }
-  .story h1 { margin-top: 80px; font-size: 88px; }
-  .story .lead { font-size: 36px; margin-top: 32px; }
+  .story h1 { margin-top: 64px; font-size: 88px; }
 
-  /* swap illustration */
-  .swap {
-    margin-top: 40px;
-    display: grid; grid-template-columns: 1fr 96px 1fr; align-items: center; gap: 20px;
+  /* free banner */
+  .free {
+    display: flex; align-items: center; gap: 24px;
+    background: var(--gold); color: var(--navy);
+    border-radius: 26px; padding: 20px 30px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.35);
   }
-  .story .swap { margin-top: 0; }
+  .free-icon {
+    flex: none; width: 64px; height: 64px; border-radius: 18px;
+    background: var(--navy); display: grid; place-items: center;
+  }
+  .free-big { font-size: 40px; font-weight: 800; letter-spacing: -.5px; line-height: 1.05; }
+  .free-small { font-size: 24px; font-weight: 700; margin-top: 4px; opacity: .85; }
+  .story .free { padding: 26px 34px; }
+  .story .free-big { font-size: 46px; }
+  .story .free-small { font-size: 27px; }
+
+  /* swap illustration (story only) */
+  .swap { display: grid; grid-template-columns: 1fr 96px 1fr; align-items: center; gap: 20px; }
   .card {
     background: rgba(255,255,255,.08);
     border: 1.5px solid rgba(255,255,255,.16);
     border-radius: 28px; padding: 22px 28px;
-    backdrop-filter: blur(6px);
   }
   .card .who { font-size: 20px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--sky); }
   .card .route { margin-top: 12px; font-size: 32px; font-weight: 800; line-height: 1.25; }
@@ -102,54 +110,62 @@
     box-shadow: 0 0 0 12px rgba(255,201,60,.16), 0 12px 28px rgba(0,0,0,.35);
   }
 
-  /* bottom: steps + QR */
-  .bottom {
-    margin-top: auto;
-    display: grid; grid-template-columns: 1fr 290px; gap: 40px; align-items: end;
+  /* features */
+  .features {
+    list-style: none;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
   }
-  .story .bottom { margin-top: 0; grid-template-columns: 1fr; gap: 72px; }
-  .steps { list-style: none; display: grid; gap: 20px; }
-  .steps li { display: flex; align-items: center; gap: 20px; font-size: 29px; font-weight: 700; }
-  .num {
-    flex: none; width: 54px; height: 54px; border-radius: 16px;
-    background: rgba(142,202,255,.16); color: var(--sky);
-    display: grid; place-items: center; font-size: 26px; font-weight: 800;
+  .features li {
+    display: flex; align-items: center; gap: 18px;
+    background: rgba(255,255,255,.07);
+    border: 1.5px solid rgba(255,255,255,.13);
+    border-radius: 22px; padding: 16px 20px;
   }
-  .best {
-    margin-top: 28px; display: inline-flex; align-items: center; gap: 14px;
-    font-size: 26px; font-weight: 700; color: var(--gold);
+  .features li.wide { grid-column: 1 / -1; }
+  .fi {
+    flex: none; width: 56px; height: 56px; border-radius: 16px;
+    background: rgba(142,202,255,.16);
+    display: grid; place-items: center;
   }
-  .stars { letter-spacing: 4px; font-size: 28px; }
+  .ft { font-size: 25px; font-weight: 800; line-height: 1.2; }
+  .ft small { display: block; font-size: 20px; font-weight: 600; color: var(--soft); margin-top: 2px; }
+  .story .features { gap: 18px; }
+  .story .features li { padding: 20px 22px; }
+  .story .ft { font-size: 27px; }
+  .story .ft small { font-size: 21px; }
 
+  /* bottom: QR + CTA */
+  .cta { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
   .qr-card {
     background: var(--white); color: var(--navy);
-    border-radius: 30px; padding: 26px 26px 20px;
+    border-radius: 28px; padding: 22px 22px 16px;
     text-align: center;
     box-shadow: 0 24px 60px rgba(0,0,0,.4);
   }
-  .qr-card img { width: 230px; height: 230px; display: block; margin: 0 auto; }
-  .qr-cta { margin-top: 18px; font-size: 26px; font-weight: 800; }
-  .qr-sub { font-size: 19px; font-weight: 600; color: #4a5a70; margin-top: 4px; }
+  .qr-card img { width: 196px; height: 196px; display: block; margin: 0 auto; }
+  .qr-cta { margin-top: 12px; font-size: 22px; font-weight: 800; }
+  .story .qr-card { padding: 28px 28px 20px; border-radius: 32px; }
+  .story .qr-card img { width: 290px; height: 290px; }
+  .story .qr-cta { font-size: 27px; margin-top: 16px; }
 
-  .story .qr-row { display: grid; grid-template-columns: 380px 1fr; gap: 50px; align-items: center; }
-  .story .qr-card img { width: 320px; height: 320px; }
+  .best { display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 700; color: var(--gold); }
+  .stars { letter-spacing: 4px; font-size: 26px; }
+  .cta-title { font-size: 38px; font-weight: 800; line-height: 1.15; margin-top: 10px; }
   .store {
+    margin-top: 20px;
     display: inline-flex; align-items: center; gap: 16px;
     background: #000; color: #fff; border: 2px solid rgba(255,255,255,.35);
-    border-radius: 18px; padding: 16px 28px;
+    border-radius: 16px; padding: 12px 24px;
   }
-  .store small { display: block; font-size: 18px; font-weight: 600; opacity: .85; }
-  .store b { display: block; font-size: 32px; font-weight: 800; line-height: 1.1; }
-
-  .url {
-    margin-top: 14px; line-height: 1.35; font-size: 22px; font-weight: 600; color: var(--soft);
-  }
+  .store small { display: block; font-size: 16px; font-weight: 600; opacity: .85; }
+  .store b { display: block; font-size: 28px; font-weight: 800; line-height: 1.1; }
+  .url { margin-top: 16px; font-size: 21px; font-weight: 600; color: var(--soft); line-height: 1.35; }
   .url strong { color: var(--white); font-weight: 700; }
-  .story .url { font-size: 26px; margin-top: 22px; }
+  .story .cta-title { font-size: 44px; }
+  .story .url { font-size: 24px; }
 
   .only-story { display: none; }
-  .story .only-story { display: block; }
-  .story .only-feed { display: none; }
+  .story .only-story { display: grid; }
 </style>
 </head>
 <body>
@@ -159,6 +175,8 @@
   <div class="top">
     <div class="brand">
       <div class="logo">
+        <!-- Offizielles Logo: tauschrevier-flyer/assets/logo.png (fällt sonst auf das Symbol zurück) -->
+        <img src="assets/logo.png" alt="" onerror="this.remove()">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 8h13"/><path d="M13 4l4 4-4 4"/>
           <path d="M20 16H7"/><path d="M11 12l-4 4 4 4"/>
@@ -172,10 +190,22 @@
     </div>
 
     <h1>Versetzung gesucht?<br><span class="hl">Finde deinen Tauschpartner.</span></h1>
-    <p class="lead">Jemand will genau dahin, wo du bist – und ist genau da, wo du hinwillst. Tauschrevier bringt euch zusammen.</p>
   </div>
 
-  <div class="swap">
+  <div class="free">
+    <div class="free-icon">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#ffc93c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13"/><path d="M3 12h18"/>
+        <path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8c3 0 6-.5 6-1.5S14 4 12 8z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="free-big">Komplett kostenlos</div>
+      <div class="free-small">bis 31.12.2026 – alle Funktionen inklusive</div>
+    </div>
+  </div>
+
+  <div class="swap only-story">
     <div class="card me">
       <div class="who">Du</div>
       <div class="route">Hamburg <span>möchte nach</span> München</div>
@@ -192,45 +222,44 @@
     </div>
   </div>
 
-  <div class="bottom">
+  <ul class="features">
+    <li>
+      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+      <span class="ft">Direkter Match<small>per Push-Nachricht</small></span>
+    </li>
+    <li>
+      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg></span>
+      <span class="ft">Integrierter Chat<small>direkt in der App</small></span>
+    </li>
+    <li>
+      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+      <span class="ft">Auch innerhalb<small>deines Bundeslandes</small></span>
+    </li>
+    <li>
+      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7"/><path d="M9 11h5"/></svg></span>
+      <span class="ft">Tauschregularien<small>fast aller Bundesländer</small></span>
+    </li>
+    <li class="wide">
+      <span class="fi"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8ecaff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      <span class="ft">Verifizierte Gesuche<small>bestätigt über deine dienstliche E-Mail-Adresse</small></span>
+    </li>
+  </ul>
+
+  <div class="cta">
+    <div class="qr-card">
+      <img src="qr.svg" alt="QR-Code zum App Store">
+      <div class="qr-cta">Scannen &amp; laden</div>
+    </div>
     <div>
-      <ul class="steps">
-        <li><span class="num">1</span>App laden &amp; Gesuch anlegen</li>
-        <li><span class="num">2</span>Passende Tauschpartner finden</li>
-        <li><span class="num">3</span>Kontakt aufnehmen &amp; tauschen</li>
-      </ul>
-      <div class="best only-feed"><span class="stars">★★★★★</span> Die beste App für deinen Tausch</div>
-      <div class="url only-feed">Jetzt im App Store:<br><strong>apps.apple.com/app/id6799975765</strong></div>
-    </div>
-
-    <div class="only-feed">
-      <div class="qr-card">
-        <img src="qr.svg" alt="QR-Code zum App Store">
-        <div class="qr-cta">Scannen &amp; laden</div>
-        <div class="qr-sub">im App Store</div>
+      <div class="best"><span class="stars">★★★★★</span></div>
+      <div class="cta-title">Die beste App für deinen Tausch.</div>
+      <div class="store">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
+        <div><small>Jetzt laden im</small><b>App Store</b></div>
       </div>
-    </div>
-
-    <div class="only-story">
-      <div class="qr-row">
-        <div class="qr-card">
-          <img src="qr.svg" alt="QR-Code zum App Store">
-          <div class="qr-cta">Scannen &amp; laden</div>
-          <div class="qr-sub">im App Store</div>
-        </div>
-        <div>
-          <div class="best" style="margin-top:0"><span class="stars">★★★★★</span></div>
-          <div style="font-size:40px;font-weight:800;line-height:1.2;margin-top:10px">Die beste App für deinen Tausch.</div>
-          <div style="margin-top:28px" class="store">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>
-            <div><small>Jetzt laden im</small><b>App Store</b></div>
-          </div>
-        </div>
-      </div>
-      <div class="url">Link: <strong>apps.apple.com/app/id6799975765</strong></div>
+      <div class="url"><strong>apps.apple.com/app/id6799975765</strong></div>
     </div>
   </div>
-
 </div>
 <script>
   document.body.className = new URLSearchParams(location.search).get('v') || 'feed';

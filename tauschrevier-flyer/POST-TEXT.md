@@ -9,9 +9,13 @@ oder `tauschrevier-story.png` (WhatsApp-Status / Facebook-Story).
 
 Irgendwo will jemand genau dahin, wo du gerade bist – und ist genau da, wo du hinwillst. Mit meiner neuen App **Tauschrevier** findet ihr euch. 🙌
 
-✅ Gesuch anlegen
-✅ Passende Tauschpartner finden
-✅ Kontakt aufnehmen & tauschen
+🎁 **Bis 31.12.2026 komplett kostenlos!**
+
+🔔 Direkter Match per Push-Nachricht
+💬 Integrierter Chat
+📍 Auch Wechsel innerhalb des eigenen Bundeslandes möglich
+📘 Tauschregularien fast aller Bundesländer
+🛡️ Verifizierte Gesuche – bestätigt über die dienstliche E-Mail-Adresse
 
 📲 Jetzt im App Store laden:
 https://apps.apple.com/us/app/tauschrevier-versetzung/id6799975765
@@ -22,9 +26,11 @@ Teilt den Beitrag gerne mit Kolleginnen und Kollegen – je mehr mitmachen, dest
 
 ## Kurzversion (WhatsApp-Status / Gruppen)
 
-🔁 Versetzung gesucht? Mit **Tauschrevier** findest du deinen Tauschpartner!
+🔁 Versetzung gesucht? Mit **Tauschrevier** findest du deinen Tauschpartner – direkter Match per Push, Chat und verifizierte Gesuche.
+🎁 Bis 31.12.2026 komplett kostenlos!
 📲 https://apps.apple.com/us/app/tauschrevier-versetzung/id6799975765
 
 ---
 
 Neu rendern (nach Änderungen an `flyer.html`): `node render.js`
+Offizielles Logo: als `assets/logo.png` ablegen, es wird dann automatisch verwendet.
