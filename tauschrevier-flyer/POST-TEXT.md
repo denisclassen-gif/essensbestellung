@@ -34,4 +34,6 @@ Teilt den Beitrag gerne mit Kolleginnen und Kollegen – je mehr mitmachen, dest
 ---
 
 Neu rendern (nach Änderungen an `flyer.html`): `node render.js`
-Logo und Tauschkachel in `assets/` sind aus den App-Screenshots ausgeschnitten.
+Logo und iPhone-Bildschirm in `assets/` stammen aus den App-Screenshots (Uhrzeit auf 9:41 gesetzt,
+Testtext im Gesuch durch Beispieltext ersetzt). `assets/app-store-badge.svg` ist das offizielle
+Apple-Badge von developer.apple.com. Schrift: Inter (SIL Open Font License).
