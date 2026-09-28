@@ -214,6 +214,7 @@
   .merke b.h { color: #c77a00; display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
   @media (prefers-color-scheme: dark) { .merke b.h { color: var(--amber); } }
   .merke ul { margin: 0; padding-left: 20px; }
+  .merke b.h svg { width: 20px; height: 20px; flex: none; }
 
   /* Screening-Prüfung */
   .chipnum { display: inline-block; font-size: 12px; font-weight: 800; padding: 5px 11px; border-radius: 99px; background: rgba(0, 107, 92, .14); color: var(--green); }
@@ -443,6 +444,30 @@
   html.polizei a { color: #0082c4; }
   html.polizei a.ico, html.polizei a.btn { color: #fff; }
   html.polizei a.btn.glassy { color: #002664; }
+  /* Leitfäden & Handreichungen */
+  .qchip { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: rgba(0, 130, 196, .12); color: #0082c4; margin-left: 4px; vertical-align: 1px; white-space: nowrap; }
+  .qchip.pr { background: rgba(224, 134, 0, .16); color: #b86b00; }
+  .lfgrid { display: grid; gap: 12px; }
+  .hr-bildschirm h1.hr-titel { font-size: 26px; margin: 0 0 4px; }
+  .hr-bildschirm .hr-unter { color: var(--muted); margin: 0 0 12px; }
+  .hr-bildschirm h2 { font-size: 18px; margin: 18px 0 6px; color: var(--green); }
+  .hr-bildschirm ul, .hr-bildschirm ol { padding-left: 22px; margin: 0; }
+  .hr-bildschirm li { margin-bottom: 6px; }
+  .hr-bildschirm .hr-quellen { font-size: 13px; color: var(--muted); }
+  .hr-bildschirm .hr-fuss { font-size: 12px; color: var(--muted); margin-top: 14px; }
+  @media print {
+    #druck .hrdruck { font: 10.5pt Arial, Helvetica, sans-serif; color: #000; }
+    #druck .hr-kopf { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #002664; padding-bottom: 8px; margin-bottom: 10px; font-size: 9pt; text-align: right; }
+    #druck .hr-kopf img { height: 34pt; }
+    #druck .hr-titel { font-size: 17pt; color: #002664; margin: 6pt 0 2pt; }
+    #druck .hr-unter { margin: 0 0 8pt; color: #333; }
+    #druck h2 { font-size: 12pt; color: #002664; margin: 10pt 0 3pt; break-after: avoid; }
+    #druck ul, #druck ol { margin: 0; padding-left: 16pt; }
+    #druck li { margin-bottom: 3pt; break-inside: avoid; }
+    #druck .hr-quellen { font-size: 8.5pt; color: #333; border-top: 1px solid #999; margin-top: 10pt; padding-top: 4pt; }
+    #druck .hr-fuss { font-size: 8pt; color: #555; margin-top: 8pt; }
+  }
+  @media (min-width: 1000px) { .lfgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   /* ===== Desktop: Seitenleiste links, breiterer Inhalt – skaliert automatisch mit der Fensterbreite ===== */
   .navmarke { display: none; }
   @media (min-width: 1000px) {
@@ -858,10 +883,12 @@ function ScreeningWizard(imEinsatz) {
     }
     const text = protokoll(k);
     const farbe = k.ergebnis === "screening" ? 2 : k.ergebnis === "kein" ? 0 : 4;
+    const ue = (C.screening_uebergaenge || {})[aktuell];
     return {
       title: "Ergebnis",
       html: `<div class="result" style="${farbVars(farbe)}">${svg(k.ergebnis === "screening" ? "shieldalert" : k.ergebnis === "kein" ? "shieldcheck" : "info", 2)}
           <h2 class="rounded">${esc(k.titel)}</h2><div>${esc(k.kurz)}</div></div>
+        ${ue && C.leitfaeden ? `<button class="btn" id="wLF" style="font-size:18px;padding:18px">${svg("arrowr", 2.4)} ${esc(ue.text)}</button>` : ""}
         ${imEinsatz ? (k.ergebnis === "screening"
           ? `<button class="btn" id="wE" style="font-size:19px;padding:20px">${svg("arrowr", 2.4)} Weiter: Screening durchführen</button>`
           : `<div class="note glass" style="border:2px solid #008444"><span><b>Kein Screening.</b> Arbeite die Punkte unten ab – dann ist der Einsatz für die Screening-Hilfe beendet.</span></div>`)
@@ -895,6 +922,7 @@ function ScreeningWizard(imEinsatz) {
         const wl = $("wl"); if (wl) wl.onclick = () => go(() => Checkliste("screening-inland"));
         const wa = $("wa"); if (wa) wa.onclick = () => go(FallUebersicht);
         const wE = $("wE"); if (wE) wE.onclick = () => { vibrate(); imEinsatz("ja", k.titel); };
+        const wLF = $("wLF"); if (wLF) wLF.onclick = () => { vibrate(); go(ue.knoten ? Leitfaden(ue.leitfaden, ue.knoten) : () => LeitfadenStart(ue.leitfaden)); };
         if (imEinsatz && k.ergebnis !== "screening") imEinsatz("nein", k.titel, true);
         $("wn").onclick = neu;
       }
@@ -1396,6 +1424,8 @@ function Mehr() {
         <span style="padding:14px;border-radius:22px;background:${POL ? "#fff;border:1px solid var(--line)" : "linear-gradient(135deg,#075c50,#003d35)"};display:grid">${EMBLEM(46)}</span>
         <div><b class="rounded" style="font-size:24px">${esc(C.meta.titel)}</b><div class="small">Version ${esc(C.meta.version)} · Stand ${esc(C.meta.stand)}</div></div></div>
       <h3 class="sec">Einsatz</h3>${rowtile('id="kt"', "Wichtige Erreichbarkeiten", "Eigene Telefonliste der Dienststelle", "phone", 0)}
+      ${C.handreichungen ? rowtile('id="mH"', "Handreichungen", "Freizügigkeit · Drittstaatsangehörige ohne Screening", "print", 3) : ""}
+      ${C.leitfaeden ? rowtile('id="mP"', "Rechtsgrundlagen & Quellen", "Prüfstand: was belegt ist, was noch geprüft werden muss", "scales", 5) : ""}
       <h3 class="sec">Hilfe</h3>${rowtile('id="ob"', "Einführung erneut ansehen", "", "play", 1)}
       <h3 class="sec">Über diese App</h3>
       ${C.meta.hinweis_intern ? `<section class="prose glass reveal" style="border:1.5px solid var(--coral)"><h4 style="color:var(--coral)">Nur für den Dienstgebrauch</h4><p>${esc(C.meta.hinweis_intern)}</p></section>` : ""}
@@ -1403,7 +1433,11 @@ function Mehr() {
       ${C.meta.copyright ? `<section class="prose glass reveal"><h4>Urheberrecht</h4><p>${esc(C.meta.copyright)}</p></section>` : ""}
       <section class="prose glass reveal"><h4>Quellen & Rechtsstand</h4><ul>${C.quellen.map(q => `<li>${esc(q)}</li>`).join("")}</ul></section>
       <section class="prose glass reveal"><h4>Auf dem iPhone installieren</h4><p>In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Die App funktioniert danach wie eine normale App – auch offline.</p></section>`,
-    bind: () => { $("kt").onclick = () => { vibrate(); go(Kontakte); }; $("ob").onclick = () => onboarding(true); }
+    bind: () => {
+      $("kt").onclick = () => { vibrate(); go(Kontakte); }; $("ob").onclick = () => onboarding(true);
+      const mH = $("mH"); if (mH) mH.onclick = () => { vibrate(); go(Handreichungen); };
+      const mP = $("mP"); if (mP) mP.onclick = () => { vibrate(); go(Pruefstand); };
+    }
   };
 }
 function Kontakte() {
@@ -2168,6 +2202,164 @@ function Vorschau(i) {
   };
 }
 
+// ================= Leitfäden: EU-Freizügigkeit / Drittstaatsangehörige ohne Screening =================
+// Jede Rechtsaussage trägt eine Quelle; „pruefen“ = Wortlaut vor Freigabe gegen die aktuelle Fassung prüfen.
+const QKURZ = { abh: "ABH Leipzig 09/2026", pddd_ahe: "PD Dresden", pddd_sta: "PD Dresden / StA", pddd_he: "PD Dresden 2023", bgh: "BGH", gensta: "GenStA Dresden", bespr: "Abstimmung 2026", bpol_uep: "Hinweis BPOL", lds: "LDS-Vordruck", pruefen: "Wortlaut prüfen" };
+const quelleChip = q => {
+  if (!q || !C.quellen_leitfaden || !C.quellen_leitfaden[q]) return "";
+  const pr = q === "pruefen";
+  return ` <span class="qchip${pr ? " pr" : ""}" title="${esc(C.quellen_leitfaden[q].titel)}">${pr ? "⚠ " : ""}${esc(QKURZ[q] || q)}</span>`;
+};
+const leitfaden = id => (C.leitfaeden || {})[id];
+
+function weiterKnopf(w, i) {
+  return `<button class="btn ${i ? "glassy" : ""}" data-wlf="${i}" style="margin:8px 0 0">${svg(w.handreichung ? "print" : w.screening ? "shieldcheck" : "arrowr", 2.2)} ${esc(w.text)}</button>`;
+}
+function weiterBinden(liste) {
+  app.querySelectorAll("[data-wlf]").forEach(b => b.onclick = () => {
+    vibrate(); const w = liste[+b.dataset.wlf];
+    if (w.handreichung) go(() => Handreichung(w.handreichung));
+    else if (w.screening) go(ScreeningWizard());
+    else if (w.leitfaden && !w.knoten) go(() => LeitfadenStart(w.leitfaden));
+    else go(Leitfaden(w.leitfaden || b.closest("[data-lf]")?.dataset.lf, w.knoten));
+  });
+}
+
+function LeitfadenStart(id) {
+  const L = leitfaden(id);
+  return {
+    title: L.titel,
+    html: `<div class="enter-fade">${ico(L.icon, L.farbe, "lg")}
+      <h2 class="rounded" style="font-size:32px;margin:14px 0 6px">${esc(L.titel)}</h2>
+      <p style="margin:0 0 16px;color:var(--muted);font-size:17px">${esc(L.kurz)}</p>
+      <div class="lfgrid">${L.einfuehrung.map((e, i) => `<div class="glass reveal" style="padding:16px">
+        <div style="display:flex;gap:10px;align-items:center"><span class="num rounded" style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:#002664;flex:none">${i + 1}</span><b style="font-size:18px">${esc(e.titel)}</b></div>
+        <p style="margin:8px 0 0">${esc(e.text)}${quelleChip(e.q)}</p></div>`).join("")}</div>
+      <button class="btn" id="lfS" style="font-size:19px;padding:20px;margin-top:16px">${svg("arrowr", 2.4)} Leitfaden starten</button>
+      ${C.handreichungen && C.handreichungen[id] ? `<button class="btn glassy" id="lfH">${svg("print")} Handreichung für den Streifendienst</button>` : ""}
+      <p class="small" style="margin-top:14px">Quellenangaben stehen an jeder Aussage. <span class="qchip pr">⚠ Wortlaut prüfen</span> = nicht durch ein vorliegendes Dokument belegt – vor dienstlicher Verwendung gegen die aktuelle Gesetzesfassung prüfen.</p></div>`,
+    bind: () => { $("lfS").onclick = () => { vibrate(); go(Leitfaden(id)); }; const h = $("lfH"); if (h) h.onclick = () => { vibrate(); go(() => Handreichung(id)); }; }
+  };
+}
+
+function Leitfaden(id, startKnoten) {
+  const L = leitfaden(id);
+  let verlauf = [], aktuell = startKnoten || L.start;
+  const haken = new Set();
+  const schritt = (richtung, fn) => uebergang(richtung, anim => { fn(); render(anim ? (richtung === "back" ? "enter-back" : "enter-fwd") : ""); });
+  const leiste = () => verlauf.length ? `<div class="bottombar static"><button class="btn glassy" id="lfZ">${svg("chevl", 2.2)} Zurück</button><button class="btn glassy danger" id="lfN">${svg("rotate")} Neu</button></div>` : "";
+  const view = () => {
+    const k = L.knoten[aktuell];
+    if (k.typ === "frage") return {
+      title: L.titel,
+      html: `<div data-lf="${id}"><div style="margin-top:4px"><span class="chipnum">Frage ${verlauf.length + 1}</span> <span class="small"><b>${esc(L.titel)}</b></span></div>
+        <div class="qbig rounded">${esc(k.frage)}</div>
+        ${k.hilfe ? `<div class="note glass">${svg("info").replace("<svg", '<svg style="color:#0082c4"')}<span>${esc(k.hilfe)}</span></div>` : ""}
+        ${k.antworten.map((a, i) => `<button class="answer glass press" data-lw="${i}"><span>${esc(a.text)}</span>${svg("arrowcircle")}</button>`).join("")}
+        ${leiste()}</div>`,
+      bind
+    };
+    const farbe = { handeln: 2, info: 0, wechsel: 4 }[k.art] ?? 0;
+    const weiter = k.weiter || [];
+    return {
+      title: "Ergebnis",
+      html: `<div data-lf="${id}"><div class="result" style="${farbVars(farbe)}">${svg(k.art === "handeln" ? "shieldalert" : k.art === "wechsel" ? "swap" : "info", 2)}
+          <h2 class="rounded">${esc(k.titel)}</h2><div>${esc(k.kurz)}</div></div>
+        ${weiter.length && k.art === "wechsel" ? weiter.map(weiterKnopf).join("") : ""}
+        ${k.massnahmen && k.massnahmen.length ? `<h3 class="sec">Das machst du jetzt <small>${haken.size}/${k.massnahmen.length}</small></h3>
+          ${k.massnahmen.map((mm, i) => `<button class="step glass press check ${haken.has(i) ? "on" : ""}" data-lh="${i}">
+            <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(mm.text)}</span>${quelleChip(mm.q)}${mm.hinweis ? `<span class="s">ⓘ ${esc(mm.hinweis)}</span>` : ""}</span></button>`).join("")}` : ""}
+        ${k.wissen && k.wissen.length ? `<div class="merke" style="margin-top:14px"><b class="h">${svg("bulb")} Gut zu wissen</b><ul>${k.wissen.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
+        ${k.normen && k.normen.length ? `<h3 class="sec">Rechtsgrundlagen</h3><div class="glass" style="padding:6px 16px">${k.normen.map(nn => `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><span class="normchip">${esc(nn.norm)}</span>${quelleChip(nn.q)}<div class="small" style="margin-top:4px;color:var(--text)">${esc(nn.text)}</div></div>`).join("")}</div>` : ""}
+        ${weiter.length && k.art !== "wechsel" ? `<h3 class="sec">Weiter</h3>${weiter.map(weiterKnopf).join("")}` : ""}
+        ${C.handreichungen && C.handreichungen[id] && !weiter.some(w => w.handreichung) ? `<button class="btn glassy" id="lfH" style="margin-top:10px">${svg("print")} Handreichung zum Ausdrucken</button>` : ""}
+        ${leiste()}</div>`,
+      bind: () => {
+        bind();
+        app.querySelectorAll("[data-lh]").forEach(el => el.onclick = () => {
+          vibrate(); const i = +el.dataset.lh; haken.has(i) ? haken.delete(i) : haken.add(i);
+          el.classList.toggle("on", haken.has(i));
+          const h = app.querySelector("h3.sec small"); if (h) h.textContent = `${haken.size}/${k.massnahmen.length}`;
+        });
+        weiterBinden(weiter);
+        const h = $("lfH"); if (h) h.onclick = () => { vibrate(); go(() => Handreichung(id)); };
+      }
+    };
+  };
+  function bind() {
+    app.querySelectorAll("[data-lw]").forEach(el => el.onclick = () => {
+      vibrate(); const i = +el.dataset.lw;
+      schritt("fwd", () => { verlauf.push(aktuell); aktuell = L.knoten[aktuell].antworten[i].ziel; haken.clear(); });
+    });
+    const z = $("lfZ"); if (z) z.onclick = () => { vibrate(); schritt("back", () => { aktuell = verlauf.pop(); haken.clear(); }); };
+    const nn = $("lfN"); if (nn) nn.onclick = () => { vibrate(); schritt("back", () => { verlauf = []; aktuell = L.start; haken.clear(); }); };
+  }
+  return view;
+}
+
+// Handreichung: Bildschirmansicht + Druck (DIN A4, mit Logo, Quellen und Stand)
+function handreichungHTML(id, druck) {
+  const H = C.handreichungen[id], Q = C.quellen_leitfaden || {};
+  const benutzt = [...new Set(H.abschnitte.flatMap(a => a.punkte.map(p => p[1]).filter(Boolean)))];
+  const nr = q => benutzt.indexOf(q) + 1;
+  return `${druck ? `<div class="hr-kopf">${C.logo ? `<img src="${C.logo}" alt="">` : ""}<div><b>Nur für den Dienstgebrauch</b><br>Stand: ${esc(C.meta.stand)}</div></div>` : ""}
+    <h1 class="hr-titel">${esc(H.titel)}</h1><p class="hr-unter">${esc(H.untertitel)}</p>
+    ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${esc(a.titel)}</h2><ul>${a.punkte.map(([t, q]) => `<li>${esc(t)}${q ? ` <sup title="${esc((Q[q] || {}).titel || "")}">[${nr(q)}]</sup>` : ""}</li>`).join("")}</ul></section>`).join("")}
+    <section class="hr-quellen"><h2>Quellen</h2><ol>${benutzt.map(q => `<li>${esc((Q[q] || {}).titel || q)}${q === "pruefen" ? "" : ` <i>(${esc((Q[q] || {}).art || "")})</i>`}</li>`).join("")}</ol>
+      <p>Diese Handreichung ist eine Arbeitshilfe. Maßgeblich sind die jeweils aktuellen Gesetze, Erlasse und die Entscheidung der zuständigen Ausländerbehörde.</p></section>
+    ${C.meta.copyright ? `<p class="hr-fuss">${esc(C.meta.copyright)}</p>` : ""}`;
+}
+
+function Handreichung(id) {
+  const H = C.handreichungen[id];
+  return {
+    title: "Handreichung",
+    html: `<button class="btn" id="hrD">${svg("print")} Drucken / als PDF speichern</button>
+      <div class="glass hr-bildschirm" style="padding:22px">${handreichungHTML(id, false)}</div>
+      ${leitfaden(id) ? `<button class="btn glassy" id="hrL">${svg("arrowr", 2.2)} Zum Leitfaden „${esc(leitfaden(id).titel)}“</button>` : ""}`,
+    bind: () => {
+      $("hrD").onclick = () => {
+        vibrate();
+        const d = document.getElementById("druck");
+        d.innerHTML = `<div class="hrdruck">${handreichungHTML(id, true)}</div>`;
+        const alt = document.title; document.title = H.titel;
+        window.print();
+        setTimeout(() => { document.title = alt; }, 1000);
+      };
+      const l = $("hrL"); if (l) l.onclick = () => { vibrate(); go(() => LeitfadenStart(id)); };
+    }
+  };
+}
+
+function Handreichungen() {
+  const hs = Object.keys(C.handreichungen || {});
+  return {
+    title: "Handreichungen",
+    html: `<p style="margin:0 0 14px">Zum Aushändigen an den Streifendienst – zum Ausdrucken oder als PDF.</p>
+      ${hs.map((id, i) => rowtile(`data-hr="${id}"`, C.handreichungen[id].titel, C.handreichungen[id].untertitel, "print", i + 2)).join("")}`,
+    bind: () => app.querySelectorAll("[data-hr]").forEach(b => b.onclick = () => { vibrate(); go(() => Handreichung(b.dataset.hr)); })
+  };
+}
+
+// Prüfstand: alle Normen der Leitfäden mit Quelle – was belegt ist und was noch geprüft werden muss
+function Pruefstand() {
+  const Q = C.quellen_leitfaden || {};
+  const alle = [];
+  for (const L of Object.values(C.leitfaeden || {})) for (const [kid, k] of Object.entries(L.knoten)) {
+    for (const nn of k.normen || []) alle.push({ ...nn, lf: L.titel, bei: k.titel });
+    for (const mm of k.massnahmen || []) if (mm.q === "pruefen") alle.push({ norm: "Maßnahme", text: mm.text, q: "pruefen", lf: L.titel, bei: k.titel });
+  }
+  const offen = alle.filter(x => x.q === "pruefen"), belegt = alle.filter(x => x.q !== "pruefen");
+  const zeile = x => `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><span class="normchip">${esc(x.norm)}</span>${quelleChip(x.q)}<div class="small" style="color:var(--text)">${esc(x.text)}</div><div class="small">${esc(x.lf)} → ${esc(x.bei)}</div></div>`;
+  return {
+    title: "Rechtsgrundlagen & Quellen",
+    html: `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span><b>${offen.length} Angaben sind noch zu prüfen</b> – sie sind nicht durch ein vorliegendes Dokument belegt. Bitte gegen die aktuelle Gesetzesfassung prüfen, bevor die Leitfäden freigegeben werden.</span></div>
+      <h3 class="sec">Noch zu prüfen <small>${offen.length}</small></h3><div class="glass" style="padding:6px 16px">${offen.map(zeile).join("")}</div>
+      <h3 class="sec">Durch Dokumente belegt <small>${belegt.length}</small></h3><div class="glass" style="padding:6px 16px">${belegt.map(zeile).join("")}</div>
+      <h3 class="sec">Quellen</h3><div class="glass" style="padding:6px 16px">${Object.entries(Q).map(([k, v]) => `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><b>${esc(QKURZ[k] || k)}</b> <span class="small">(${esc(v.art)})</span><div class="small" style="color:var(--text)">${esc(v.titel)}</div></div>`).join("")}</div>`
+  };
+}
+
 // ================= Geführter Einsatz (interne Ausgabe) =================
 // Ein Schritt pro Bildschirm: erst prüfen (Screening ja/nein), dann abarbeiten bis zur Übermittlung.
 const ES = () => (S.einsatz ||= { i: 0, haken: {}, pruefung: null, ergebnis: "" });
@@ -2269,6 +2461,9 @@ function EinsatzStart() {
         ${a && e && e.pruefung !== "nein" ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b></div>
           <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
         ${istUma() ? umaKarte(true) : ""}
+        ${C.leitfaeden ? `<h3 class="sec">Weitere Themen</h3>
+          ${Object.values(C.leitfaeden).map(L => rowtile(`data-lfs="${L.id}"`, L.titel, L.kurz, L.icon, L.farbe)).join("")}
+          ${C.handreichungen ? rowtile('id="sH"', "Handreichungen für den Streifendienst", "Zum Aushändigen – ausdrucken oder als PDF", "print", 3) : ""}` : ""}
         <h3 class="sec">Für Geübte</h3>
         ${rowtile('id="sD"', "Direkt zum Dokumenten-Assistenten", "Angaben erfassen und alle Unterlagen erstellen – ohne Führung", "docs", 2)}
         ${rowtile('id="sP"', "Nur prüfen: Screening ja oder nein?", "Die Prüffragen ohne den übrigen Einsatz", "shieldcheck", 4)}
@@ -2285,6 +2480,8 @@ function EinsatzStart() {
         S.einsatz = null; save(); neuZeichnen();
       };
       $("sD").onclick = () => { vibrate(); go(FallUebersicht); };
+      app.querySelectorAll("[data-lfs]").forEach(b => b.onclick = () => { vibrate(); go(() => LeitfadenStart(b.dataset.lfs)); });
+      const sH = $("sH"); if (sH) sH.onclick = () => { vibrate(); go(Handreichungen); };
       $("sP").onclick = () => { vibrate(); go(ScreeningWizard()); };
       $("sC").onclick = () => { vibrate(); go(Ablauf); };
       const fk = $("fk"); if (fk) fk.onclick = () => { vibrate(); go(FallUebersicht); };

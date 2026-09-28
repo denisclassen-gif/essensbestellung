@@ -58,7 +58,7 @@ def mische_intern(c, i):
         c["screening"]["knoten"][knoten].update(aenderung)
     c["kontakte"] = i.get("kontakte", c["kontakte"])
     c["kapitel"] += i.get("kapitel_zusatz", [])
-    for schluessel in ("ablauf", "dokumentauswahl", "vorlagen", "uma_hilfe", "sidas", "einsatz"):
+    for schluessel in ("ablauf", "dokumentauswahl", "vorlagen", "uma_hilfe", "sidas", "einsatz", "leitfaeden", "handreichungen", "quellen_leitfaden", "screening_uebergaenge"):
         if schluessel in i:
             c[schluessel] = i[schluessel]
     # Eingebaute Word-Vorlagen und Merkblätter (nur interne Ausgabe, Ordner content/intern/vorlagen/ ist ignoriert)
