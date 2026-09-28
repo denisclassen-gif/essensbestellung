@@ -2326,11 +2326,10 @@ function Leitfaden(id, startKnoten) {
 function handreichungHTML(id, druck) {
   const H = C.handreichungen[id], Q = C.quellen_leitfaden || {};
   const benutzt = [...new Set(H.abschnitte.flatMap(a => a.punkte.map(p => p[1]).filter(Boolean)))];
-  const nr = q => benutzt.indexOf(q) + 1;
   return `${druck ? `<div class="hr-kopf">${C.logo ? `<img src="${C.logo}" alt="">` : ""}<div><b>Nur für den Dienstgebrauch</b><br>Stand: ${esc(C.meta.stand)}</div></div>` : ""}
     <h1 class="hr-titel">${esc(H.titel)}</h1><p class="hr-unter">${esc(H.untertitel)}</p>
-    ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${esc(a.titel)}</h2><ul>${a.punkte.map(([t, q]) => `<li>${esc(t)}${q ? ` <sup title="${esc((Q[q] || {}).titel || "")}">[${nr(q)}]</sup>` : ""}</li>`).join("")}</ul></section>`).join("")}
-    <section class="hr-quellen"><h2>Quellen</h2><ol>${benutzt.map(q => `<li>${esc((Q[q] || {}).titel || q)}${q === "pruefen" ? "" : ` <i>(${esc((Q[q] || {}).art || "")})</i>`}</li>`).join("")}</ol>
+    ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${esc(a.titel)}</h2><ul>${a.punkte.map(([t]) => `<li>${esc(t)}</li>`).join("")}</ul></section>`).join("")}
+    <section class="hr-quellen"><h2>Quellen</h2><ul>${benutzt.map(q => `<li>${esc((Q[q] || {}).titel || q)}${q === "pruefen" ? "" : ` <i>(${esc((Q[q] || {}).art || "")})</i>`}</li>`).join("")}</ul>
       <p>Diese Handreichung ist eine Arbeitshilfe. Maßgeblich sind die jeweils aktuellen Gesetze, Erlasse und die Entscheidung der zuständigen Ausländerbehörde.</p></section>
     ${C.meta.copyright ? `<p class="hr-fuss">${esc(C.meta.copyright)}</p>` : ""}`;
 }
