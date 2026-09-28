@@ -468,6 +468,27 @@
     #druck .hr-fuss { font-size: 8pt; color: #555; margin-top: 8pt; }
   }
   @media (min-width: 1000px) { .lfgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  /* Festhalteanordnung: DIN-A4-Brief mit Kopfbogen (Infospalte rechts wie im Kopfbogen der PD) */
+  .fhbrief { position: relative; width: 210mm; min-height: 297mm; box-sizing: border-box; padding: 96mm 0 12mm; background: #fff; color: #000; font: 10.5pt/1.35 Arial, Helvetica, sans-serif; text-align: left; }
+  .fhbrief .fh-logo { position: absolute; top: 11mm; right: 12mm; height: 16mm; }
+  .fhbrief .fh-logo.txt { height: auto; font-size: 12pt; letter-spacing: .08em; }
+  .fhbrief .fh-falz { position: absolute; left: 7mm; width: 4mm; border-top: .3pt solid #000; }
+  .fhbrief .fh-falz.loch { width: 6mm; }
+  .fhbrief .fh-absender { position: absolute; top: 46mm; left: 22mm; width: 85mm; font-size: 7pt; letter-spacing: .02em; border-bottom: .3pt solid #000; padding-bottom: .5mm; }
+  .fhbrief .fh-anschrift { position: absolute; top: 52mm; left: 22mm; width: 85mm; height: 36mm; white-space: pre-line; }
+  .fhbrief .fh-info { position: absolute; top: 46mm; left: 161.5mm; width: 40mm; font-size: 8pt; line-height: 1.3; word-break: break-word; }
+  .fhbrief .fh-text { margin-left: 22mm; width: 132mm; }
+  .fhbrief h1 { font-size: 11.5pt; margin: 0; font-weight: 700; }
+  .fhbrief .fh-unter { margin: 0 0 4mm; }
+  .fhbrief h2, #druck .fhbrief h2 { font-size: 10.5pt; margin: 0 0 2mm; font-weight: 700; color: #000; }
+  .fhbrief .fh-pers { border-collapse: collapse; margin: 0 0 3mm; }
+  .fhbrief .fh-pers td { padding: .8mm 0; vertical-align: top; border: 0; }
+  .fhbrief .fh-pers td:first-child { width: 46mm; }
+  .fhbrief p { margin: 0 0 2.2mm; text-align: justify; hyphens: auto; white-space: pre-wrap; orphans: 3; widows: 3; }
+  .fhbrief .fh-unterschrift { height: 12mm; }
+  .fh-vorschau { padding: 8px; overflow: hidden; }
+  .fh-zoom .fhbrief { box-shadow: 0 1px 6px rgba(0, 0, 0, .25); }
+  @media print { #druck .fhdruck .fhbrief { box-shadow: none; min-height: 0; padding-bottom: 0; } }
   /* ===== Desktop: Seitenleiste links, breiterer Inhalt – skaliert automatisch mit der Fensterbreite ===== */
   .navmarke { display: none; }
   @media (min-width: 1000px) {
@@ -1179,7 +1200,7 @@ function Checkliste(id) {
   return {
     title: l.titel,
     html: `<p class="small" style="font-size:15px">${esc(l.kontext)}</p>${bar(set.size / l.punkte.length)}<div style="height:12px"></div>
-      ${l.punkte.map((p, i) => `<button class="step glass press check ${set.has(i) ? "on" : ""}" data-i="${i}" role="checkbox" aria-checked="${set.has(i)}">
+      ${l.punkte.map((p, i) => `${p.abschnitt ? `<h3 class="sec">${esc(p.abschnitt)}</h3>` : ""}<button class="step glass press check ${set.has(i) ? "on" : ""}" data-i="${i}" role="checkbox" aria-checked="${set.has(i)}">
         <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">${esc(p.hinweis)}</span>` : ""}</span></button>`).join("")}
       <p class="small">Abgehakte Punkte werden nur lokal gespeichert. Keine Personendaten eintragen.</p>
       <button class="btn glassy danger" id="cr">${svg("rotate")} Checkliste zurücksetzen</button>`,
@@ -1425,6 +1446,7 @@ function Mehr() {
         <div><b class="rounded" style="font-size:24px">${esc(C.meta.titel)}</b><div class="small">Version ${esc(C.meta.version)} · Stand ${esc(C.meta.stand)}</div></div></div>
       <h3 class="sec">Einsatz</h3>${rowtile('id="kt"', "Wichtige Erreichbarkeiten", "Eigene Telefonliste der Dienststelle", "phone", 0)}
       ${C.handreichungen ? rowtile('id="mH"', "Handreichungen", "Freizügigkeit · Drittstaatsangehörige ohne Screening", "print", 3) : ""}
+      ${C.festhalten ? rowtile('id="mF"', "Festhalteanordnung (§ 62 Abs. 5 AufenthG)", "Vorlage zum Ausdrucken – Daten werden eingetragen", "lock", 4) : ""}
       ${C.leitfaeden ? rowtile('id="mP"', "Rechtsgrundlagen & Quellen", "Prüfstand: was belegt ist, was noch geprüft werden muss", "scales", 5) : ""}
       <h3 class="sec">Hilfe</h3>${rowtile('id="ob"', "Einführung erneut ansehen", "", "play", 1)}
       <h3 class="sec">Über diese App</h3>
@@ -1437,6 +1459,7 @@ function Mehr() {
       $("kt").onclick = () => { vibrate(); go(Kontakte); }; $("ob").onclick = () => onboarding(true);
       const mH = $("mH"); if (mH) mH.onclick = () => { vibrate(); go(Handreichungen); };
       const mP = $("mP"); if (mP) mP.onclick = () => { vibrate(); go(Pruefstand); };
+      const mF = $("mF"); if (mF) mF.onclick = () => { vibrate(); go(Festhalteanordnung); };
     }
   };
 }
@@ -2213,12 +2236,14 @@ const quelleChip = q => {
 const leitfaden = id => (C.leitfaeden || {})[id];
 
 function weiterKnopf(w, i) {
-  return `<button class="btn ${i ? "glassy" : ""}" data-wlf="${i}" style="margin:8px 0 0">${svg(w.handreichung ? "print" : w.screening ? "shieldcheck" : "arrowr", 2.2)} ${esc(w.text)}</button>`;
+  return `<button class="btn ${i ? "glassy" : ""}" data-wlf="${i}" style="margin:8px 0 0">${svg(w.handreichung || w.vorlage ? "print" : w.checkliste ? "list" : w.screening ? "shieldcheck" : "arrowr", 2.2)} ${esc(w.text)}</button>`;
 }
 function weiterBinden(liste) {
   app.querySelectorAll("[data-wlf]").forEach(b => b.onclick = () => {
     vibrate(); const w = liste[+b.dataset.wlf];
     if (w.handreichung) go(() => Handreichung(w.handreichung));
+    else if (w.vorlage === "festhalten") go(Festhalteanordnung);
+    else if (w.checkliste) go(() => Checkliste(w.checkliste));
     else if (w.screening) go(ScreeningWizard());
     else if (w.leitfaden && !w.knoten) go(() => LeitfadenStart(w.leitfaden));
     else go(Leitfaden(w.leitfaden || b.closest("[data-lf]")?.dataset.lf, w.knoten));
@@ -2339,6 +2364,133 @@ function Handreichungen() {
       ${hs.map((id, i) => rowtile(`data-hr="${id}"`, C.handreichungen[id].titel, C.handreichungen[id].untertitel, "print", i + 2)).join("")}`,
     bind: () => app.querySelectorAll("[data-hr]").forEach(b => b.onclick = () => { vibrate(); go(() => Handreichung(b.dataset.hr)); })
   };
+}
+
+// ================= Festhalteanordnung nach § 62 Abs. 5 AufenthG (nur interne Ausgabe) =================
+// Eigenes Formular mit Kopfbogen der Dienststelle; übernimmt vorhandene Angaben aus dem Fall. Nur auf diesem Gerät, 7 Tage.
+const FHKEY = "geas.intern.festhalten.v1";
+let FH = (() => {
+  try {
+    const f = JSON.parse(localStorage.getItem(FHKEY) || "null");
+    if (f && Date.now() - f.angelegt < AUFBEWAHRUNG) return f;
+    localStorage.removeItem(FHKEY);
+  } catch (e) {}
+  return null;
+})();
+function fhSpeichern() { try { FH ? localStorage.setItem(FHKEY, JSON.stringify(FH)) : localStorage.removeItem(FHKEY); } catch (e) {} }
+function fhWerte() {
+  const K = C.festhalten;
+  if (!FH) FH = { angelegt: Date.now(), werte: {} };
+  const w = FH.werte;
+  for (const [id, quelle] of Object.entries(K.vorbelegung || {})) if (!w[id] && F && F.werte[quelle]) w[id] = F.werte[quelle];
+  for (const f of K.felder) if (w[f.id] === undefined && f.standard !== undefined) w[f.id] = f.standard;
+  return w;
+}
+const fhDatum = v => { if (!v) return ""; const d = new Date(v); return isNaN(d) ? v : d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " Uhr"; };
+const fhListe = a => a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " und " + a[a.length - 1];
+
+function fhFeld(f, w) {
+  const v = w[f.id] ?? "";
+  const pf = f.pflicht ? `<span class="pflicht ${(Array.isArray(v) ? v.length : v) ? "ok" : ""}">Pflicht</span>` : "";
+  const hint = f.hinweis ? `<div class="hint">${svg("info").replace("<svg", '<svg style="width:15px;height:15px;flex:none"')}${esc(f.hinweis)}</div>` : "";
+  if (f.typ === "text") return `<div class="field"><input id="fh-${f.id}" data-fh="${f.id}" value="${esc(v)}" placeholder="${esc(f.platzhalter || " ")}" autocomplete="off"><label for="fh-${f.id}">${esc(f.label)} ${pf}</label>${hint}</div>`;
+  if (f.typ === "mehrzeilig") return `<div class="field ml"><label for="fh-${f.id}">${esc(f.label)} ${pf}</label><textarea id="fh-${f.id}" data-fh="${f.id}" rows="3" placeholder="${esc(f.platzhalter || "")}">${esc(v)}</textarea>${hint}</div>`;
+  if (f.typ === "datumzeit") return `<div class="box glass"><div class="lbl">${esc(f.label)} ${pf}</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input type="datetime-local" data-fhdt="${f.id}" value="${esc(v)}"><button class="chip" data-fhnow="${f.id}" style="color:var(--green)">${svg("clock")} Jetzt</button></div>${hint}</div>`;
+  const gew = Array.isArray(v) ? v : v ? [v] : [];
+  return `<div class="box glass"><div class="lbl">${esc(f.label)} ${pf}${f.typ === "mehrfach" ? '<span class="small">Mehrfachauswahl</span>' : ""}</div>
+    <div class="chips">${f.optionen.map(o => `<button class="chip ${gew.includes(o) ? "on" : ""}" data-fhc="${f.id}" data-o="${esc(o)}">${gew.includes(o) ? svg("check", 3) : ""}${esc(o)}</button>`).join("")}</div>${hint}</div>`;
+}
+
+// Der Text folgt dem Aufbau der Anordnungen der Landesdirektion Sachsen – ohne Strichcode, mit Kopfbogen der Polizeidirektion.
+function fhBrief(w) {
+  const K = C.festhalten, T = K.text;
+  const zeile = (l, v) => `<tr><td>${esc(l)}</td><td>${esc(v || "")}</td></tr>`;
+  const eu = w.rechtslage === K.rechtslage_eu;
+  const nrn = (w.haftgruende || []).map(h => (h.match(/Nr\. (\d)/) || [])[1]).filter(Boolean);
+  const frist = w.frist === "nicht gewährt" ? "nicht gewährt" : "abgelaufen" + (w.frist_datum ? " (" + w.frist_datum + ")" : "");
+  const absatz = s => `<p>${esc(s)}</p>`;
+  return `<div class="fhbrief">
+    ${C.logo ? `<img class="fh-logo" src="${C.logo}" alt="">` : `<div class="fh-logo txt">${esc(K.behoerde)}</div>`}
+    <i class="fh-falz" style="top:105mm"></i><i class="fh-falz loch" style="top:148.5mm"></i><i class="fh-falz" style="top:210mm"></i>
+    <div class="fh-absender">${esc(K.absender)}</div>
+    <div class="fh-anschrift">${esc(w.empfaenger || "")}</div>
+    <div class="fh-info">
+      <b>Ihr/-e Ansprechpartner/-in</b><br>${esc(w.sachbearbeiter || "")}<br>${esc(w.dienststelle || "")}<br><br>
+      <b>Durchwahl</b><br>Telefon ${esc(w.telefon || "")}<br>${w.email ? esc(w.email).replace("@", "@<br>") + "<br>" : ""}<br>
+      <b>Aktenzeichen</b><br>(bitte bei Antwort angeben)<br>${esc(w.aktenzeichen || "")}<br>${w.azr ? "AZR-Nr.: " + esc(w.azr) + "<br>" : ""}<br>
+      ${esc(w.ort || "")}, ${esc(new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }))}
+    </div>
+    <div class="fh-text">
+      <h1>${esc(T.titel)}</h1><div class="fh-unter">${esc(T.untertitel)}</div>
+      <h2>${esc(T.zustaendigkeit)}</h2>
+      <table class="fh-pers">${zeile("Name:", w.name)}${zeile("Vorname:", w.vorname)}${zeile("Geburtsdatum:", w.geburtsdatum)}${zeile("Staatsangehörigkeit:", w.staatsangehoerigkeit)}${zeile("Anschrift / Aufenthalt:", w.anschrift)}${zeile("AZR:", w.azr)}</table>
+      ${absatz(eu
+        ? T.eu.replace("{abh}", w.abh || "").replace("{bescheid}", w.bescheid || "").replace("{frist}", frist)
+        : T.drittstaat.replace("{bescheid}", w.bescheid || "").replace("{frist}", frist))}
+      ${w.eilantrag && w.eilantrag.startsWith("Kein") ? absatz(T.eilantrag) : ""}
+      ${absatz(T.verdacht.replace(" {nr}", nrn.length ? " Nr. " + fhListe(nrn) : ""))}
+      ${w.tatsachen ? absatz(w.tatsachen) : ""}
+      ${absatz(T.richter.replace("{grund}", w.richter_nicht || ""))}
+      ${absatz(T.entziehen.replace("{grund}", w.entziehen || ""))}
+      ${absatz(T.anordnung.replace("{behoerde}", K.behoerde).replace("{zeit}", fhDatum(w.festhalten_zeit)))}
+      ${absatz(T.vorfuehrung)}
+      ${absatz(T.abh.replace("{abh_info}", w.abh_info || ""))}
+      <p style="margin-top:6mm">${esc(T.gruss)}</p><p>Im Auftrag</p>
+      <div class="fh-unterschrift"></div><p>${esc(w.sachbearbeiter || "")}</p>
+    </div>
+  </div>`;
+}
+
+function Festhalteanordnung() {
+  const K = C.festhalten, w = fhWerte();
+  fhSpeichern();
+  const fehlend = () => K.felder.filter(f => f.pflicht && !(Array.isArray(w[f.id]) ? w[f.id].length : w[f.id])).map(f => f.label);
+  const gruppen = [...new Set(K.felder.map(f => f.gruppe))];
+  const view = () => {
+    const warn = K.warnungen.filter(x => [].concat(w[x.feld] || []).includes(x.wert));
+    return {
+      title: "Festhalteanordnung",
+      html: `<div class="glass" style="padding:18px;border:1.5px solid #002664">
+          <h3 class="rounded" style="margin:0 0 6px;font-size:21px">${esc(K.titel)}</h3>
+          ${K.hinweise.map(h => `<p style="margin:8px 0 0"><b>${esc(h.titel)}</b> ${esc(h.text)}${quelleChip(h.q)}</p>`).join("")}
+        </div>
+        ${warn.map(x => `<div class="note glass" style="margin-top:12px;border:1.5px solid var(--coral)">${svg("alert").replace("<svg", '<svg style="color:var(--coral)"')}<span><b style="color:var(--coral)">Achtung:</b> ${esc(x.text)}</span></div>`).join("")}
+        ${gruppen.map(g => `<h3 class="sec">${esc(g)}</h3>${K.felder.filter(f => f.gruppe === g).map(f => fhFeld(f, w)).join("")}`).join("")}
+        <button class="btn" id="fhD">${svg("print")} Drucken / als PDF speichern</button>
+        <h3 class="sec">Vorschau</h3><div class="fh-vorschau glass"><div class="fh-zoom">${fhBrief(w)}</div></div>
+        <button class="btn glassy danger" id="fhX">${svg("rotate")} Formular leeren</button>
+        <p class="small">Die Angaben bleiben nur auf diesem Gerät und werden nach 7 Tagen automatisch gelöscht.</p>`,
+      bind: () => {
+        const neu = () => { fhSpeichern(); const z = app.querySelector(".fh-zoom"); if (z) z.innerHTML = fhBrief(w); };
+        const skal = () => { const v = app.querySelector(".fh-vorschau"), z = app.querySelector(".fh-zoom"); if (v && z) z.style.zoom = Math.min(1, (v.clientWidth - 16) / 794); };
+        skal(); window.__fhSkal = skal;
+        if (!window.__fhR) { window.__fhR = 1; window.addEventListener("resize", () => document.querySelector(".fh-zoom") && window.__fhSkal()); }
+        app.querySelectorAll("[data-fh]").forEach(el => el.oninput = () => { w[el.dataset.fh] = el.value; neu(); });
+        app.querySelectorAll("[data-fhdt]").forEach(el => el.onchange = () => { w[el.dataset.fhdt] = el.value; neu(); });
+        app.querySelectorAll("[data-fhnow]").forEach(el => el.onclick = () => { vibrate(); w[el.dataset.fhnow] = lokalISO(new Date()); fhSpeichern(); neuZeichnen(); });
+        app.querySelectorAll("[data-fhc]").forEach(el => el.onclick = () => {
+          vibrate(); const f = K.felder.find(x => x.id === el.dataset.fhc), o = el.dataset.o;
+          if (f.typ === "mehrfach") { const a = [].concat(w[f.id] || []); w[f.id] = a.includes(o) ? a.filter(x => x !== o) : [...a, o]; }
+          else w[f.id] = w[f.id] === o ? "" : o;
+          fhSpeichern(); neuZeichnen();
+        });
+        $("fhD").onclick = () => {
+          vibrate();
+          const f = fehlend();
+          if (f.length && !confirm("Noch offen:\n– " + f.join("\n– ") + "\n\nTrotzdem drucken?")) return;
+          const d = document.getElementById("druck");
+          d.className = ""; d.innerHTML = `<div class="fhdruck">${fhBrief(w)}</div>`;
+          const st = document.createElement("style"); st.textContent = "@page { size: A4; margin: 20mm 0 18mm; } @page :first { margin: 0 0 18mm; } html, body { background: #fff !important; }"; document.head.appendChild(st);
+          const alt = document.title; document.title = ["Festhalteanordnung", w.name, w.vorname].filter(Boolean).join("_").replace(/\s+/g, "_");
+          window.print();
+          setTimeout(() => { document.title = alt; st.remove(); }, 1000);
+        };
+        $("fhX").onclick = () => { if (confirm("Alle Angaben im Formular löschen?")) { FH = null; fhSpeichern(); go(Festhalteanordnung); } };
+      }
+    };
+  };
+  return view();
 }
 
 // Prüfstand: alle Normen der Leitfäden mit Quelle – was belegt ist und was noch geprüft werden muss
@@ -2463,7 +2615,8 @@ function EinsatzStart() {
         ${istUma() ? umaKarte(true) : ""}
         ${C.leitfaeden ? `<h3 class="sec">Weitere Themen</h3>
           ${Object.values(C.leitfaeden).map(L => rowtile(`data-lfs="${L.id}"`, L.titel, L.kurz, L.icon, L.farbe)).join("")}
-          ${C.handreichungen ? rowtile('id="sH"', "Handreichungen für den Streifendienst", "Zum Aushändigen – ausdrucken oder als PDF", "print", 3) : ""}` : ""}
+          ${C.handreichungen ? rowtile('id="sH"', "Handreichungen für den Streifendienst", "Zum Aushändigen – ausdrucken oder als PDF", "print", 3) : ""}
+          ${C.festhalten ? rowtile('id="sF"', "Festhalteanordnung (§ 62 Abs. 5 AufenthG)", "Wenn noch kein Ersuchen der Ausländerbehörde vorliegt", "lock", 4) : ""}` : ""}
         <h3 class="sec">Für Geübte</h3>
         ${rowtile('id="sD"', "Direkt zum Dokumenten-Assistenten", "Angaben erfassen und alle Unterlagen erstellen – ohne Führung", "docs", 2)}
         ${rowtile('id="sP"', "Nur prüfen: Screening ja oder nein?", "Die Prüffragen ohne den übrigen Einsatz", "shieldcheck", 4)}
@@ -2482,6 +2635,7 @@ function EinsatzStart() {
       $("sD").onclick = () => { vibrate(); go(FallUebersicht); };
       app.querySelectorAll("[data-lfs]").forEach(b => b.onclick = () => { vibrate(); go(() => LeitfadenStart(b.dataset.lfs)); });
       const sH = $("sH"); if (sH) sH.onclick = () => { vibrate(); go(Handreichungen); };
+      const sF = $("sF"); if (sF) sF.onclick = () => { vibrate(); go(Festhalteanordnung); };
       $("sP").onclick = () => { vibrate(); go(ScreeningWizard()); };
       $("sC").onclick = () => { vibrate(); go(Ablauf); };
       const fk = $("fk"); if (fk) fk.onclick = () => { vibrate(); go(FallUebersicht); };
