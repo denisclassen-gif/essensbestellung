@@ -2204,7 +2204,7 @@ function Vorschau(i) {
 
 // ================= Leitfäden: EU-Freizügigkeit / Drittstaatsangehörige ohne Screening =================
 // Jede Rechtsaussage trägt eine Quelle; „pruefen“ = Wortlaut vor Freigabe gegen die aktuelle Fassung prüfen.
-const QKURZ = { abh: "ABH Leipzig 09/2026", pddd_ahe: "PD Dresden", pddd_sta: "PD Dresden / StA", pddd_he: "PD Dresden 2023", bgh: "BGH", gensta: "GenStA Dresden", bespr: "Abstimmung 2026", bpol_uep: "Hinweis BPOL", lds: "LDS-Vordruck", pruefen: "Wortlaut prüfen" };
+const QKURZ = { pddd_ahe: "PD Dresden", pddd_sta: "PD Dresden / StA", pddd_he: "PD Dresden 2023", bgh: "BGH", gensta: "GenStA Dresden", bespr: "Abstimmung 2026", bpol_uep: "Hinweis BPOL", lds: "LDS-Vordruck", pruefen: "Wortlaut prüfen", gesetz: "Gesetz ✓" };
 const quelleChip = q => {
   if (!q || !C.quellen_leitfaden || !C.quellen_leitfaden[q]) return "";
   const pr = q === "pruefen";
