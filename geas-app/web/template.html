@@ -487,6 +487,8 @@
   .fhbrief p { margin: 0 0 2.2mm; text-align: justify; hyphens: auto; white-space: pre-wrap; orphans: 3; widows: 3; }
   .fhbrief .fh-unterschrift { height: 12mm; }
   .fh-vorschau { padding: 8px; overflow: hidden; }
+  .fhb { margin: 8px 2px 0; } .fhb .chips { margin-top: 6px; } .fhb .chip { font-size: 14px; text-align: left; }
+  .fhb .chip svg { width: 14px; height: 14px; }
   .fh-zoom .fhbrief { box-shadow: 0 1px 6px rgba(0, 0, 0, .25); }
   @media print { #druck .fhdruck .fhbrief { box-shadow: none; min-height: 0; padding-bottom: 0; } }
   /* ===== Desktop: Seitenleiste links, breiterer Inhalt – skaliert automatisch mit der Fensterbreite ===== */
@@ -2392,8 +2394,13 @@ function fhFeld(f, w) {
   const v = w[f.id] ?? "";
   const pf = f.pflicht ? `<span class="pflicht ${(Array.isArray(v) ? v.length : v) ? "ok" : ""}">Pflicht</span>` : "";
   const hint = f.hinweis ? `<div class="hint">${svg("info").replace("<svg", '<svg style="width:15px;height:15px;flex:none"')}${esc(f.hinweis)}</div>` : "";
-  if (f.typ === "text") return `<div class="field"><input id="fh-${f.id}" data-fh="${f.id}" value="${esc(v)}" placeholder="${esc(f.platzhalter || " ")}" autocomplete="off"><label for="fh-${f.id}">${esc(f.label)} ${pf}</label>${hint}</div>`;
-  if (f.typ === "mehrzeilig") return `<div class="field ml"><label for="fh-${f.id}">${esc(f.label)} ${pf}</label><textarea id="fh-${f.id}" data-fh="${f.id}" rows="3" placeholder="${esc(f.platzhalter || "")}">${esc(v)}</textarea>${hint}</div>`;
+  // Textbausteine: antippen fügt die Passage ein (Einzeiler: ersetzt), erneut antippen entfernt sie
+  const bs = f.bausteine ? `<div class="fhb"><div class="small">Bausteine antippen – Angaben in [eckigen Klammern] ersetzen</div><div class="chips">${f.bausteine.map((b, i) => {
+      const an = String(v).includes(b.text);
+      return `<button class="chip ${an ? "on" : ""}" data-fhb="${f.id}" data-i="${i}" title="${esc(b.text)}">${svg(an ? "check" : "plus", 3)}${esc(b.kurz)}</button>`;
+    }).join("")}</div></div>` : "";
+  if (f.typ === "text") return `<div class="field"><input id="fh-${f.id}" data-fh="${f.id}" value="${esc(v)}" placeholder="${esc(f.platzhalter || " ")}" autocomplete="off"><label for="fh-${f.id}">${esc(f.label)} ${pf}</label>${bs}${hint}</div>`;
+  if (f.typ === "mehrzeilig") return `<div class="field ml"><label for="fh-${f.id}">${esc(f.label)} ${pf}</label><textarea id="fh-${f.id}" data-fh="${f.id}" rows="${Math.min(10, Math.max(3, Math.ceil(String(v).length / 45)))}" placeholder="${esc(f.platzhalter || "")}">${esc(v)}</textarea>${bs}${hint}</div>`;
   if (f.typ === "datumzeit") return `<div class="box glass"><div class="lbl">${esc(f.label)} ${pf}</div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input type="datetime-local" data-fhdt="${f.id}" value="${esc(v)}"><button class="chip" data-fhnow="${f.id}" style="color:var(--green)">${svg("clock")} Jetzt</button></div>${hint}</div>`;
   const gew = Array.isArray(v) ? v : v ? [v] : [];
@@ -2468,6 +2475,12 @@ function Festhalteanordnung() {
         app.querySelectorAll("[data-fh]").forEach(el => el.oninput = () => { w[el.dataset.fh] = el.value; neu(); });
         app.querySelectorAll("[data-fhdt]").forEach(el => el.onchange = () => { w[el.dataset.fhdt] = el.value; neu(); });
         app.querySelectorAll("[data-fhnow]").forEach(el => el.onclick = () => { vibrate(); w[el.dataset.fhnow] = lokalISO(new Date()); fhSpeichern(); neuZeichnen(); });
+        app.querySelectorAll("[data-fhb]").forEach(el => el.onclick = () => {
+          vibrate(); const f = K.felder.find(x => x.id === el.dataset.fhb), t = f.bausteine[+el.dataset.i].text, alt = String(w[f.id] || "");
+          if (f.typ === "text") w[f.id] = alt === t ? "" : t;
+          else w[f.id] = alt.includes(t) ? alt.replace(t, "").replace(/ {2,}/g, " ").trim() : (alt.trim() ? alt.trim() + " " : "") + t;
+          fhSpeichern(); neuZeichnen();
+        });
         app.querySelectorAll("[data-fhc]").forEach(el => el.onclick = () => {
           vibrate(); const f = K.felder.find(x => x.id === el.dataset.fhc), o = el.dataset.o;
           if (f.typ === "mehrfach") { const a = [].concat(w[f.id] || []); w[f.id] = a.includes(o) ? a.filter(x => x !== o) : [...a, o]; }
@@ -2477,6 +2490,8 @@ function Festhalteanordnung() {
         $("fhD").onclick = () => {
           vibrate();
           const f = fehlend();
+          const offen = [...new Set(K.felder.flatMap(x => String(w[x.id] || "").match(/\[[^\]]{1,40}\]/g) || []))];
+          if (offen.length) f.push("Platzhalter ersetzen: " + offen.join(", "));
           if (f.length && !confirm("Noch offen:\n– " + f.join("\n– ") + "\n\nTrotzdem drucken?")) return;
           const d = document.getElementById("druck");
           d.className = ""; d.innerHTML = `<div class="fhdruck">${fhBrief(w)}</div>`;
