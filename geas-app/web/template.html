@@ -453,6 +453,33 @@
   .hr-bildschirm h2 { font-size: 18px; margin: 18px 0 6px; color: var(--green); }
   .hr-bildschirm ul, .hr-bildschirm ol { padding-left: 22px; margin: 0; }
   .hr-bildschirm li { margin-bottom: 6px; }
+  /* Handreichung: Piktogramme und Grafiken (Bildschirm und Druck) */
+  .hr-ico { display: inline-grid; place-items: center; width: 1.55em; height: 1.55em; border-radius: 50%; background: #002664; color: #fff; margin-right: .45em; vertical-align: -.35em; }
+  .hr-ico svg { width: 62%; height: 62%; }
+  li.hr-wichtig { display: flex; gap: .5em; align-items: flex-start; }
+  .hr-wico { flex: none; width: 1.5em; height: 1.5em; color: #b36b00; } .hr-wico svg { width: 100%; height: 100%; }
+  .hrg { margin: .6em 0 .9em; break-inside: avoid; }
+  .hrg-titel { font-weight: 700; color: #002664; margin-bottom: .35em; font-size: .95em; }
+  .hrg-ablauf { display: flex; align-items: stretch; gap: .3em; }
+  .hrg-schritt { flex: 1 1 0; position: relative; border: 1.5px solid #002664; border-radius: 8px; padding: .5em .45em .45em; text-align: center; font-size: .82em; line-height: 1.3; background: #f3f6fb; }
+  .hrg-schritt .hrg-ico { display: block; width: 1.9em; height: 1.9em; margin: 0 auto .25em; color: #002664; }
+  .hrg-ico svg { width: 100%; height: 100%; }
+  .hrg-nr { position: absolute; top: -.6em; left: -.5em; width: 1.4em; height: 1.4em; border-radius: 50%; background: #002664; color: #fff; font-weight: 800; font-size: .85em; display: grid; place-items: center; }
+  .hrg-pfeil { align-self: center; color: #002664; font-size: 1.1em; flex: none; }
+  .hrg-vergleich { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; }
+  .hrg-spalte { border: 2px solid var(--f); border-radius: 10px; overflow: hidden; font-size: .85em; line-height: 1.3; text-align: center; }
+  .hrg-kopf { background: var(--f); color: #fff; padding: .45em; display: flex; gap: .4em; align-items: center; justify-content: center; }
+  .hrg-kopf svg { width: 1.3em; height: 1.3em; flex: none; }
+  .hrg-zeile { padding: .35em .6em; }
+  .hrg-runter { color: var(--f); font-size: .8em; line-height: 1; }
+  .hrg-fazit { margin: .35em .5em .5em; padding: .4em; border-radius: 6px; background: var(--f); color: #fff; font-weight: 800; }
+  .hrg-karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5em, 1fr)); gap: .45em; }
+  .hrg-karte { border: 1.5px solid var(--f); border-top-width: 5px; border-radius: 8px; padding: .45em; font-size: .8em; line-height: 1.3; text-align: center; }
+  .hrg-karte .hrg-ico { display: block; width: 1.8em; height: 1.8em; margin: 0 auto .2em; color: var(--f); }
+  .hrg-karte b { display: block; color: var(--f); }
+  .hr-bildschirm .hrg-schritt, .hr-bildschirm .hrg-karte { background: var(--glass, #fff); color: var(--text); }
+  @media (max-width: 560px) { .hr-bildschirm .hrg-ablauf { flex-direction: column; } .hr-bildschirm .hrg-pfeil { transform: rotate(90deg); } .hr-bildschirm .hrg-vergleich { grid-template-columns: 1fr; } }
+  @media print { #druck .hrg, #druck .hr-ico, #druck .hrg * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } #druck .hr-abschnitt h2 { display: flex; align-items: center; } #druck li.hr-wichtig { display: flex; } }
   .hr-bildschirm li.hr-wichtig { background: rgba(224, 134, 0, .12); border-left: 4px solid #e08600; border-radius: 6px; padding: 6px 10px; list-style: none; margin-left: -16px; font-weight: 600; }
   .step.wichtig { box-shadow: inset 0 0 0 2px #e08600; }
   .wbadge { display: flex; width: max-content; gap: 4px; align-items: center; font-size: 12px; font-weight: 800; color: #b36b00; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 2px; }
@@ -662,6 +689,8 @@ const P = {
   home: '<path d="M12 3l7.5 2.8v5.7c0 4.6-3.2 8-7.5 9.5-4.3-1.5-7.5-4.9-7.5-9.5V5.8z"/><path d="M12 3v18"/>',
   quiz: '<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 114 2c-1 .7-1.6 1.3-1.6 2.5M12 16.8v.2"/>',
   wave: '<path d="M7.5 11.5V6a1.5 1.5 0 013 0v4.5M10.5 10V4.5a1.5 1.5 0 013 0V10M13.5 10.5V6a1.5 1.5 0 013 0v6.5c0 4.5-2.5 8-6.5 8-3 0-4.5-1.6-6-4L2.8 13a1.6 1.6 0 012.7-1.7L7.5 14"/><path d="M18.5 3.5c1 .8 1.7 1.8 2 3"/>',
+  camera: '<path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/>',
+  ban: '<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>',
   grid: '<rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/>'
 };
 const svg = (n, sw = 1.8) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n] || P.info}</svg>`;
@@ -2329,13 +2358,25 @@ function Leitfaden(id, startKnoten) {
   return view;
 }
 
+// Grafiken der Handreichung: Ablauf (Schritte mit Pfeilen), Vergleich (zwei Spalten), Karten (Status-Übersicht)
+function hrGrafik(g) {
+  if (!g) return "";
+  const kopf = g.titel ? `<div class="hrg-titel">${esc(g.titel)}</div>` : "";
+  if (g.typ === "ablauf") return `<div class="hrg">${kopf}<div class="hrg-ablauf">${g.schritte.map((x, i) => `${i ? '<span class="hrg-pfeil">➜</span>' : ""}<div class="hrg-schritt"><span class="hrg-ico">${svg(x.icon, 2)}</span><span class="hrg-nr">${i + 1}</span><div>${esc(x.text)}</div></div>`).join("")}</div></div>`;
+  if (g.typ === "vergleich") return `<div class="hrg">${kopf}<div class="hrg-vergleich">${g.spalten.map(sp => `<div class="hrg-spalte" style="--f:${sp.farbe}"><div class="hrg-kopf">${svg(sp.icon, 2)}<b>${esc(sp.kopf)}</b></div>${sp.zeilen.map((z, i) => `${i ? '<div class="hrg-runter">▼</div>' : ""}<div class="hrg-zeile">${esc(z)}</div>`).join("")}<div class="hrg-fazit">${esc(sp.fazit)}</div></div>`).join("")}</div></div>`;
+  if (g.typ === "karten") return `<div class="hrg">${kopf}<div class="hrg-karten">${g.karten.map(k => `<div class="hrg-karte" style="--f:${k.farbe}"><span class="hrg-ico">${svg(k.icon, 2)}</span><b>${esc(k.kopf)}</b><div>${esc(k.text)}</div></div>`).join("")}</div></div>`;
+  return "";
+}
+
 // Handreichung: Bildschirmansicht + Druck (DIN A4, mit Logo, Quellen und Stand)
 function handreichungHTML(id, druck) {
   const H = C.handreichungen[id], Q = C.quellen_leitfaden || {};
   const benutzt = [...new Set(H.abschnitte.flatMap(a => a.punkte.map(p => p[1]).filter(Boolean)))];
   return `${druck ? `<div class="hr-kopf">${C.logo ? `<img src="${C.logo}" alt="">` : ""}<div><b>Nur für den Dienstgebrauch</b><br>Stand: ${esc(C.meta.stand)}</div></div>` : ""}
     <h1 class="hr-titel">${esc(H.titel)}</h1><p class="hr-unter">${esc(H.untertitel)}</p>
-    ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${esc(a.titel)}</h2><ul>${a.punkte.map(([t, , w]) => w ? `<li class="hr-wichtig"><b>Besonders wichtig:</b> ${esc(t)}</li>` : `<li>${esc(t)}</li>`).join("")}</ul></section>`).join("")}
+    ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${a.icon ? `<span class="hr-ico">${svg(a.icon, 2)}</span>` : ""}${esc(a.titel)}</h2><ul>${a.punkte.map(([t, , w]) => w
+      ? `<li class="hr-wichtig"><span class="hr-wico">${svg(String(w).split(":")[1] || "alert", 2)}</span><span><b>Besonders wichtig:</b> ${esc(t)}</span></li>`
+      : `<li>${esc(t)}</li>`).join("")}</ul>${hrGrafik(a.grafik)}</section>`).join("")}
     <section class="hr-quellen"><h2>Quellen</h2><ul>${benutzt.map(q => `<li>${esc((Q[q] || {}).titel || q)}${q === "pruefen" ? "" : ` <i>(${esc((Q[q] || {}).art || "")})</i>`}</li>`).join("")}</ul>
       <p>Diese Handreichung ist eine Arbeitshilfe. Maßgeblich sind die jeweils aktuellen Gesetze, Erlasse und die Entscheidung der zuständigen Ausländerbehörde.</p></section>
     ${C.meta.copyright ? `<p class="hr-fuss">${esc(C.meta.copyright)}</p>` : ""}`;
