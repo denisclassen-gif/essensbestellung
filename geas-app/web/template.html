@@ -459,6 +459,8 @@
   li.hr-wichtig { display: flex; gap: .5em; align-items: flex-start; }
   .hr-wico { flex: none; width: 1.5em; height: 1.5em; color: #b36b00; } .hr-wico svg { width: 100%; height: 100%; }
   .hrg { margin: .6em 0 .9em; break-inside: avoid; }
+  .hr-frage { color: #002664; background: #e3ebf7; padding: 0 .25em; border-radius: 3px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @media (prefers-color-scheme: dark) { .hr-bildschirm .hr-frage { background: rgba(120, 160, 230, .25); color: inherit; } }
   .hrg-titel { font-weight: 700; color: #002664; margin-bottom: .35em; font-size: .95em; }
   .hrg-ablauf { display: flex; align-items: stretch; gap: .3em; }
   .hrg-schritt { flex: 1 1 0; position: relative; border: 1.5px solid #002664; border-radius: 8px; padding: .5em .45em .45em; text-align: center; font-size: .82em; line-height: 1.3; background: #f3f6fb; }
@@ -845,9 +847,9 @@ function fristenHTML(wert) {
   return `<div class="frist glass"><label class="small" for="fa"><b>Aufgriff (Datum und Uhrzeit)</b></label><br>
     <input type="datetime-local" id="fa" value="${wert || lokalISO(new Date())}" style="margin-top:8px">
     <div class="row">${ico("columns", 2, "sm")}<div><div class="small"><b>Richterliche Entscheidung spätestens</b></div><div class="d" style="color:var(--coral)" id="f1"></div>
-      <div class="small">Nur wenn die Person festgehalten wird. Ohne Entscheidung bis dahin: freilassen.</div></div></div>
+      <div class="small">Nur wenn die Person festgehalten wird: richterliche Entscheidung unverzüglich herbeiführen; ohne Entscheidung bis zum Ende des Tages nach dem Ergreifen freilassen (§ 15b Abs. 1 AufenthG).</div></div></div>
     <div class="row">${ico("hourglass", 3, "sm")}<div><div class="small"><b>Screening abgeschlossen spätestens</b></div><div class="d" style="color:#e08600" id="f2"></div>
-      <div class="small">Höchstdauer des Screenings im Inland: 3 Tage.</div></div></div>
+      <div class="small">Höchstdauer des Screenings im Inland: 3 Tage ab Aufgriff (Art. 8 Abs. 4 Screening-VO). Die LDS braucht einen Teil dieser Zeit für ihre Maßnahmen – Screeningformular deshalb unverzüglich anlegen und versenden.</div></div></div>
     <div class="small">Hilfsrechnung ohne Gewähr. Im Zweifel gilt die frühere Frist; mit der Dienstgruppenleitung abstimmen.</div></div>`;
 }
 function fristenBind() {
@@ -946,6 +948,7 @@ function ScreeningWizard(imEinsatz) {
       html: `<div class="result" style="${farbVars(farbe)}">${svg(k.ergebnis === "screening" ? "shieldalert" : k.ergebnis === "kein" ? "shieldcheck" : "info", 2)}
           <h2 class="rounded">${esc(k.titel)}</h2><div>${esc(k.kurz)}</div></div>
         ${ue && C.leitfaeden ? `<button class="btn" id="wLF" style="font-size:18px;padding:18px">${svg("arrowr", 2.4)} ${esc(ue.text)}</button>` : ""}
+        ${ue && ue.handreichung && C.handreichungen && C.handreichungen[ue.handreichung] ? `<button class="btn glassy" id="wHR">${svg("print")} Handreichung „${esc(C.handreichungen[ue.handreichung].titel.replace(/^Handreichung:\s*/, ""))}“</button>` : ""}
         ${imEinsatz ? (k.ergebnis === "screening"
           ? `<button class="btn" id="wE" style="font-size:19px;padding:20px">${svg("arrowr", 2.4)} Weiter: Screening durchführen</button>`
           : `<div class="note glass" style="border:2px solid #008444"><span><b>Kein Screening.</b> Arbeite die Punkte unten ab – dann ist der Einsatz für die Screening-Hilfe beendet.</span></div>`)
@@ -980,6 +983,7 @@ function ScreeningWizard(imEinsatz) {
         const wa = $("wa"); if (wa) wa.onclick = () => go(FallUebersicht);
         const wE = $("wE"); if (wE) wE.onclick = () => { vibrate(); imEinsatz("ja", k.titel); };
         const wLF = $("wLF"); if (wLF) wLF.onclick = () => { vibrate(); go(ue.knoten ? Leitfaden(ue.leitfaden, ue.knoten) : () => LeitfadenStart(ue.leitfaden)); };
+        const wHR = $("wHR"); if (wHR) wHR.onclick = () => { vibrate(); go(() => Handreichung(ue.handreichung)); };
         if (imEinsatz && k.ergebnis !== "screening") imEinsatz("nein", k.titel, true);
         $("wn").onclick = neu;
       }
@@ -1580,6 +1584,7 @@ function onboarding(erneut = false) {
 // Eine .docx-Datei ist ein ZIP-Archiv. Wir lesen es, ändern word/document.xml und schreiben ein neues Archiv.
 // Die Vorlagen werden NICHT in der App gespeichert – sie werden bei jedem Fall neu ausgewählt.
 const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+const WP_NS = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
 const W14_NS = "http://schemas.microsoft.com/office/word/2010/wordml";
 const XML_NS = "http://www.w3.org/XML/1998/namespace";
 
@@ -1715,6 +1720,13 @@ function listeTreffer(optionen, wert) {
 const listeAus = roh => String(roh || "").split(/\s*[,;\n]\s*|\s+und\s+/).map(s => s.trim()).filter(Boolean);
 
 function regelWert(regel) {
+  // mehrere Angaben untereinander, z. B. Kommentarfeld: „Aufgriffszeitpunkt: …“, „Sicherheitsrisiko: …“
+  if (regel.art === "zusammen") return regel.teile.map(t => {
+    if (t.wenn && !bedingungErfuellt(t.wenn)) return "";
+    const roh = wert(t.feld).trim();
+    const v = roh && FELDER[t.feld] && FELDER[t.feld].typ === "datumzeit" ? new Date(roh).toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " Uhr" : roh;
+    return v ? (t.label ? t.label + ": " + v : v) : "";
+  }).filter(Boolean).join("\n");
   const roh = regel.wert ? wert(regel.wert).trim() : "";
   if (regel.art === "liste") return listeAus(roh)[regel.index] || "";
   if (regel.art === "zeile") {
@@ -1915,6 +1927,37 @@ function textfelderBefuellen(doc, regeln, bericht) {
   }
 }
 
+// Textfeld auf eine eigene Zeile setzen (oben und unten umbrechen), damit es keinen Text überdeckt oder verschiebt
+function textfeldAnker(doc, regeln) {
+  for (const r of regeln || []) {
+    const anker = Array.from(doc.getElementsByTagNameNS(WP_NS, "anchor")).filter(a => a.getElementsByTagNameNS(W_NS, "txbxContent").length)[r.index];
+    if (!anker) continue;
+    const quadrat = anker.getElementsByTagNameNS(WP_NS, "wrapSquare")[0];
+    if (quadrat && r.umbruch === "oben_unten") quadrat.parentNode.replaceChild(doc.createElementNS(WP_NS, "wp:wrapTopAndBottom"), quadrat);
+    const v = anker.getElementsByTagNameNS(WP_NS, "positionV")[0];
+    const off = v && v.getElementsByTagNameNS(WP_NS, "posOffset")[0];
+    if (off && r.abstand_v !== undefined) off.textContent = String(r.abstand_v);
+  }
+}
+
+const NACH_STRIKE = ["dstrike", "outline", "shadow", "emboss", "imprint", "noProof", "snapToGrid", "vanish", "webHidden", "color", "spacing", "w", "kern", "position", "sz", "szCs", "highlight", "u", "effect", "bdr", "shd", "fitText", "vertAlign", "rtl", "cs", "em", "lang", "eastAsianLayout", "specVanish", "oMath"];
+// Absätze durchstreichen, die die Streife nicht erledigt (z. B. Aushändigung des Überprüfungsformulars)
+function durchstreichen(doc, regeln, bericht) {
+  for (const r of regeln || []) {
+    for (const p of Array.from(doc.getElementsByTagNameNS(W_NS, "p")).filter(p => wText(p).includes(r.enthaelt))) {
+      for (const run of Array.from(p.getElementsByTagNameNS(W_NS, "r"))) {
+        let rPr = wKinder(run, "rPr")[0];
+        if (!rPr) { rPr = doc.createElementNS(W_NS, "w:rPr"); run.insertBefore(rPr, run.firstChild); }
+        if (wKinder(rPr, "strike").length) continue;
+        // Reihenfolge nach Word-Schema: <w:strike> steht vor dstrike, color, sz, u, lang …
+        const danach = Array.from(rPr.childNodes).find(n => NACH_STRIKE.includes(n.localName));
+        rPr.insertBefore(doc.createElementNS(W_NS, "w:strike"), danach || null);
+      }
+      if (bericht) bericht.gesetzt++;
+    }
+  }
+}
+
 function vorlageErkennen(doc) {
   const aliase = Array.from(doc.getElementsByTagNameNS(W_NS, "alias")).map(a => wAttr(a));
   // Nur den Kopf des Dokuments auswerten – im Fließtext werden andere Formulare oft erwähnt.
@@ -1949,6 +1992,8 @@ async function vorlageBefuellen(datei, korrekturen = {}, vorgabe = null) {
   const fremd = !!(vorgabe && vorgabe.sprache);
   const bericht = art === "screening" ? screeningBefuellen(doc, C.vorlagen.screening, korrekturen) : kopfdatenBefuellen(doc, C.vorlagen, { art, fremd });
   if (art !== "screening") textfelderBefuellen(doc, (C.vorlagen.textfelder || {})[art], bericht);
+  if (art !== "screening") textfeldAnker(doc, (C.vorlagen.textfeld_anker || {})[art]);
+  if (art !== "screening") durchstreichen(doc, (C.vorlagen.durchstreichen || {})[art], bericht);
   // Kopfdaten stehen bei manchen Vorlagen (z. B. Fragebögen) in der Word-Kopfzeile
   if (art !== "screening") for (const kz of dateien.filter(d => /^word\/header\d*\.xml$/.test(d.name))) {
     const hdoc = new DOMParser().parseFromString(new TextDecoder().decode(kz.daten), "application/xml");
@@ -1973,6 +2018,24 @@ async function vorlageBefuellen(datei, korrekturen = {}, vorgabe = null) {
     if (inhalt) while (inhalt.firstChild) sdt.parentNode.insertBefore(inhalt.firstChild, sdt);
     sdt.parentNode.removeChild(sdt);
   }
+  // Die Vorschau teilt nummerierte Absätze am gespeicherten Seitenwechsel (w:lastRenderedPageBreak) – es entsteht ein leerer Listenpunkt („4.“).
+  // Nur für die Vorschau: diese Marken in nummerierten Absätzen entfernen.
+  for (const m of Array.from(vdoc.getElementsByTagNameNS(W_NS, "lastRenderedPageBreak"))) {
+    let p = m.parentNode; while (p && p.localName !== "p") p = p.parentNode;
+    const pPr = p && wKinder(p, "pPr")[0];
+    if (pPr && wKinder(pPr, "numPr").length) m.parentNode.removeChild(m);
+  }
+  // Schwebende Textfelder, die die Vorschau über den Text legt (z. B. Name in der Belehrung § 15/20): in der Vorschau als eigene Zeile zeigen
+  if ((C.vorlagen.textfeld_anker || {})[art]) for (const tb of Array.from(vdoc.getElementsByTagNameNS(W_NS, "txbxContent"))) {
+    if (!wText(tb).trim()) continue;
+    let r = tb.parentNode; while (r && r.localName !== "r") r = r.parentNode;
+    let p = r && r.parentNode; while (p && p.localName !== "p") p = p.parentNode;
+    if (!r || !p || !p.parentNode || !r.parentNode) continue;
+    const neu = Array.from(wKinder(tb, "p")).map(x => x.cloneNode(true));
+    r.parentNode.removeChild(r);
+    let nach = p;
+    for (const q of neu) { nach.parentNode.insertBefore(q, nach.nextSibling); nach = q; }
+  }
   const vorschauBlob = await zipSchreiben(dateien.map(d => d === eintrag ? { name: d.name, daten: new TextEncoder().encode(new XMLSerializer().serializeToString(vdoc)) } : d), DOCX);
   // Dateiname nach Vorgabe: AZR-Nr_Name_Vorname_Geburtsdatum (weitere Formulare mit Zusatz der Formularart)
   const name = dateiBasis() + (art === "screening" ? "" : "_" + dateiSicher(ART_KURZ[art] || datei.name.replace(/\.docx$/i, ""))) + (fremd ? "_" + dateiSicher(vorgabe.sprache) : "") + ".docx";
@@ -1990,7 +2053,8 @@ function speichern(blob, name) {
 function dokumenteImFall() {
   const asyl = wert("asyl") === "Ja", uma = istUma();
   const hatDokumente = auswahl("dokumente").some(d => !d.startsWith("Kein"));
-  const passt1 = w => w === "immer" || (w === "asyl" && asyl) || (w === "ohne_asyl" && !asyl) || (w === "uma" && uma) || (w === "erwachsen" && !uma) || (w === "dokumente" && hatDokumente) || (w === "ohne_asyl_oder_uma" && (!asyl || uma));
+  const passt1 = w => w === "immer" || (w === "asyl" && asyl) || (w === "ohne_asyl" && !asyl) || (w === "uma" && uma) || (w === "erwachsen" && !uma) || (w === "dokumente" && hatDokumente) || (w === "ohne_asyl_oder_uma" && (!asyl || uma))
+    || (w === "kein_rueckkehr" && !wert("weiterleitung").startsWith("Rückkehrverfahren"));
   const passt = w => w.split("+").every(passt1);   // z. B. "asyl+dokumente"
   dokumenteImFall.passt = passt;
   return (C.dokumentauswahl || []).filter(d => passt(d.wann));
@@ -2263,7 +2327,7 @@ function Vorschau(i) {
 
 // ================= Leitfäden: EU-Freizügigkeit / Drittstaatsangehörige ohne Screening =================
 // Jede Rechtsaussage trägt eine Quelle; „pruefen“ = Wortlaut vor Freigabe gegen die aktuelle Fassung prüfen.
-const QKURZ = { pddd_ahe: "PD Dresden", pddd_sta: "PD Dresden / StA", pddd_he: "PD Dresden 2023", bgh: "BGH", gensta: "GenStA Dresden", bespr: "Abstimmung 2026", bpol_uep: "Hinweis BPOL", lds: "LDS-Vordruck", pruefen: "Wortlaut prüfen", gesetz: "Gesetz ✓" };
+const QKURZ = { pddd_ahe: "PD Dresden", pddd_sta: "PD Dresden / StA", pddd_he: "PD Dresden 2023", bgh: "BGH", gensta: "GenStA Dresden", bespr: "Abstimmung 2026", bpol_uep: "Hinweis BPOL", lds: "LDS-Vordruck", pruefen: "Wortlaut prüfen", gesetz: "Gesetz ✓", sta_2026: "StA 09/2026" };
 const quelleChip = q => {
   if (!q || !C.quellen_leitfaden || !C.quellen_leitfaden[q]) return "";
   const pr = q === "pruefen";
@@ -2368,6 +2432,9 @@ function hrGrafik(g) {
   return "";
 }
 
+// Punkte, die mit einer Frage beginnen („Ausländerbehörde informieren? Immer …“): Frage hervorgehoben und fett
+const hrFrage = t => { const m = String(t).match(/^([^?]{3,100}\?)(\s[\s\S]*)$/); return m ? `<b class="hr-frage">${esc(m[1])}</b>${esc(m[2])}` : esc(t); };
+
 // Handreichung: Bildschirmansicht + Druck (DIN A4, mit Logo, Quellen und Stand)
 function handreichungHTML(id, druck) {
   const H = C.handreichungen[id], Q = C.quellen_leitfaden || {};
@@ -2375,8 +2442,8 @@ function handreichungHTML(id, druck) {
   return `${druck ? `<div class="hr-kopf">${C.logo ? `<img src="${C.logo}" alt="">` : ""}<div><b>Nur für den Dienstgebrauch</b><br>Stand: ${esc(C.meta.stand)}</div></div>` : ""}
     <h1 class="hr-titel">${esc(H.titel)}</h1><p class="hr-unter">${esc(H.untertitel)}</p>
     ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${a.icon ? `<span class="hr-ico">${svg(a.icon, 2)}</span>` : ""}${esc(a.titel)}</h2><ul>${a.punkte.map(([t, , w]) => w
-      ? `<li class="hr-wichtig"><span class="hr-wico">${svg(String(w).split(":")[1] || "alert", 2)}</span><span><b>Besonders wichtig:</b> ${esc(t)}</span></li>`
-      : `<li>${esc(t)}</li>`).join("")}</ul>${hrGrafik(a.grafik)}</section>`).join("")}
+      ? `<li class="hr-wichtig"><span class="hr-wico">${svg(String(w).split(":")[1] || "alert", 2)}</span><span><b>Besonders wichtig:</b> ${hrFrage(t)}</span></li>`
+      : `<li>${hrFrage(t)}</li>`).join("")}</ul>${hrGrafik(a.grafik)}</section>`).join("")}
     <section class="hr-quellen"><h2>Quellen</h2><ul>${benutzt.map(q => `<li>${esc((Q[q] || {}).titel || q)}${q === "pruefen" ? "" : ` <i>(${esc((Q[q] || {}).art || "")})</i>`}</li>`).join("")}</ul>
       <p>Diese Handreichung ist eine Arbeitshilfe. Maßgeblich sind die jeweils aktuellen Gesetze, Erlasse und die Entscheidung der zuständigen Ausländerbehörde.</p></section>
     ${C.meta.copyright ? `<p class="hr-fuss">${esc(C.meta.copyright)}</p>` : ""}`;
@@ -2607,7 +2674,7 @@ function Einsatz(nr) {
       <div class="small" style="margin:10px 2px 0;font-weight:700;color:var(--green)">${esc(st.phase)}</div>
       <h2 class="rounded" style="font-size:30px;margin:2px 0 8px;line-height:1.15">${esc(st.titel)}</h2>
       <p style="margin:0 0 14px;font-size:17px">${esc(st.kurz)}</p>
-      ${a && nachPruefung && e.pruefung !== "nein" ? `<div class="fristen2" style="margin:0 0 14px"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b></div>
+      ${a && nachPruefung && e.pruefung !== "nein" ? `<div class="fristen2" style="margin:0 0 14px"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b><div class="small" style="margin-top:4px">Formular unverzüglich an Referat 2 senden – die LDS braucht Zeit für ihre Maßnahmen.</div></div>
         <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
       ${(st.info || []).map(t => `<div class="note glass">${svg("info").replace("<svg", '<svg style="color:#0082c4"')}<span class="small" style="color:var(--text)">${esc(t)}</span></div>`).join("")}
       ${st.punkte.length ? `<h3 class="sec" style="margin-top:18px">Das machst du jetzt <small>${haken.size}/${st.punkte.length}</small></h3>
@@ -2670,7 +2737,7 @@ function EinsatzStart() {
           <span class="cta">${laeuft ? "Weiter" : "Los geht's"} ${svg("arrowr", 2.4)}</span></button>
         ${laeuft ? `<button class="btn glassy" id="sN" style="margin-top:0">${svg("plus", 2.4)} Neuen Einsatz beginnen</button>` : ""}
         ${F ? `<div style="margin-top:14px">${fallKarte()}</div>` : ""}
-        ${a && e && e.pruefung !== "nein" ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b></div>
+        ${a && e && e.pruefung !== "nein" ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b><div class="small" style="margin-top:4px">Formular unverzüglich an Referat 2 senden – die LDS braucht Zeit für ihre Maßnahmen.</div></div>
           <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
         ${istUma() ? umaKarte(true) : ""}
         ${C.leitfaeden ? `<h3 class="sec">Weitere Themen</h3>
@@ -2732,7 +2799,7 @@ function Ablauf() {
         <div class="note glass" style="border:1.5px solid var(--coral)">${svg("lock").replace("<svg", '<svg style="color:var(--coral)"')}<span class="small"><b style="color:var(--coral)">Nur für den Dienstgebrauch.</b> ${esc(C.meta.hinweis_intern || "")}</span></div>
         ${fallKarte()}
         ${istUma() ? umaKarte(true) : ""}
-        ${a ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b></div>
+        ${a ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b><div class="small" style="margin-top:4px">Formular unverzüglich an Referat 2 senden – die LDS braucht Zeit für ihre Maßnahmen.</div></div>
           <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
         ${C.ablauf.map(s => {
           const set = new Set(S.checklisten["ablauf-" + s.nr] || []);

@@ -55,7 +55,7 @@ def mische_intern(c, i):
         for f in s["felder"]:
             f.update(i.get("felder_patch", {}).get(f["id"], {}))
     for knoten, aenderung in i.get("screening_patch", {}).items():
-        c["screening"]["knoten"][knoten].update(aenderung)
+        c["screening"]["knoten"].setdefault(knoten, {}).update(aenderung)
     c["kontakte"] = i.get("kontakte", c["kontakte"])
     c["kapitel"] += i.get("kapitel_zusatz", [])
     c["checklisten"] += i.get("checklisten_zusatz", [])
