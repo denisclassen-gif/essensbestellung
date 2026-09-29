@@ -453,6 +453,10 @@
   .hr-bildschirm h2 { font-size: 18px; margin: 18px 0 6px; color: var(--green); }
   .hr-bildschirm ul, .hr-bildschirm ol { padding-left: 22px; margin: 0; }
   .hr-bildschirm li { margin-bottom: 6px; }
+  .hr-bildschirm li.hr-wichtig { background: rgba(224, 134, 0, .12); border-left: 4px solid #e08600; border-radius: 6px; padding: 6px 10px; list-style: none; margin-left: -16px; font-weight: 600; }
+  .step.wichtig { box-shadow: inset 0 0 0 2px #e08600; }
+  .wbadge { display: flex; width: max-content; gap: 4px; align-items: center; font-size: 12px; font-weight: 800; color: #b36b00; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 2px; }
+  .wbadge svg { width: 14px; height: 14px; }
   .hr-bildschirm .hr-quellen { font-size: 13px; color: var(--muted); }
   .hr-bildschirm .hr-fuss { font-size: 12px; color: var(--muted); margin-top: 14px; }
   @media print {
@@ -464,6 +468,7 @@
     #druck h2 { font-size: 12pt; color: #002664; margin: 10pt 0 3pt; break-after: avoid; }
     #druck ul, #druck ol { margin: 0; padding-left: 16pt; }
     #druck li { margin-bottom: 3pt; break-inside: avoid; }
+    #druck li.hr-wichtig { list-style: none; margin-left: -16pt; border-left: 3pt solid #e08600; background: #fff3dc; padding: 3pt 6pt; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     #druck .hr-quellen { font-size: 8.5pt; color: #333; border-top: 1px solid #999; margin-top: 10pt; padding-top: 4pt; }
     #druck .hr-fuss { font-size: 8pt; color: #555; margin-top: 8pt; }
   }
@@ -2294,8 +2299,8 @@ function Leitfaden(id, startKnoten) {
           <h2 class="rounded">${esc(k.titel)}</h2><div>${esc(k.kurz)}</div></div>
         ${weiter.length && k.art === "wechsel" ? weiter.map(weiterKnopf).join("") : ""}
         ${k.massnahmen && k.massnahmen.length ? `<h3 class="sec">Das machst du jetzt <small>${haken.size}/${k.massnahmen.length}</small></h3>
-          ${k.massnahmen.map((mm, i) => `<button class="step glass press check ${haken.has(i) ? "on" : ""}" data-lh="${i}">
-            <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(mm.text)}</span>${quelleChip(mm.q)}${mm.hinweis ? `<span class="s">ⓘ ${esc(mm.hinweis)}</span>` : ""}</span></button>`).join("")}` : ""}
+          ${k.massnahmen.map((mm, i) => `<button class="step glass press check ${haken.has(i) ? "on" : ""} ${mm.wichtig ? "wichtig" : ""}" data-lh="${i}">
+            <span class="cbox">${svg("check", 3)}</span><span class="txt">${mm.wichtig ? `<span class="wbadge">${svg("alert", 2.4)} Besonders wichtig</span>` : ""}<span class="strikeme">${esc(mm.text)}</span>${quelleChip(mm.q)}${mm.hinweis ? `<span class="s">ⓘ ${esc(mm.hinweis)}</span>` : ""}</span></button>`).join("")}` : ""}
         ${k.wissen && k.wissen.length ? `<div class="merke" style="margin-top:14px"><b class="h">${svg("bulb")} Gut zu wissen</b><ul>${k.wissen.map(w => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
         ${k.normen && k.normen.length ? `<h3 class="sec">Rechtsgrundlagen</h3><div class="glass" style="padding:6px 16px">${k.normen.map(nn => `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><span class="normchip">${esc(nn.norm)}</span>${quelleChip(nn.q)}<div class="small" style="margin-top:4px;color:var(--text)">${esc(nn.text)}</div></div>`).join("")}</div>` : ""}
         ${weiter.length && k.art !== "wechsel" ? `<h3 class="sec">Weiter</h3>${weiter.map(weiterKnopf).join("")}` : ""}
@@ -2330,7 +2335,7 @@ function handreichungHTML(id, druck) {
   const benutzt = [...new Set(H.abschnitte.flatMap(a => a.punkte.map(p => p[1]).filter(Boolean)))];
   return `${druck ? `<div class="hr-kopf">${C.logo ? `<img src="${C.logo}" alt="">` : ""}<div><b>Nur für den Dienstgebrauch</b><br>Stand: ${esc(C.meta.stand)}</div></div>` : ""}
     <h1 class="hr-titel">${esc(H.titel)}</h1><p class="hr-unter">${esc(H.untertitel)}</p>
-    ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${esc(a.titel)}</h2><ul>${a.punkte.map(([t]) => `<li>${esc(t)}</li>`).join("")}</ul></section>`).join("")}
+    ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${esc(a.titel)}</h2><ul>${a.punkte.map(([t, , w]) => w ? `<li class="hr-wichtig"><b>Besonders wichtig:</b> ${esc(t)}</li>` : `<li>${esc(t)}</li>`).join("")}</ul></section>`).join("")}
     <section class="hr-quellen"><h2>Quellen</h2><ul>${benutzt.map(q => `<li>${esc((Q[q] || {}).titel || q)}${q === "pruefen" ? "" : ` <i>(${esc((Q[q] || {}).art || "")})</i>`}</li>`).join("")}</ul>
       <p>Diese Handreichung ist eine Arbeitshilfe. Maßgeblich sind die jeweils aktuellen Gesetze, Erlasse und die Entscheidung der zuständigen Ausländerbehörde.</p></section>
     ${C.meta.copyright ? `<p class="hr-fuss">${esc(C.meta.copyright)}</p>` : ""}`;
