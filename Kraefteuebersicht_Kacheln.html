@@ -2065,15 +2065,50 @@ async function readXlsxSheetGrid(file, preferredSheetName){
     for(var si=0; si<siNodes.length; si++) sharedStrings.push(siTextContent(siNodes[si]));
   }
 
+  /* Zellrahmen (oben/unten) je Formatvorlage – ZeeGeeS trennt die Gruppen eines
+     geteilten Zuges durch dünne Linien, daran wird später die Teilung erkannt. */
+  var xfBorder = [];
+  try{
+    var stylesXml = await extract("xl/styles.xml");
+    if(stylesXml){
+      var stDoc = new DOMParser().parseFromString(stylesXml, "application/xml");
+      var hasLine = function(borderEl, side){
+        var el = borderEl.getElementsByTagName(side)[0];
+        var st = el ? el.getAttribute("style") : null;
+        return !!st && st !== "none";
+      };
+      var bordersEl = stDoc.getElementsByTagName("borders")[0];
+      var borderDefs = [];
+      if(bordersEl){
+        for(var bi=0; bi<bordersEl.children.length; bi++){
+          var bEl = bordersEl.children[bi];
+          borderDefs.push({ top: hasLine(bEl,"top"), bottom: hasLine(bEl,"bottom") });
+        }
+      }
+      var cellXfsEl = stDoc.getElementsByTagName("cellXfs")[0];
+      if(cellXfsEl){
+        for(var xi=0; xi<cellXfsEl.children.length; xi++){
+          xfBorder.push(borderDefs[parseInt(cellXfsEl.children[xi].getAttribute("borderId"),10) || 0] || { top:false, bottom:false });
+        }
+      }
+    }
+  }catch(e){ /* ohne Rahmeninfo wird die Teilung heuristisch erkannt */ }
+
   var sheetDoc = new DOMParser().parseFromString(sheetXml, "application/xml");
   var cNodes = sheetDoc.getElementsByTagName("c");
   var grid = {};
+  var topBorder = {}, borderCols = {};
   var maxRow = 0, maxCol = 0;
   for(var ci=0; ci<cNodes.length; ci++){
     var cNode = cNodes[ci];
     var ref = cNode.getAttribute("r");
     if(!ref) continue;
     var pos = refToRowCol(ref);
+    var bd = xfBorder[parseInt(cNode.getAttribute("s"),10) || 0];
+    if(bd){
+      if(bd.top){ topBorder[pos.row + "," + pos.col] = true; borderCols[pos.col] = true; }
+      if(bd.bottom){ topBorder[(pos.row+1) + "," + pos.col] = true; borderCols[pos.col] = true; }
+    }
     var type = cNode.getAttribute("t");
     var value = null;
     if(type === "inlineStr"){
@@ -2095,7 +2130,7 @@ async function readXlsxSheetGrid(file, preferredSheetName){
       }
     }
   }
-  return { grid: grid, maxRow: maxRow, maxCol: maxCol };
+  return { grid: grid, maxRow: maxRow, maxCol: maxCol, topBorder: topBorder, borderCols: borderCols };
 }
 
 function parseRosterGrid(gridObj){
@@ -2111,11 +2146,26 @@ function parseRosterGrid(gridObj){
   var DZ_ONLY_RE = /^DZ:\s*(\d{1,2}):(\d{2})Uhr\s*-\s*(\d{1,2}):(\d{2})Uhr$/;
   var DZ_INLINE_RE = /^(.*?)\s*DZ:\s*(\d{1,2}):(\d{2})Uhr\s*-\s*(\d{1,2}):(\d{2})Uhr$/;
   var FOOTER_RE = /^(Erstellt am|ZeeGeeS)/;
-  var currentUnit = "Vorinformation";
+
+  /* Jede Einheit belegt im ZeeGeeS-Wochenplan einen festen 6-Zeilen-Block, wobei die
+     Beschriftung in Spalte A IMMER auf der 3. der 6 Zeilen steht (2 Zeilen davor
+     gehören noch mit dazu) – bestätigt anhand der schwarzen Trennlinien (oberer
+     Zellrahmen) in echten Exportdateien, die exakt alle 6 Zeilen einen Block
+     abschließen, nicht an der Position der Beschriftung. Der Block einer Einheit
+     ist also [Beschriftungszeile-2, Beschriftungszeile+3], unabhängig davon, wo
+     die nächste Beschriftung folgt. */
+  var blocks = [];
+  for(var br=1; br<=maxRow; br++){
+    var ba = cell(br,1);
+    if(ba && !FOOTER_RE.test(ba)){
+      blocks.push({ start: Math.max(1, br-2), end: br+3, unit: ba });
+    }
+  }
+  var rowBlock = [];
+  blocks.forEach(function(b){ for(var rr=b.start; rr<=b.end && rr<=maxRow; rr++) rowBlock[rr] = b; });
+
   var assignments = [];
   for(var r=1; r<=maxRow; r++){
-    var a = cell(r,1);
-    if(a && !FOOTER_RE.test(a)) currentUnit = a;
     for(var cKey in dayCols){
       var c2 = parseInt(cKey,10);
       var date = dayCols[c2];
@@ -2133,10 +2183,185 @@ function parseRosterGrid(gridObj){
         label = text; sh=+m2[1]; sm=+m2[2]; eh=+m2[3]; em=+m2[4];
       }
       if(sh===eh && sm===em) continue;
-      assignments.push({ unit: currentUnit, date: date, label: label, startH:sh, startM:sm, endH:eh, endM:em });
+      var blk = rowBlock[r];
+      assignments.push({ unit: blk ? blk.unit : "Vorinformation", date: date, label: label,
+        startH:sh, startM:sm, endH:eh, endM:em, row: r, col: c2, block: blk });
     }
   }
-  return assignments;
+  return { assignments: assignments, blocks: blocks };
+}
+
+/* ---------------- Zug/Gruppen- und Hundertschafts-Erkennung ----------------
+   Jeder Zug (BPZ, BFE, IZD-Zug/-BFE, EZ) ist ab Spalte B in drei Gruppen à 2 Zeilen
+   aufgeteilt: Zeile 1-2 des Blocks = 1. Gruppe, Zeile 3-4 = 2. Gruppe, Zeile 5-6 =
+   3. Gruppe (Beispiel BPZ 213, Beschriftung in A101: B99/B100 = 1., B101/B102 = 2.,
+   B103/B104 = 3. Gruppe).
+   Ob ein Zug an einem Tag geteilt ist, zeigt ZeeGeeS mit dünnen Linien zwischen den
+   Zeilenpaaren; ein ungeteilter Zug hat nur die Linie am Blockanfang und seinen
+   Eintrag auf der Beschriftungszeile. Fehlt die Rahmeninfo, gilt ein Zug als
+   ungeteilt, wenn nur die Beschriftungszeile belegt ist.
+   Pro Tag im geteilten Zug:
+   - alle drei Gruppen gleich   => "BPZ 213"
+   - zwei Gruppen gleich        => "BPZ 213 o. 1 BPGr." (die dritte ggf. als "3. BPGr. BPZ 213")
+   - sonst                      => jede belegte Gruppe einzeln, z. B. "3. BPGr. BPZ 212"
+   Führungsgruppen (FüG/HuFüG) und alle übrigen Einheiten werden nie aufgeteilt.
+   Danach werden Hundertschaften (BPH, BFHU, IZD-EHU) zusammengefasst, wenn die
+   Führungsgruppe und ALLE zugehörigen Züge ungeteilt denselben Eintrag mit denselben
+   Zeiten haben. Die Zugehörigkeit ergibt sich nur aus den Namen (BPH 21/FüG ↔ BPZ 211-213,
+   BFHUSN/FüG ↔ BFE1SN-BFE3SN, IZD HuFüG ↔ direkt folgende IZD-Züge), Hundertschaften
+   werden also nie untereinander vermischt. */
+/* Stärke eines Einsatzzuges = EHu − "EHu o. 1 EZ" laut Kräftekatalog */
+var IMPORT_EZ_STAERKE = { hd:0, gd:5, md:24, tk:0 };
+function importKatalogStaerke(typ){
+  var k = katalogByTyp(typ);
+  return k ? { hd:k.hd, gd:k.gd, md:k.md, tk:k.tk } : null;
+}
+function importStaerkeMinus(a, b){
+  if(!a || !b) return null;
+  return { hd:Math.max(0,a.hd-b.hd), gd:Math.max(0,a.gd-b.gd), md:Math.max(0,a.md-b.md), tk:Math.max(0,a.tk-b.tk) };
+}
+/* Welche Einheiten sind Züge mit 3 Gruppen? Bereitschaftspolizei (BPZ, BFE) => "BPGr.",
+   IZD-/Einsatzzüge => "EGr." */
+function zugFamilie(einheitName){
+  var n = einheitName.trim();
+  if(/^BPZ\s*\d/i.test(n)) return { gruppe:"BPGr.", zugTyp:"BPZ", zug: importKatalogStaerke("BPZ"), grTyp:"BPGr", gr: importKatalogStaerke("BPGr") };
+  if(/^BFE\s*\d/i.test(n)) return { gruppe:"BPGr.", zugTyp:"BFE", zug: importKatalogStaerke("BFE"), grTyp:"BPGr (BFE)", gr: importKatalogStaerke("BPGr (BFE)") };
+  if(/^IZD\s+(Zug|BFE)\b/i.test(n) || /^EZ\b/i.test(n)) return { gruppe:"EGr.", zugTyp:"", zug: IMPORT_EZ_STAERKE, grTyp:"EGr", gr: importKatalogStaerke("EGr") };
+  return null;
+}
+function fuehrungsTyp(einheitName){
+  if(/^BPH\s*\d+\s*\/\s*FüG$/i.test(einheitName)) return "BPH-FüGr";
+  if(/^IZD\s+HuFüG\b/i.test(einheitName)) return "EHu-FührungsGr";
+  return "";
+}
+function importLabelNorm(label){ return String(label).replace(/\s+/g, " ").trim(); }
+function importEintragKey(a){
+  return a.date + "|" + importLabelNorm(a.label) + "|" + a.startH + ":" + a.startM + "|" + a.endH + ":" + a.endM;
+}
+function zugGruppenSignatur(list){
+  if(list.length===0) return null;
+  var keys = list.map(function(a){ return importEintragKey(a); });
+  keys.sort();
+  return keys.join(";");
+}
+function zugGruppenDedupe(list){
+  var seen = {}, out = [];
+  list.forEach(function(a){
+    var k = importEintragKey(a);
+    if(!seen[k]){ seen[k]=true; out.push(a); }
+  });
+  return out;
+}
+function zugIstGeteilt(gridObj, block, col, perGroup){
+  if(gridObj && gridObj.borderCols && gridObj.borderCols[col]){
+    var tb = gridObj.topBorder;
+    return !!(tb[(block.start+2)+","+col] || tb[(block.start+4)+","+col]);
+  }
+  return !(perGroup[0].length===0 && perGroup[2].length===0);
+}
+function resolveZugGruppen(parsed, gridObj){
+  var byKey = {}, keys = [];
+  parsed.assignments.forEach(function(a){
+    var k = (a.block ? a.block.start : 0) + "|" + a.col;
+    if(!byKey[k]){ byKey[k] = { block: a.block, col: a.col, list: [] }; keys.push(k); }
+    byKey[k].list.push(a);
+  });
+  var resolved = [];
+  function push(list, unitName, einheitName, art, extra){
+    zugGruppenDedupe(list).forEach(function(a){
+      resolved.push({ unit: unitName, einheit: einheitName, art: art, colorKey: einheitName,
+        remark: extra.remark || "", typ: extra.typ || "", strength: extra.strength || null,
+        date: a.date, label: importLabelNorm(a.label), startH:a.startH, startM:a.startM, endH:a.endH, endM:a.endM,
+        sortRow: a.block ? a.block.start : 0, col: a.col });
+    });
+  }
+  keys.forEach(function(k){
+    var info = byKey[k], block = info.block, list = info.list;
+    var einheitName = block ? block.unit.trim() : "Vorinformation";
+    var fam = (block && (block.end - block.start + 1) === 6 && !/FüG/i.test(einheitName)) ? zugFamilie(einheitName) : null;
+    if(!fam){
+      var fTyp = block ? fuehrungsTyp(einheitName) : "";
+      push(list, einheitName, einheitName, block && /FüG/i.test(einheitName) ? "fuehrung" : "einheit",
+        { typ: fTyp, strength: importKatalogStaerke(fTyp) });
+      return;
+    }
+    var ganz = { typ: fam.zugTyp, strength: fam.zug };
+    var perGroup = [[],[],[]];
+    list.forEach(function(a){
+      perGroup[Math.min(2, Math.floor((a.row - block.start)/2))].push(a);
+    });
+    if(!zugIstGeteilt(gridObj, block, info.col, perGroup)){
+      push(list, einheitName, einheitName, "ganz", ganz);
+      return;
+    }
+    var sigs = perGroup.map(zugGruppenSignatur);
+    var filled = [0,1,2].filter(function(i){ return sigs[i]!==null; });
+    if(filled.length === 3 && sigs[0]===sigs[1] && sigs[1]===sigs[2]){
+      push(perGroup[0], einheitName, einheitName, "ganz", ganz);
+      return;
+    }
+    var gruppe = { typ: fam.grTyp, strength: fam.gr };
+    function einzeln(gi){ push(perGroup[gi], (gi+1) + ". " + fam.gruppe + " " + einheitName, einheitName, "gruppe", gruppe); }
+    var paar = null;
+    [[0,1],[0,2],[1,2]].some(function(p){
+      if(sigs[p[0]]!==null && sigs[p[0]]===sigs[p[1]]){ paar = p; return true; }
+      return false;
+    });
+    if(paar){
+      push(perGroup[paar[0]], einheitName + " o. 1 " + fam.gruppe, einheitName, "teil",
+        { strength: importStaerkeMinus(fam.zug, fam.gr), remark: (paar[0]+1) + ". + " + (paar[1]+1) + ". " + fam.gruppe });
+      var rest = [0,1,2].filter(function(i){ return paar.indexOf(i)===-1; })[0];
+      if(sigs[rest]!==null) einzeln(rest);
+      return;
+    }
+    filled.forEach(einzeln);
+  });
+  resolved = hundertschaftenZusammenfassen(resolved, hundertschaftenErmitteln(parsed.blocks));
+  resolved.sort(function(x,y){ return x.sortRow - y.sortRow || x.col - y.col; });
+  return resolved;
+}
+
+function hundertschaftenErmitteln(blocks){
+  var names = blocks.map(function(b){ return b.unit.trim(); });
+  function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  var defs = [];
+  names.forEach(function(n, i){
+    var m, def = null;
+    if((m = /^BPH\s*(\d+)\s*\/\s*FüG$/i.exec(n))){
+      var zugRe = new RegExp("^BPZ\\s*" + m[1] + "\\d$", "i");
+      def = { name: "BPH " + m[1], typ: "BPH", mitglieder: names.filter(function(x){ return zugRe.test(x); }) };
+    } else if((m = /^BFHU\s*(\S*?)\s*\/\s*FüG$/i.exec(n))){
+      var bfeRe = new RegExp("^BFE\\s*\\d\\s*" + escRe(m[1]) + "$", "i");
+      def = { name: "BFHU" + (m[1] ? " " + m[1] : ""), typ: "BFHu", mitglieder: names.filter(function(x){ return bfeRe.test(x); }) };
+    } else if((m = /^IZD\s+HuFüG\b\s*(.*)$/i.exec(n))){
+      var izd = [];
+      for(var j=i+1; j<names.length && /^IZD\s/i.test(names[j]) && !/FüG/i.test(names[j]); j++) izd.push(names[j]);
+      def = { name: ("IZD EHU " + m[1]).trim(), typ: "EHu", mitglieder: izd };
+    }
+    if(def && def.mitglieder.length >= 2){ def.fuehrung = n; defs.push(def); }
+  });
+  return defs;
+}
+function hundertschaftenZusammenfassen(resolved, defs){
+  defs.forEach(function(def){
+    resolved.filter(function(e){ return !e.weg && e.art === "fuehrung" && e.einheit === def.fuehrung; }).forEach(function(f){
+      var key = importEintragKey(f), treffer = [];
+      var komplett = def.mitglieder.every(function(mn){
+        var t = resolved.find(function(e){ return !e.weg && e.art === "ganz" && e.einheit === mn && importEintragKey(e) === key; });
+        if(t) treffer.push(t);
+        return !!t;
+      });
+      if(!komplett) return;
+      f.weg = true;
+      treffer.forEach(function(t){ t.weg = true; });
+      resolved.push({ unit: def.name, einheit: def.name, art: "hundertschaft", colorKey: def.name,
+        remark: def.fuehrung + " + " + def.mitglieder.join(", "),
+        typ: def.typ, strength: importKatalogStaerke(def.typ),
+        date: f.date, label: f.label, startH:f.startH, startM:f.startM, endH:f.endH, endM:f.endM,
+        sortRow: f.sortRow, col: f.col });
+    });
+  });
+  return resolved.filter(function(e){ return !e.weg; });
 }
 
 function importAddDays(dateStr, n){
@@ -2147,6 +2372,10 @@ function importAddDays(dateStr, n){
 
 function categorizeAssignments(assignments){
   var groups = {};
+  /* Kacheln zeigen nur Uhrzeiten – umfasst der Export mehrere Tage, steht der Tag in der Bemerkung */
+  var tage = {};
+  assignments.forEach(function(a){ tage[a.date] = true; });
+  var mehrereTage = Object.keys(tage).length > 1;
   assignments.forEach(function(a){
     var parts = a.label.split("+");
     var base = parts[0].trim();
@@ -2160,7 +2389,10 @@ function categorizeAssignments(assignments){
     var start = a.date + "T" + pad(a.startH) + ":" + pad(a.startM);
     var end = endDate + "T" + pad(a.endH) + ":" + pad(a.endM);
     if(!groups[target]) groups[target] = [];
-    groups[target].push({ unit: a.unit, start: start, end: end, remark: modifiers.length ? ("+"+modifiers.join(" +")) : "" });
+    var tag = mehrereTage ? new Date(a.date + "T00:00:00").toLocaleDateString("de-DE", {weekday:"short", day:"2-digit", month:"2-digit"}) : "";
+    var remark = [tag, modifiers.length ? ("+"+modifiers.join(" +")) : "", a.remark || ""].filter(Boolean).join(" – ");
+    groups[target].push({ unit: a.unit, colorKey: a.colorKey || a.unit, start: start, end: end, remark: remark,
+      typ: a.typ || "", strength: a.strength || null });
   });
   return groups;
 }
@@ -2184,14 +2416,16 @@ function applyImportGroups(groups){
       sectionByName[name] = section;
     }
     groups[name].forEach(function(entry){
-      if(!colorByUnit[entry.unit]){
-        colorByUnit[entry.unit] = AUTO_COLORS[colorIdx % AUTO_COLORS.length];
+      var colorKey = entry.colorKey || entry.unit;
+      if(!colorByUnit[colorKey]){
+        colorByUnit[colorKey] = AUTO_COLORS[colorIdx % AUTO_COLORS.length];
         colorIdx++;
       }
       state.units.push({
         id: uid(), sectionId: section.id, name: entry.unit,
         start: entry.start, end: entry.end,
-        color: colorByUnit[entry.unit], remark: entry.remark,
+        color: colorByUnit[colorKey], remark: entry.remark,
+        count: 1, typ: entry.typ || "", strength: entry.strength || emptyStrength(),
         order: nextOrderForSection(section.id)
       });
       added++;
@@ -2201,7 +2435,7 @@ function applyImportGroups(groups){
 }
 
 async function importZeeGeesRoster(gridObj){
-  var assignments = parseRosterGrid(gridObj);
+  var assignments = resolveZugGruppen(parseRosterGrid(gridObj), gridObj);
   if(assignments.length === 0){
     alert("In der Excel-Datei wurden keine erkennbaren Einsatzzeiten gefunden. Bitte prüfen, ob es sich um einen ZeeGeeS-Wochenexport im bekannten Format handelt.");
     return;
@@ -2212,6 +2446,10 @@ async function importZeeGeesRoster(gridObj){
     return rank(x)-rank(y) || x.localeCompare(y,"de");
   });
   var summary = names.map(function(n){ return "- " + n + ": " + groups[n].length + " Eintrag/Einträge"; }).join("\n");
+  var verbaende = assignments.filter(function(a){ return a.art === "hundertschaft" || a.art === "teil"; }).map(function(a){
+    return "- " + a.unit + ": " + a.label + " (" + a.date.split("-").reverse().join(".") + ")";
+  });
+  if(verbaende.length) summary += "\n\nZusammengefasste Hundertschaften / Züge o. 1 Gruppe:\n" + verbaende.join("\n");
   var msg = "Excel-Import: " + assignments.length + " Einträge in " + names.length + " Abschnitt(en) gefunden:\n\n" + summary +
     "\n\nVorhandene Abschnitte mit gleichem Namen (z. B. „Präsenztag“/„Präsennacht“) werden ergänzt, fehlende Abschnitte werden neu angelegt.\n" +
     "Hinweis: Bereits vorhandene Kacheln werden dabei nicht entfernt oder abgeglichen – bei mehrfachem Import derselben Datei können doppelte Kacheln entstehen.\n\nJetzt importieren?";
