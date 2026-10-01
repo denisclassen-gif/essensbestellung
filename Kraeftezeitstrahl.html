@@ -2039,7 +2039,8 @@ function parseRosterGrid(gridObj){
    Danach werden Hundertschaften (BPH, BFHU, IZD-EHU) zusammengefasst, wenn die
    Führungsgruppe und alle zugehörigen Züge – oder ein bzw. zwei davon ("BPH 21 o. 1x BPZ",
    Bemerkung "BPZ 212 + BPZ 213") – ungeteilt denselben Eintrag mit denselben Zeiten haben.
-   Ohne passenden Eintrag der Führungsgruppe wird nie zusammengefasst. Die Zugehörigkeit ergibt sich nur aus den Namen (BPH 21/FüG ↔ BPZ 211-213,
+   Ohne passenden Eintrag der Führungsgruppe wird nie zusammengefasst, ebenso nicht, wenn
+   ein "fehlender" Zug mit einzelnen Gruppen doch am selben Einsatz beteiligt ist. Die Zugehörigkeit ergibt sich nur aus den Namen (BPH 21/FüG ↔ BPZ 211-213,
    BFHUSN/FüG ↔ BFE1SN-BFE3SN, IZD HuFüG ↔ direkt folgende IZD-Züge), Hundertschaften
    werden also nie untereinander vermischt. */
 /* Stärke eines Einsatzzuges = EHu − "EHu o. 1 EZ" laut Kräftekatalog */
@@ -2202,6 +2203,13 @@ function hundertschaftenZusammenfassen(resolved, defs){
          ganze Hundertschaft, "BPH 21 o. 1x BPZ" oder "BPH 21 o. 2x BPZ" */
       var fehlen = def.mitglieder.length - treffer.length;
       if(treffer.length < 1 || fehlen > 2) return;
+      /* "o. 1x/2x Zug" nur, wenn die fehlenden Züge in diesem Einsatz gar nicht vorkommen –
+         sind sie mit einzelnen Gruppen dabei, bleibt alles einzeln stehen */
+      var vorhanden = treffer.map(function(t){ return t.einheit; });
+      var teilweiseDabei = def.mitglieder.some(function(mn){
+        return vorhanden.indexOf(mn) < 0 && resolved.some(function(e){ return !e.weg && e.einheit === mn && importEintragKey(e) === key; });
+      });
+      if(fehlen && teilweiseDabei) return;
       f.weg = true;
       treffer.forEach(function(t){ t.weg = true; });
       var typ = fehlen ? (def.typ + " o. " + fehlen + " " + def.zug) : def.typ;
