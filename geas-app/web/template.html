@@ -533,6 +533,8 @@
   .modus button { text-align: left; border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 12px; background: var(--glass); color: var(--text); font: inherit; cursor: pointer; display: flex; flex-direction: column; }
   .modus button span { font-size: 12.5px; color: var(--muted); }
   .modus button.on { border-color: #002664; box-shadow: inset 0 0 0 1.5px #002664; background: color-mix(in srgb, #002664 8%, var(--glass)); }
+  figure.abb{margin:14px 0 4px}figure.abb img{width:100%;height:auto;border-radius:10px;border:1px solid rgba(0,0,0,.12);cursor:zoom-in;background:#fff}figure.abb figcaption{font-size:13px;opacity:.75;margin-top:6px}
+  .abb-gross{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:12px;cursor:zoom-out}.abb-gross img{max-width:100%;max-height:100%;background:#fff;border-radius:6px}
   details.vertiefung { margin: 12px 0; border-radius: 16px; border: 1px solid var(--line); padding: 4px 14px; }
   details.vertiefung > summary { cursor: pointer; padding: 10px 0; font-weight: 800; display: flex; gap: 8px; align-items: center; color: #002664; list-style: none; }
   details.vertiefung > summary svg { width: 18px; height: 18px; }
@@ -625,7 +627,7 @@ const EINST = Object.fromEntries((C.einstellungen || []).map(e => [e.id, (ANPASS
 if (ANPASSUNG.weisungen) C.weisungen = ANPASSUNG.weisungen;
 (function ersetzen(o) {
   for (const k of Object.keys(o)) {
-    if (k === "vorlagen_eingebaut" || k === "logo" || k === "stern") continue;
+    if (k === "vorlagen_eingebaut" || k === "logo" || k === "stern" || k === "bild") continue;
     const v = o[k];
     if (typeof v === "string") { if (v.includes("{{e:")) o[k] = v.replace(/\{\{e:([\w-]+)\}\}/g, (m, id) => EINST[id] ?? m); }
     else if (v && typeof v === "object") ersetzen(v);
@@ -1384,6 +1386,14 @@ function Wissen() {
     }
   };
 }
+// Abbildung zu einem Abschnitt (nur wenn der Build ein Bild eingebettet hat); Antippen öffnet groß
+const abbildung = a => a.bild && String(a.bild).startsWith("data:image/") ? `<figure class="abb"><img src="${a.bild}" alt="${esc(a.bild_titel || a.titel)}" loading="lazy" data-abb>${a.bild_titel ? `<figcaption>${esc(a.bild_titel)}</figcaption>` : ""}</figure>` : "";
+document.addEventListener("click", e => {
+  const img = e.target.closest && e.target.closest("img[data-abb]");
+  if (!img) return;
+  const o = document.createElement("div"); o.className = "abb-gross"; o.innerHTML = `<img src="${img.src}" alt="${esc(img.alt)}">`;
+  o.onclick = () => o.remove(); document.body.appendChild(o);
+});
 function KapitelDetail(id) {
   const idx = C.kapitel.findIndex(x => x.id === id), k = C.kapitel[idx];
   const fragen = C.quiz.filter(q => q.kapitel === id);
@@ -1395,10 +1405,10 @@ function KapitelDetail(id) {
         <div class="inner">${icon(k.icon).replace("<svg", '<svg style="width:40px;height:40px"')}<h2 class="rounded" style="font-size:34px">${esc(k.titel)}</h2><p>${esc(k.kurz)}</p></div></section>
       <div class="content overlap">
         ${C.intern ? modusSchalter() : ""}
-        ${k.abschnitte.slice(0, 1).map(a => `<section class="prose glass reveal"><h4>${esc(a.titel)}</h4>${rich(a.text)}</section>`).join("")}
+        ${k.abschnitte.slice(0, 1).map(a => `<section class="prose glass reveal"><h4>${esc(a.titel)}</h4>${rich(a.text)}${abbildung(a)}</section>`).join("")}
         ${beispielBox(k.beispiele)}
-        ${C.intern && !FACH() ? k.abschnitte.slice(1).map(a => `<details class="vertiefung glass"><summary>${svg("books", 2)} ${esc(a.titel)}</summary><div class="vt prose">${rich(a.text)}</div></details>`).join("")
-          : k.abschnitte.slice(1).map(a => `<section class="prose glass reveal"><h4>${esc(a.titel)}</h4>${rich(a.text)}</section>`).join("")}
+        ${C.intern && !FACH() ? k.abschnitte.slice(1).map(a => `<details class="vertiefung glass"><summary>${svg("books", 2)} ${esc(a.titel)}</summary><div class="vt prose">${rich(a.text)}${abbildung(a)}</div></details>`).join("")
+          : k.abschnitte.slice(1).map(a => `<section class="prose glass reveal"><h4>${esc(a.titel)}</h4>${rich(a.text)}${abbildung(a)}</section>`).join("")}
         ${k.merke.length ? `<div class="merke reveal"><b class="h">${svg("bulb").replace("<svg", '<svg style="width:20px;height:20px"')} Merke</b><ul>${k.merke.map(m => `<li>${inline(m)}</li>`).join("")}</ul></div>` : ""}
         ${fragen.length ? `<button class="btn" id="kq" style="${farbVars(idx)}">${svg("quiz")} ${fragen.length} Quizfragen zu diesem Kapitel</button>` : ""}
         <button class="btn glassy" id="kr">${read ? svg("check", 2.6) + " Gelesen – Markierung entfernen" : "Als gelesen markieren"}</button>
@@ -2423,7 +2433,7 @@ function Vorschau(i) {
 
 // ================= Leitfäden: EU-Freizügigkeit / Drittstaatsangehörige ohne Screening =================
 // Jede Rechtsaussage trägt eine Quelle; „pruefen“ = Wortlaut vor Freigabe gegen die aktuelle Fassung prüfen.
-const QKURZ = { pddd_ahe: "PD Dresden", pddd_sta: "PD Dresden / StA", pddd_he: "PD Dresden 2023", bgh: "BGH", gensta: "GenStA Dresden", bespr: "Abstimmung 2026", bpol_uep: "Hinweis BPOL", lds: "LDS-Vordruck", pruefen: "Wortlaut prüfen", gesetz: "Gesetz ✓", sta_2026: "StA 09/2026", bpol_bras: "BPOL BRAS 120", bpol_afz: "BPOL Fortbildung" };
+const QKURZ = { pddd_ahe: "PD Dresden", pddd_sta: "PD Dresden / StA", pddd_he: "PD Dresden 2023", bgh: "BGH", gensta: "GenStA Dresden", bespr: "Abstimmung 2026", bpol_uep: "Hinweis BPOL", lds: "LDS-Vordruck", pruefen: "Wortlaut prüfen", gesetz: "Gesetz ✓", sta_2026: "StA 09/2026", bpol_bras: "BPOL BRAS 120", bpol_afz: "BPOL Fortbildung", lms_ivo: "LMS Auskunft 2.0" };
 const quelleChip = q => {
   if (!q || !C.quellen_leitfaden || !C.quellen_leitfaden[q]) return "";
   const pr = q === "pruefen";

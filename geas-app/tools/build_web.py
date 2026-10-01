@@ -93,6 +93,17 @@ def mische_intern(c, i):
         bild = root / "content" / "intern" / datei
         if bild.exists():
             c[schluessel] = "data:image/png;base64," + base64.b64encode(bild.read_bytes()).decode()
+    # Abbildungen in Kapiteln (z. B. Bildschirmfotos aus internen Systemen) nur intern einbetten
+    bilder = root / "content" / "intern" / "bilder"
+    for k in c["kapitel"]:
+        for a in k.get("abschnitte", []):
+            if isinstance(a.get("bild"), str) and not a["bild"].startswith("data:"):
+                datei = bilder / a["bild"]
+                if datei.exists():
+                    typ = "jpeg" if datei.suffix.lower() in (".jpg", ".jpeg") else datei.suffix.lower().lstrip(".")
+                    a["bild"] = f"data:image/{typ};base64," + base64.b64encode(datei.read_bytes()).decode()
+                else:
+                    del a["bild"]
     return c
 
 
