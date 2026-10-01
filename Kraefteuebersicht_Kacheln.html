@@ -850,7 +850,7 @@ function defaultState(){
     zoom: 40,
     printFormat: "A3",
     colWidth: 200,
-    showStrength: true,
+    showStrength: false,
     logo: LOGO_DATA_URI,
     motto: MOTTO_DATA_URI,
     sections: [
@@ -870,7 +870,8 @@ function defaultState(){
 }
 
 function ensureUnitDefaults(st){
-  if(typeof st.showStrength !== "boolean") st.showStrength = true;
+  /* Stärke ist standardmäßig ausgeblendet; bestehende Lagen einmalig umstellen */
+  if(typeof st.showStrength !== "boolean" || !st.staerkeStandardAus){ st.showStrength = false; st.staerkeStandardAus = true; }
   if(typeof st.colWidth !== "number") st.colWidth = 200;
   st.units.forEach(function(u){
     if(typeof u.count !== "number" || u.count < 1) u.count = 1;
@@ -990,6 +991,10 @@ function renderTotals(){
   var t = sumStrength(units);
   var el = $("totalsBar");
   if(units.length === 0){ el.innerHTML = ""; return; }
+  if(state.showStrength === false){
+    el.innerHTML = "<strong>" + units.length + "</strong> Kachel(n)";
+    return;
+  }
   if(strengthIsEmpty(t)){
     /* z. B. nach einem Excel-Import, der keine Stärken mitbringt */
     el.innerHTML = "<strong>" + units.length + "</strong> Kachel(n) – noch keine Kräftestärke hinterlegt.";
@@ -2216,11 +2221,12 @@ function parseRosterGrid(gridObj){
    Pro Tag im geteilten Zug (angezeigt wird immer mit Anzahl davor, z. B. "1x BPZ 213"):
    - alle drei Gruppen gleich   => "BPZ 213"
    - zwei Gruppen gleich        => "BPZ 213 o. 1x BPGr.", Bemerkung "1. + 2. BPGr."
-   - sonst                      => jede belegte Gruppe einzeln: "BPGr. BPZ 212", Bemerkung "3. BPGr."
+   - sonst                      => jede belegte Gruppe einzeln: "BPGr. - BPZ 212", Bemerkung "3. BPGr."
    Führungsgruppen (FüG/HuFüG) und alle übrigen Einheiten werden nie aufgeteilt.
    Danach werden Hundertschaften (BPH, BFHU, IZD-EHU) zusammengefasst, wenn die
-   Führungsgruppe und alle zugehörigen Züge – oder alle bis auf einen ("BPH 21 o. 1x BPZ",
-   Bemerkung "BPZ 212 + BPZ 213") – ungeteilt denselben Eintrag mit denselben Zeiten haben. Die Zugehörigkeit ergibt sich nur aus den Namen (BPH 21/FüG ↔ BPZ 211-213,
+   Führungsgruppe und alle zugehörigen Züge – oder ein bzw. zwei davon ("BPH 21 o. 1x BPZ",
+   Bemerkung "BPZ 212 + BPZ 213") – ungeteilt denselben Eintrag mit denselben Zeiten haben.
+   Ohne passenden Eintrag der Führungsgruppe wird nie zusammengefasst. Die Zugehörigkeit ergibt sich nur aus den Namen (BPH 21/FüG ↔ BPZ 211-213,
    BFHUSN/FüG ↔ BFE1SN-BFE3SN, IZD HuFüG ↔ direkt folgende IZD-Züge), Hundertschaften
    werden also nie untereinander vermischt. */
 /* Stärke eines Einsatzzuges = EHu − "EHu o. 1 EZ" laut Kräftekatalog */
@@ -2314,7 +2320,7 @@ function resolveZugGruppen(parsed, gridObj){
       return;
     }
     function einzeln(gi){
-      push(perGroup[gi], fam.gruppe + " " + einheitName, einheitName, "gruppe",
+      push(perGroup[gi], fam.gruppe + " - " + einheitName, einheitName, "gruppe",
         { typ: fam.grTyp, strength: fam.gr, remark: (gi+1) + ". " + fam.gruppe });
     }
     var paar = null;
@@ -2365,13 +2371,15 @@ function hundertschaftenZusammenfassen(resolved, defs){
         var t = resolved.find(function(e){ return !e.weg && e.art === "ganz" && e.einheit === mn && importEintragKey(e) === key; });
         if(t) treffer.push(t);
       });
-      /* ganze Hundertschaft, oder Hundertschaft ohne genau einen Zug ("BPH 21 o. 1x BPZ") */
+      /* Ausgangspunkt ist immer der Eintrag der Führungsgruppe: zusammengefasst wird nur,
+         wenn die FüG denselben Einsatz mit denselben Zeiten hat wie die Züge –
+         ganze Hundertschaft, "BPH 21 o. 1x BPZ" oder "BPH 21 o. 2x BPZ" */
       var fehlen = def.mitglieder.length - treffer.length;
-      if(fehlen > 1 || treffer.length < 2) return;
+      if(treffer.length < 1 || fehlen > 2) return;
       f.weg = true;
       treffer.forEach(function(t){ t.weg = true; });
-      var typ = fehlen ? (def.typ + " o. 1 " + def.zug) : def.typ;
-      resolved.push({ unit: fehlen ? (def.name + " o. 1x " + def.zug) : def.name, einheit: def.name, art: "hundertschaft", colorKey: def.name,
+      var typ = fehlen ? (def.typ + " o. " + fehlen + " " + def.zug) : def.typ;
+      resolved.push({ unit: fehlen ? (def.name + " o. " + fehlen + "x " + def.zug) : def.name, einheit: def.name, art: "hundertschaft", colorKey: def.name,
         remark: fehlen ? treffer.map(function(t){ return t.einheit; }).join(" + ") : "",
         typ: katalogByTyp(typ) ? typ : "", strength: importKatalogStaerke(typ),
         date: f.date, label: f.label, startH:f.startH, startM:f.startM, endH:f.endH, endM:f.endM,
@@ -2398,6 +2406,11 @@ function praesenzFarbe(name){
   return r === 0 ? PRAESENZ_FARBE_TAG : r === 1 ? PRAESENZ_FARBE_NACHT : null;
 }
 function praesenzZuerst(st){
+  /* einheitliche Schreibweise "Präsenz Tag" / "Präsenz Nacht" (auch für ältere Lagen) */
+  st.sections.forEach(function(s){
+    var r = praesenzRang(s.name);
+    if(r === 0) s.name = "Präsenz Tag"; else if(r === 1) s.name = "Präsenz Nacht";
+  });
   st.sections = st.sections.map(function(s, i){ return { s: s, i: i }; })
     .sort(function(a, b){ return praesenzRang(a.s.name) - praesenzRang(b.s.name) || a.i - b.i; })
     .map(function(x){ return x.s; });
@@ -2436,7 +2449,7 @@ function andereFarbtoene(){ return FAMILIEN_FARBTOENE.slice(1); }
 function familieAusName(name){
   var n = String(name || "").replace(/\s+/g, " ").trim()
     .replace(/^\d+x? (?=\S)/, "")                      /* Anzahl/altes Präfix "1 BPZ 213" */
-    .replace(/^(\d\. )?(BPGr|EGr)\. /i, "")           /* "BPGr. BPZ 212", alt "3. BPGr. BPZ 212" */
+    .replace(/^(\d\. )?(BPGr|EGr)\. (- )?/i, "")      /* "BPGr. - BPZ 212", alt "3. BPGr. BPZ 212" */
     .replace(/ o\. \d+x? (BPGr\.|EGr\.|BPZ|BFE|EZ)$/i, ""); /* "BPZ 213 o. 1x BPGr.", "BPH 21 o. 1x BPZ" */
   var m;
   if((m = /^BPH ?(\d+)(\s*\/\s*FüG)?$/i.exec(n))) return { key: "BPH " + m[1], stufe: 0 };
@@ -2528,8 +2541,8 @@ function categorizeAssignments(assignments){
     var base = parts[0].trim();
     var modifiers = parts.slice(1).map(function(s){ return s.trim(); }).filter(Boolean);
     var target;
-    if(base === "P/T") target = "Präsenztag";
-    else if(base === "P/N") target = "Präsenznacht";
+    if(base === "P/T") target = "Präsenz Tag";
+    else if(base === "P/N") target = "Präsenz Nacht";
     else target = base || a.label;
     var startMin = a.startH*60+a.startM, endMin = a.endH*60+a.endM;
     var endDate = endMin <= startMin ? importAddDays(a.date, 1) : a.date;
@@ -2551,7 +2564,7 @@ function applyImportGroups(groups, farben){
   state.units.forEach(function(u){ if(!colorByUnit[u.name]) colorByUnit[u.name] = u.color; });
   var colorIdx = 0;
   var names = Object.keys(groups).sort(function(x,y){
-    function rank(n){ return n==="Präsenztag" ? 0 : n==="Präsenznacht" ? 1 : 2; }
+    function rank(n){ return praesenzRang(n); }
     return rank(x)-rank(y) || x.localeCompare(y,"de");
   });
   var added = 0;
@@ -2592,7 +2605,7 @@ async function importZeeGeesRoster(gridObj){
   }
   var groups = categorizeAssignments(assignments);
   var names = Object.keys(groups).sort(function(x,y){
-    function rank(n){ return n==="Präsenztag" ? 0 : n==="Präsenznacht" ? 1 : 2; }
+    function rank(n){ return praesenzRang(n); }
     return rank(x)-rank(y) || x.localeCompare(y,"de");
   });
   var summary = names.map(function(n){ return "- " + n + ": " + groups[n].length + " Eintrag/Einträge"; }).join("\n");
@@ -2601,7 +2614,7 @@ async function importZeeGeesRoster(gridObj){
   });
   if(verbaende.length) summary += "\n\nZusammengefasste Hundertschaften / Züge:\n" + verbaende.join("\n");
   var msg = "Excel-Import: " + assignments.length + " Einträge in " + names.length + " Abschnitt(en) gefunden:\n\n" + summary +
-    "\n\nVorhandene Abschnitte mit gleichem Namen (z. B. „Präsenztag“/„Präsennacht“) werden ergänzt, fehlende Abschnitte werden neu angelegt.\n" +
+    "\n\nVorhandene Abschnitte mit gleichem Namen (z. B. „Präsenz Tag“/„Präsenz Nacht“) werden ergänzt, fehlende Abschnitte werden neu angelegt.\n" +
     "Hinweis: Bereits vorhandene Kacheln werden dabei nicht entfernt oder abgeglichen – bei mehrfachem Import derselben Datei können doppelte Kacheln entstehen.\n\nJetzt importieren?";
   if(!confirm(msg)) return;
   var added = applyImportGroups(groups, importFarben(parsed.blocks));

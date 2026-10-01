@@ -116,11 +116,17 @@
   .bar{
     position:absolute; top:3px; height:calc(var(--lane-h) - 6px); border-radius:6px;
     border:1px solid rgba(0,0,0,.25); box-shadow:0 1px 2px rgba(0,0,0,.15);
-    display:flex; align-items:center; overflow:hidden; cursor:grab; user-select:none; touch-action:none;
+    display:flex; flex-wrap:wrap; align-items:center; align-content:center; column-gap:.5rem;
+    padding:2px .5rem; line-height:1.25; overflow:hidden; cursor:grab; user-select:none; touch-action:none;
   }
   .bar:active{cursor:grabbing;}
-  .bar .bar-label{padding:0 .5rem; font-size:.76rem; font-weight:600; white-space:nowrap; flex:0 0 auto; pointer-events:none;}
-  .bar .bar-remark{font-size:.72rem; font-style:italic; font-weight:400; white-space:nowrap; opacity:.9; padding-right:.5rem; flex:0 0 auto; pointer-events:none;}
+  /* Beschriftung bricht innerhalb des Balkens um; die Spur wird dafür höher (renderGrid) */
+  .bar .bar-label{font-size:.76rem; font-weight:600; flex:0 1 auto; min-width:0; overflow-wrap:break-word; pointer-events:none;}
+  .bar .bar-remark{font-size:.72rem; font-style:italic; font-weight:400; opacity:.9; flex:0 1 auto; min-width:0; overflow-wrap:break-word; pointer-events:none;}
+  .bar.schmal{padding:2px 3px;}
+  .bar.schmal .bar-label{font-size:.64rem; line-height:1.15;}
+  .label-resize{position:absolute; top:0; bottom:0; right:-4px; width:8px; cursor:col-resize; z-index:6;}
+  .label-resize:hover, .label-resize.active{background:rgba(47,111,78,.35);}
   .bar .handle{position:absolute; top:0; bottom:0; width:8px; cursor:ew-resize; z-index:2;}
   .bar .handle-left{left:0;}
   .bar .handle-right{right:0;}
@@ -182,7 +188,7 @@
   .anz-row .typ-field{flex:1 1 auto; min-width:0;}
   .anz-row label{margin-top:0;}
   .anz-row input, .anz-row select{margin:0;}
-  .bar .bar-strength{font-size:.72rem; font-weight:700; white-space:nowrap; opacity:.95; padding-right:.5rem; flex:0 0 auto; pointer-events:none;}
+  .bar .bar-strength{font-size:.72rem; font-weight:700; white-space:nowrap; opacity:.95; flex:0 0 auto; pointer-events:none;}
   .icon-btn-eye{display:inline-flex; align-items:center; gap:.35rem;}
   .icon-btn-eye svg{width:16px; height:16px; flex:0 0 auto;}
   .checkbox-row{display:flex; align-items:center; gap:.4rem; margin-top:.7rem;}
@@ -774,7 +780,9 @@ function katalogMatches(text){
 }
 
 function ensureUnitDefaults(st){
-  if(typeof st.showStrength !== "boolean") st.showStrength = true;
+  if(typeof st.labelWidth !== "number") st.labelWidth = 190;
+  /* Stärke ist standardmäßig ausgeblendet; bestehende Lagen einmalig umstellen */
+  if(typeof st.showStrength !== "boolean" || !st.staerkeStandardAus){ st.showStrength = false; st.staerkeStandardAus = true; }
   st.units.forEach(function(u){
     if(typeof u.count !== "number" || u.count < 1) u.count = 1;
     if(typeof u.typ !== "string") u.typ = "";
@@ -842,6 +850,12 @@ var hiddenBar = $("hiddenBar");
 
 /* ---------------- Rendering ---------------- */
 function pxPerHour(){ return state.zoom; }
+/* Stundenbeschriftung ausdünnen, wenn eine Stunde zu schmal für "05:00" ist */
+function hourLabelStep(){
+  var steps = [1, 2, 3, 4, 6, 12, 24];
+  for(var i=0; i<steps.length; i++){ if(steps[i] * pxPerHour() >= 38) return steps[i]; }
+  return 24;
+}
 
 function render(){
   praesenzZuerst(state);
@@ -944,6 +958,35 @@ function computeLanes(units){
   return { laneOf: laneOf, laneCount: Math.max(1, laneEnds.length) };
 }
 
+/* Breite der Spalte "Einsatzabschnitt" – per Ziehgriff am rechten Rand änderbar,
+   wird gespeichert und auch für die Druckaufteilung verwendet. */
+function labelWidthPx(){ return clamp(state.labelWidth || 190, 90, 450); }
+function labelResizeHandle(){
+  var h = document.createElement("div");
+  h.className = "label-resize no-print";
+  h.title = "Ziehen, um die Spalte „Einsatzabschnitt“ breiter oder schmaler zu machen";
+  h.addEventListener("pointerdown", function(e){
+    e.preventDefault(); e.stopPropagation();
+    var startX = e.clientX, startW = labelWidthPx();
+    h.classList.add("active");
+    h.setPointerCapture(e.pointerId);
+    function move(ev){
+      state.labelWidth = clamp(Math.round(startW + ev.clientX - startX), 90, 450);
+      gridContainer.style.setProperty("--label-w", state.labelWidth + "px");
+    }
+    function up(){
+      h.classList.remove("active");
+      h.removeEventListener("pointermove", move);
+      h.removeEventListener("pointerup", up);
+      renderGrid();
+      saveState();
+    }
+    h.addEventListener("pointermove", move);
+    h.addEventListener("pointerup", up);
+  });
+  return h;
+}
+
 /* Beim Drucken: Abschnitts-Indizes, vor denen eine neue Seite beginnt (mit
    wiederholter Zeitachse) – wird in preparePrintLayout() berechnet. */
 var printPageBreaks = null;
@@ -953,6 +996,7 @@ function renderGrid(){
   var totalMin = Math.max(1,(endMs-startMs)/60000);
   var totalW = totalMin/60*pxPerHour();
   gridContainer.style.setProperty("--grid-total-w", totalW+"px");
+  gridContainer.style.setProperty("--label-w", labelWidthPx()+"px");
   var visibleSections = state.sections.filter(function(s){ return !s.hidden; });
   var breaks = {};
   visibleSections.forEach(function(s, i){
@@ -966,7 +1010,8 @@ function renderGrid(){
   /* --- Kopf: Label-Ecke --- */
   var cornerLabel = document.createElement("div");
   cornerLabel.className = "cell-label header" + (breakBefore ? " print-break-before" : "");
-  cornerLabel.textContent = "Einsatzabschnitt";
+  cornerLabel.textContent = "Einsatz\u00ADabschnitt";
+  cornerLabel.appendChild(labelResizeHandle());
   cornerLabel.style.gridRow = String(row);
   cornerLabel.style.gridColumn = "1";
   gridContainer.appendChild(cornerLabel);
@@ -994,9 +1039,11 @@ function renderGrid(){
 
   var hourRow = document.createElement("div");
   hourRow.className = "hour-row";
+  var labelStep = hourLabelStep();
   hourTicks().forEach(function(t){
     var left = (t-startMs)/60000/60*pxPerHour();
     var d = new Date(t);
+    if(d.getHours() % labelStep !== 0) return;
     var el = document.createElement("div");
     el.className = "hour-tick" + (d.getHours()===0 ? " strong" : "");
     el.style.left = left+"px";
@@ -1014,9 +1061,11 @@ function renderGrid(){
   overlay.style.width = totalW+"px";
   overlay.style.gridRow = fromRow + " / span " + Math.max(1,rowCount);
   overlay.style.gridColumn = "2";
+  var lineStep = pxPerHour() >= 6 ? 1 : hourLabelStep();
   hourTicks().forEach(function(t){
     var left = (t-startMs)/60000/60*pxPerHour();
     var d = new Date(t);
+    if(d.getHours() % lineStep !== 0) return;
     var line = document.createElement("div");
     line.className = "gridline" + (d.getHours()===0 ? " day" : (d.getHours()%6===0 ? " strong" : ""));
     line.style.left = left+"px";
@@ -1083,6 +1132,7 @@ function renderGrid(){
     });
     labelCell.appendChild(nameEl);
     labelCell.appendChild(controls);
+    labelCell.appendChild(labelResizeHandle());
     gridContainer.appendChild(labelCell);
 
     var lanes = document.createElement("div");
@@ -1112,6 +1162,7 @@ function renderGrid(){
         (strengthIsEmpty(u.strength) ? "" : ("\nStärke hD/gD/mD/TK: " + fmtStrength(u.strength) + "  = " + strengthTotal(u.strength) + " Kräfte")) +
         (u.remark ? ("\n"+u.remark) : "");
       bar.dataset.id = u.id;
+      bar.dataset.lane = lane;
 
       var hl = document.createElement("div");
       hl.className = "handle handle-left";
@@ -1127,18 +1178,22 @@ function renderGrid(){
       if(fmt.size === "small") lbl.style.fontSize = ".65rem";
       else if(fmt.size === "large") lbl.style.fontSize = ".92rem";
       var countPrefix = (u.count || 1) + "x ";
-      lbl.textContent = countPrefix + u.name + "  " + fmtHM(u.start) + "–" + fmtHM(u.end) + " (" + fmtDuration(u.start,u.end) + ")";
+      /* sehr schmale Balken (z. B. Wochenansicht): Kurzform mit Anzahl und Name –
+         Uhrzeit steht an der Achse, alles Weitere im Tooltip */
+      var schmal = width < 110;
+      if(schmal) bar.classList.add("schmal");
+      lbl.textContent = countPrefix + u.name + (schmal ? "" : ("  " + fmtHM(u.start) + "–" + fmtHM(u.end) + " (" + fmtDuration(u.start,u.end) + ")"));
 
       bar.appendChild(hl);
       bar.appendChild(lbl);
-      if(strengthText){
+      if(strengthText && !schmal){
         var strSpan = document.createElement("span");
         strSpan.className = "bar-strength";
         strSpan.textContent = strengthText;
         strSpan.title = "hD/gD/mD/TK";
         bar.appendChild(strSpan);
       }
-      if(u.remark){
+      if(u.remark && !schmal){
         var remarkSpan = document.createElement("span");
         remarkSpan.className = "bar-remark";
         remarkSpan.textContent = "  " + u.remark;
@@ -1150,6 +1205,25 @@ function renderGrid(){
     });
 
     gridContainer.appendChild(lanes);
+
+    /* Spurhöhe an den Balkeninhalt anpassen, damit die Beschriftung vollständig im Balken steht */
+    var laneH = [];
+    for(var li=0; li<laneInfo.laneCount; li++) laneH[li] = LANE_H;
+    var bars = lanes.querySelectorAll(".bar");
+    bars.forEach(function(bar){
+      bar.style.height = "auto";
+      var need = Math.ceil(bar.offsetHeight) + 6, ln = +bar.dataset.lane;
+      if(need > laneH[ln]) laneH[ln] = need;
+    });
+    var laneTop = [], sumH = 0;
+    laneH.forEach(function(h, i){ laneTop[i] = sumH; sumH += h; });
+    bars.forEach(function(bar){
+      var ln = +bar.dataset.lane;
+      bar.style.top = (laneTop[ln] + 3) + "px";
+      bar.style.height = (laneH[ln] - 6) + "px";
+    });
+    lanes.style.height = sumH + "px";
+    labelCell.style.minHeight = sumH + "px";
   });
   buildOverlay(segmentStart, segmentRows);
 }
@@ -1955,11 +2029,12 @@ function parseRosterGrid(gridObj){
    Pro Tag im geteilten Zug (angezeigt wird immer mit Anzahl davor, z. B. "1x BPZ 213"):
    - alle drei Gruppen gleich   => "BPZ 213"
    - zwei Gruppen gleich        => "BPZ 213 o. 1x BPGr.", Bemerkung "1. + 2. BPGr."
-   - sonst                      => jede belegte Gruppe einzeln: "BPGr. BPZ 212", Bemerkung "3. BPGr."
+   - sonst                      => jede belegte Gruppe einzeln: "BPGr. - BPZ 212", Bemerkung "3. BPGr."
    Führungsgruppen (FüG/HuFüG) und alle übrigen Einheiten werden nie aufgeteilt.
    Danach werden Hundertschaften (BPH, BFHU, IZD-EHU) zusammengefasst, wenn die
-   Führungsgruppe und alle zugehörigen Züge – oder alle bis auf einen ("BPH 21 o. 1x BPZ",
-   Bemerkung "BPZ 212 + BPZ 213") – ungeteilt denselben Eintrag mit denselben Zeiten haben. Die Zugehörigkeit ergibt sich nur aus den Namen (BPH 21/FüG ↔ BPZ 211-213,
+   Führungsgruppe und alle zugehörigen Züge – oder ein bzw. zwei davon ("BPH 21 o. 1x BPZ",
+   Bemerkung "BPZ 212 + BPZ 213") – ungeteilt denselben Eintrag mit denselben Zeiten haben.
+   Ohne passenden Eintrag der Führungsgruppe wird nie zusammengefasst. Die Zugehörigkeit ergibt sich nur aus den Namen (BPH 21/FüG ↔ BPZ 211-213,
    BFHUSN/FüG ↔ BFE1SN-BFE3SN, IZD HuFüG ↔ direkt folgende IZD-Züge), Hundertschaften
    werden also nie untereinander vermischt. */
 /* Stärke eines Einsatzzuges = EHu − "EHu o. 1 EZ" laut Kräftekatalog */
@@ -2053,7 +2128,7 @@ function resolveZugGruppen(parsed, gridObj){
       return;
     }
     function einzeln(gi){
-      push(perGroup[gi], fam.gruppe + " " + einheitName, einheitName, "gruppe",
+      push(perGroup[gi], fam.gruppe + " - " + einheitName, einheitName, "gruppe",
         { typ: fam.grTyp, strength: fam.gr, remark: (gi+1) + ". " + fam.gruppe });
     }
     var paar = null;
@@ -2104,13 +2179,15 @@ function hundertschaftenZusammenfassen(resolved, defs){
         var t = resolved.find(function(e){ return !e.weg && e.art === "ganz" && e.einheit === mn && importEintragKey(e) === key; });
         if(t) treffer.push(t);
       });
-      /* ganze Hundertschaft, oder Hundertschaft ohne genau einen Zug ("BPH 21 o. 1x BPZ") */
+      /* Ausgangspunkt ist immer der Eintrag der Führungsgruppe: zusammengefasst wird nur,
+         wenn die FüG denselben Einsatz mit denselben Zeiten hat wie die Züge –
+         ganze Hundertschaft, "BPH 21 o. 1x BPZ" oder "BPH 21 o. 2x BPZ" */
       var fehlen = def.mitglieder.length - treffer.length;
-      if(fehlen > 1 || treffer.length < 2) return;
+      if(treffer.length < 1 || fehlen > 2) return;
       f.weg = true;
       treffer.forEach(function(t){ t.weg = true; });
-      var typ = fehlen ? (def.typ + " o. 1 " + def.zug) : def.typ;
-      resolved.push({ unit: fehlen ? (def.name + " o. 1x " + def.zug) : def.name, einheit: def.name, art: "hundertschaft", colorKey: def.name,
+      var typ = fehlen ? (def.typ + " o. " + fehlen + " " + def.zug) : def.typ;
+      resolved.push({ unit: fehlen ? (def.name + " o. " + fehlen + "x " + def.zug) : def.name, einheit: def.name, art: "hundertschaft", colorKey: def.name,
         remark: fehlen ? treffer.map(function(t){ return t.einheit; }).join(" + ") : "",
         typ: katalogByTyp(typ) ? typ : "", strength: importKatalogStaerke(typ),
         date: f.date, label: f.label, startH:f.startH, startM:f.startM, endH:f.endH, endM:f.endM,
@@ -2322,6 +2399,11 @@ function praesenzFarbe(name){
   return r === 0 ? PRAESENZ_FARBE_TAG : r === 1 ? PRAESENZ_FARBE_NACHT : null;
 }
 function praesenzZuerst(st){
+  /* einheitliche Schreibweise "Präsenz Tag" / "Präsenz Nacht" (auch für ältere Lagen) */
+  st.sections.forEach(function(s){
+    var r = praesenzRang(s.name);
+    if(r === 0) s.name = "Präsenz Tag"; else if(r === 1) s.name = "Präsenz Nacht";
+  });
   st.sections = st.sections.map(function(s, i){ return { s: s, i: i }; })
     .sort(function(a, b){ return praesenzRang(a.s.name) - praesenzRang(b.s.name) || a.i - b.i; })
     .map(function(x){ return x.s; });
@@ -2360,7 +2442,7 @@ function andereFarbtoene(){ return FAMILIEN_FARBTOENE.slice(1); }
 function familieAusName(name){
   var n = String(name || "").replace(/\s+/g, " ").trim()
     .replace(/^\d+x? (?=\S)/, "")                      /* Anzahl/altes Präfix "1 BPZ 213" */
-    .replace(/^(\d\. )?(BPGr|EGr)\. /i, "")           /* "BPGr. BPZ 212", alt "3. BPGr. BPZ 212" */
+    .replace(/^(\d\. )?(BPGr|EGr)\. (- )?/i, "")      /* "BPGr. - BPZ 212", alt "3. BPGr. BPZ 212" */
     .replace(/ o\. \d+x? (BPGr\.|EGr\.|BPZ|BFE|EZ)$/i, ""); /* "BPZ 213 o. 1x BPGr.", "BPH 21 o. 1x BPZ" */
   var m;
   if((m = /^BPH ?(\d+)(\s*\/\s*FüG)?$/i.exec(n))) return { key: "BPH " + m[1], stufe: 0 };
@@ -2448,8 +2530,8 @@ function categorizeAssignments(assignments){
     var base = parts[0].trim();
     var modifiers = parts.slice(1).map(function(s){ return s.trim(); }).filter(Boolean);
     var target;
-    if(base === "P/T") target = "Präsenztag";
-    else if(base === "P/N") target = "Präsenznacht";
+    if(base === "P/T") target = "Präsenz Tag";
+    else if(base === "P/N") target = "Präsenz Nacht";
     else target = base || a.label;
     var startMin = a.startH*60+a.startM, endMin = a.endH*60+a.endM;
     var endDate = endMin <= startMin ? importAddDays(a.date, 1) : a.date;
@@ -2470,7 +2552,7 @@ function applyImportGroups(groups, farben){
   state.units.forEach(function(u){ if(!colorByUnit[u.name]) colorByUnit[u.name] = u.color; });
   var colorIdx = 0;
   var names = Object.keys(groups).sort(function(x,y){
-    function rank(n){ return n==="Präsenztag" ? 0 : n==="Präsenznacht" ? 1 : 2; }
+    function rank(n){ return praesenzRang(n); }
     return rank(x)-rank(y) || x.localeCompare(y,"de");
   });
   var added = 0;
@@ -2517,7 +2599,7 @@ async function importZeeGeesRoster(gridObj){
   }
   var groups = categorizeAssignments(assignments);
   var names = Object.keys(groups).sort(function(x,y){
-    function rank(n){ return n==="Präsenztag" ? 0 : n==="Präsenznacht" ? 1 : 2; }
+    function rank(n){ return praesenzRang(n); }
     return rank(x)-rank(y) || x.localeCompare(y,"de");
   });
   var summary = names.map(function(n){ return "- " + n + ": " + groups[n].length + " Eintrag/Einträge"; }).join("\n");
@@ -2526,7 +2608,7 @@ async function importZeeGeesRoster(gridObj){
   });
   if(verbaende.length) summary += "\n\nZusammengefasste Hundertschaften / Züge:\n" + verbaende.join("\n");
   var msg = "Excel-Import: " + assignments.length + " Einträge in " + names.length + " Abschnitt(en) gefunden:\n\n" + summary +
-    "\n\nVorhandene Abschnitte mit gleichem Namen (z. B. „Präsenztag“/„Präsennacht“) werden ergänzt, fehlende Abschnitte werden neu angelegt.\n" +
+    "\n\nVorhandene Abschnitte mit gleichem Namen (z. B. „Präsenz Tag“/„Präsenz Nacht“) werden ergänzt, fehlende Abschnitte werden neu angelegt.\n" +
     "Hinweis: Bereits vorhandene Einträge werden dabei nicht entfernt oder abgeglichen – bei mehrfachem Import derselben Datei können doppelte Einträge entstehen.\n\nJetzt importieren?";
   if(!confirm(msg)) return;
   var added = applyImportGroups(groups, importFarben(parsed.blocks));
@@ -2558,7 +2640,6 @@ $("excelFileInput").addEventListener("change", function(e){
 /* ---------------- Drucken ---------------- */
 var PAGE_SIZES_MM = { A4: {w:297, h:210}, A4H: {w:210, h:297}, A3: {w:420, h:297}, A3H: {w:297, h:420} };
 var PRINT_MARGIN_MM = 18; // 9mm links + 9mm rechts, muss zu @page margin passen
-var LABEL_WIDTH_PX = 190; // muss zu --label-w passen
 
 function currentPageSize(){
   return PAGE_SIZES_MM[state.printFormat] || PAGE_SIZES_MM.A4;
@@ -2574,8 +2655,9 @@ function computePrintZoom(scale){
   var totalHours = Math.max(0.25, (tsOf(state.end)-tsOf(state.start))/3600000);
   var size = currentPageSize();
   var availablePx = (size.w - PRINT_MARGIN_MM) * 96/25.4 / scale;
-  var usablePx = Math.max(200, availablePx - LABEL_WIDTH_PX);
-  return Math.max(8, Math.min(240, usablePx/totalHours));
+  var usablePx = Math.max(200, availablePx - labelWidthPx());
+  /* nach unten offen, damit auch lange Zeiträume vollständig auf die Seite passen */
+  return Math.max(1, Math.min(240, usablePx/totalHours));
 }
 
 /* Höhe aller gedruckten Teile (Kopf, Zeitstrahl, Ersteller, Copyright) in px */
