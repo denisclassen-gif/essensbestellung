@@ -1031,7 +1031,7 @@ function buildTile(u){
   if(f.italic) nm.style.fontStyle = "italic";
   if(f.size === "small") nm.style.fontSize = ".75rem";
   else if(f.size === "large") nm.style.fontSize = "1rem";
-  nm.textContent = ((u.count && u.count > 1) ? (u.count + "× ") : "") + u.name;
+  nm.textContent = (u.count || 1) + "x " + u.name;
   tile.appendChild(nm);
 
   if(state.showStrength !== false && !strengthIsEmpty(u.strength)){
@@ -1196,7 +1196,7 @@ function buildOriginGhost(u, section){
   var sectionName = section ? section.name : "Ursprungsabschnitt";
   var name = document.createElement("div");
   name.className = "origin-ghost-name";
-  name.textContent = ((u.count && u.count > 1) ? (u.count + "× ") : "") + u.name;
+  name.textContent = (u.count || 1) + "x " + u.name;
   ghost.appendChild(name);
   if(state.showStrength !== false && !strengthIsEmpty(u.strength)){
     var st = document.createElement("div");
@@ -2213,14 +2213,14 @@ function parseRosterGrid(gridObj){
    Zeilenpaaren; ein ungeteilter Zug hat nur die Linie am Blockanfang und seinen
    Eintrag auf der Beschriftungszeile. Fehlt die Rahmeninfo, gilt ein Zug als
    ungeteilt, wenn nur die Beschriftungszeile belegt ist.
-   Pro Tag im geteilten Zug:
+   Pro Tag im geteilten Zug (angezeigt wird immer mit Anzahl davor, z. B. "1x BPZ 213"):
    - alle drei Gruppen gleich   => "BPZ 213"
-   - zwei Gruppen gleich        => "BPZ 213 o. 1 BPGr." (die dritte ggf. als "3. BPGr. BPZ 213")
-   - sonst                      => jede belegte Gruppe einzeln, z. B. "3. BPGr. BPZ 212"
+   - zwei Gruppen gleich        => "BPZ 213 o. 1x BPGr.", Bemerkung "1. + 2. BPGr."
+   - sonst                      => jede belegte Gruppe einzeln: "BPGr. BPZ 212", Bemerkung "3. BPGr."
    Führungsgruppen (FüG/HuFüG) und alle übrigen Einheiten werden nie aufgeteilt.
    Danach werden Hundertschaften (BPH, BFHU, IZD-EHU) zusammengefasst, wenn die
-   Führungsgruppe und ALLE zugehörigen Züge ungeteilt denselben Eintrag mit denselben
-   Zeiten haben. Die Zugehörigkeit ergibt sich nur aus den Namen (BPH 21/FüG ↔ BPZ 211-213,
+   Führungsgruppe und alle zugehörigen Züge – oder alle bis auf einen ("BPH 21 o. 1x BPZ",
+   Bemerkung "BPZ 212 + BPZ 213") – ungeteilt denselben Eintrag mit denselben Zeiten haben. Die Zugehörigkeit ergibt sich nur aus den Namen (BPH 21/FüG ↔ BPZ 211-213,
    BFHUSN/FüG ↔ BFE1SN-BFE3SN, IZD HuFüG ↔ direkt folgende IZD-Züge), Hundertschaften
    werden also nie untereinander vermischt. */
 /* Stärke eines Einsatzzuges = EHu − "EHu o. 1 EZ" laut Kräftekatalog */
@@ -2313,15 +2313,17 @@ function resolveZugGruppen(parsed, gridObj){
       push(perGroup[0], einheitName, einheitName, "ganz", ganz);
       return;
     }
-    var gruppe = { typ: fam.grTyp, strength: fam.gr };
-    function einzeln(gi){ push(perGroup[gi], (gi+1) + ". " + fam.gruppe + " " + einheitName, einheitName, "gruppe", gruppe); }
+    function einzeln(gi){
+      push(perGroup[gi], fam.gruppe + " " + einheitName, einheitName, "gruppe",
+        { typ: fam.grTyp, strength: fam.gr, remark: (gi+1) + ". " + fam.gruppe });
+    }
     var paar = null;
     [[0,1],[0,2],[1,2]].some(function(p){
       if(sigs[p[0]]!==null && sigs[p[0]]===sigs[p[1]]){ paar = p; return true; }
       return false;
     });
     if(paar){
-      push(perGroup[paar[0]], einheitName + " o. 1 " + fam.gruppe, einheitName, "teil",
+      push(perGroup[paar[0]], einheitName + " o. 1x " + fam.gruppe, einheitName, "teil",
         { strength: importStaerkeMinus(fam.zug, fam.gr), remark: (paar[0]+1) + ". + " + (paar[1]+1) + ". " + fam.gruppe });
       var rest = [0,1,2].filter(function(i){ return paar.indexOf(i)===-1; })[0];
       if(sigs[rest]!==null) einzeln(rest);
@@ -2342,14 +2344,14 @@ function hundertschaftenErmitteln(blocks){
     var m, def = null;
     if((m = /^BPH\s*(\d+)\s*\/\s*FüG$/i.exec(n))){
       var zugRe = new RegExp("^BPZ\\s*" + m[1] + "\\d$", "i");
-      def = { name: "BPH " + m[1], typ: "BPH", mitglieder: names.filter(function(x){ return zugRe.test(x); }) };
+      def = { name: "BPH " + m[1], typ: "BPH", zug: "BPZ", mitglieder: names.filter(function(x){ return zugRe.test(x); }) };
     } else if((m = /^BFHU\s*(\S*?)\s*\/\s*FüG$/i.exec(n))){
       var bfeRe = new RegExp("^BFE\\s*\\d\\s*" + escRe(m[1]) + "$", "i");
-      def = { name: "BFHU" + (m[1] ? " " + m[1] : ""), typ: "BFHu", mitglieder: names.filter(function(x){ return bfeRe.test(x); }) };
+      def = { name: "BFHU" + (m[1] ? " " + m[1] : ""), typ: "BFHu", zug: "BFE", mitglieder: names.filter(function(x){ return bfeRe.test(x); }) };
     } else if((m = /^IZD\s+HuFüG\b\s*(.*)$/i.exec(n))){
       var izd = [];
       for(var j=i+1; j<names.length && /^IZD\s/i.test(names[j]) && !/FüG/i.test(names[j]); j++) izd.push(names[j]);
-      def = { name: ("IZD EHU " + m[1]).trim(), typ: "EHu", mitglieder: izd };
+      def = { name: ("IZD EHU " + m[1]).trim(), typ: "EHu", zug: "EZ", mitglieder: izd };
     }
     if(def && def.mitglieder.length >= 2){ def.fuehrung = n; defs.push(def); }
   });
@@ -2359,17 +2361,19 @@ function hundertschaftenZusammenfassen(resolved, defs){
   defs.forEach(function(def){
     resolved.filter(function(e){ return !e.weg && e.art === "fuehrung" && e.einheit === def.fuehrung; }).forEach(function(f){
       var key = importEintragKey(f), treffer = [];
-      var komplett = def.mitglieder.every(function(mn){
+      def.mitglieder.forEach(function(mn){
         var t = resolved.find(function(e){ return !e.weg && e.art === "ganz" && e.einheit === mn && importEintragKey(e) === key; });
         if(t) treffer.push(t);
-        return !!t;
       });
-      if(!komplett) return;
+      /* ganze Hundertschaft, oder Hundertschaft ohne genau einen Zug ("BPH 21 o. 1x BPZ") */
+      var fehlen = def.mitglieder.length - treffer.length;
+      if(fehlen > 1 || treffer.length < 2) return;
       f.weg = true;
       treffer.forEach(function(t){ t.weg = true; });
-      resolved.push({ unit: def.name, einheit: def.name, art: "hundertschaft", colorKey: def.name,
-        remark: def.fuehrung + " + " + def.mitglieder.join(", "),
-        typ: def.typ, strength: importKatalogStaerke(def.typ),
+      var typ = fehlen ? (def.typ + " o. 1 " + def.zug) : def.typ;
+      resolved.push({ unit: fehlen ? (def.name + " o. 1x " + def.zug) : def.name, einheit: def.name, art: "hundertschaft", colorKey: def.name,
+        remark: fehlen ? treffer.map(function(t){ return t.einheit; }).join(" + ") : "",
+        typ: katalogByTyp(typ) ? typ : "", strength: importKatalogStaerke(typ),
         date: f.date, label: f.label, startH:f.startH, startM:f.startM, endH:f.endH, endM:f.endM,
         sortRow: f.sortRow, col: f.col });
     });
@@ -2431,9 +2435,9 @@ function andereFarbtoene(){ return FAMILIEN_FARBTOENE.slice(1); }
 /* Familie und Abstufung aus dem Namen: 0 = Führung/Hundertschaft, 1–4 = Züge */
 function familieAusName(name){
   var n = String(name || "").replace(/\s+/g, " ").trim()
-    .replace(/^1 (?=\S)/, "")                         /* altes Präfix "1 BPZ 213" */
-    .replace(/^\d\. (BPGr|EGr)\. /i, "")              /* "3. BPGr. BPZ 212" */
-    .replace(/ o\. 1 (BPGr|EGr)\.$/i, "");            /* "BPZ 213 o. 1 BPGr." */
+    .replace(/^\d+x? (?=\S)/, "")                      /* Anzahl/altes Präfix "1 BPZ 213" */
+    .replace(/^(\d\. )?(BPGr|EGr)\. /i, "")           /* "BPGr. BPZ 212", alt "3. BPGr. BPZ 212" */
+    .replace(/ o\. \d+x? (BPGr\.|EGr\.|BPZ|BFE|EZ)$/i, ""); /* "BPZ 213 o. 1x BPGr.", "BPH 21 o. 1x BPZ" */
   var m;
   if((m = /^BPH ?(\d+)(\s*\/\s*FüG)?$/i.exec(n))) return { key: "BPH " + m[1], stufe: 0 };
   if((m = /^BPZ ?(\d+)(\d)$/i.exec(n))) return { key: "BPH " + m[1], stufe: +m[2] };
@@ -2533,7 +2537,7 @@ function categorizeAssignments(assignments){
     var end = endDate + "T" + pad(a.endH) + ":" + pad(a.endM);
     if(!groups[target]) groups[target] = [];
     var tag = mehrereTage ? new Date(a.date + "T00:00:00").toLocaleDateString("de-DE", {weekday:"short", day:"2-digit", month:"2-digit"}) : "";
-    var remark = [tag, modifiers.length ? ("+"+modifiers.join(" +")) : "", a.remark || ""].filter(Boolean).join(" – ");
+    var remark = [a.remark || "", modifiers.length ? ("+"+modifiers.join(" +")) : "", tag].filter(Boolean).join(" – ");
     groups[target].push({ unit: a.unit, colorKey: a.colorKey || a.unit, start: start, end: end, remark: remark,
       typ: a.typ || "", strength: a.strength || null });
   });
@@ -2593,9 +2597,9 @@ async function importZeeGeesRoster(gridObj){
   });
   var summary = names.map(function(n){ return "- " + n + ": " + groups[n].length + " Eintrag/Einträge"; }).join("\n");
   var verbaende = assignments.filter(function(a){ return a.art === "hundertschaft" || a.art === "teil"; }).map(function(a){
-    return "- " + a.unit + ": " + a.label + " (" + a.date.split("-").reverse().join(".") + ")";
+    return "- 1x " + a.unit + (a.remark ? " (" + a.remark + ")" : "") + ": " + a.label + " – " + a.date.split("-").reverse().join(".");
   });
-  if(verbaende.length) summary += "\n\nZusammengefasste Hundertschaften / Züge o. 1 Gruppe:\n" + verbaende.join("\n");
+  if(verbaende.length) summary += "\n\nZusammengefasste Hundertschaften / Züge:\n" + verbaende.join("\n");
   var msg = "Excel-Import: " + assignments.length + " Einträge in " + names.length + " Abschnitt(en) gefunden:\n\n" + summary +
     "\n\nVorhandene Abschnitte mit gleichem Namen (z. B. „Präsenztag“/„Präsennacht“) werden ergänzt, fehlende Abschnitte werden neu angelegt.\n" +
     "Hinweis: Bereits vorhandene Kacheln werden dabei nicht entfernt oder abgeglichen – bei mehrfachem Import derselben Datei können doppelte Kacheln entstehen.\n\nJetzt importieren?";
