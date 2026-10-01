@@ -845,6 +845,7 @@ function pxPerHour(){ return state.zoom; }
 
 function render(){
   praesenzZuerst(state);
+  farbregelAnwenden(state);
   titleInput.value = state.title || "";
   authorInput.value = state.author || "";
   logoImg.src = state.logo || "";
@@ -1326,7 +1327,7 @@ function openUnitModal(id, presetSectionId){
   syncFmtUi();
 
   var color = unit ? unit.color : nextAutoColor();
-  $("unitAutoColor").checked = !unit;
+  $("unitAutoColor").checked = !unit || !unit.farbeManuell;
   $("unitColor").value = color;
   $("unitColorHex").value = String(color).toUpperCase();
   $("unitColorCustom").classList.remove("show");
@@ -1504,9 +1505,10 @@ $("unitSaveBtn").addEventListener("click", function(){
     var u = state.units.find(function(x){ return x.id===unitEditingId; });
     if(u.sectionId !== sectionId){ u.order = nextOrderForSection(sectionId); }
     u.name = name; u.sectionId = sectionId; u.start = start; u.end = end; u.remark = remark; u.color = color;
+    u.farbeManuell = !auto;
     u.count = count; u.typ = typ; u.strength = strength; u.fmt = fmt;
   } else {
-    state.units.push({ id: uid(), sectionId: sectionId, name: name, start: start, end: end, color: color, remark: remark,
+    state.units.push({ id: uid(), sectionId: sectionId, name: name, start: start, end: end, color: color, farbeManuell: !auto, remark: remark,
       count: count, typ: typ, strength: strength, fmt: fmt, order: nextOrderForSection(sectionId) });
   }
   closeUnitModal();
@@ -2248,7 +2250,7 @@ function applyPesImport(rows, colorMode){
     state.units.push({
       id: uid(), sectionId: section.id, name: row.typ,
       start: row.start, end: row.end,
-      color: colorFor(row), remark: pesRemark(row),
+      color: colorFor(row), farbeManuell: true, remark: pesRemark(row),
       count: row.anzahl, typ: row.typ,
       strength: { hd: row.hd, gd: row.gd, md: row.md, tk: row.tk },
       order: nextOrderForSection(section.id)
@@ -2337,6 +2339,63 @@ function familienFarbe(ton, stufe){
   var hell = [71, 79, 84, 88, 91];
   return hslZuHex(ton, stufe === 0 ? 52 : 58, hell[Math.min(stufe, hell.length - 1)]);
 }
+/* Feste Farbtöne je Hundertschaft – aus dem Namen abgeleitet, damit dieselbe
+   Einheit in beiden Ansichten und bei jedem Import dieselbe Farbe hat. */
+var FAMILIEN_TON_FEST = {
+  "BFHU": 28, "BPH 21": 50, "BPH 31": 75, "AHU": 100, "EHU": 140, "BPH 13": 165,
+  "BPH 33": 185, "BPH 23": 258, "BPH 11": 280, "BPH 32": 305, "BPH 12": 330, "BPH 22": 352
+};
+function familienTon(key){
+  if(FAMILIEN_TON_FEST[key] != null) return FAMILIEN_TON_FEST[key];
+  var h = 0;
+  for(var i=0; i<key.length; i++) h = (h*31 + key.charCodeAt(i)) % 997;
+  return andereFarbtoene()[h % andereFarbtoene().length];
+}
+function andereFarbtoene(){ return FAMILIEN_FARBTOENE.slice(1); }
+/* Familie und Abstufung aus dem Namen: 0 = Führung/Hundertschaft, 1–4 = Züge */
+function familieAusName(name){
+  var n = String(name || "").replace(/\s+/g, " ").trim()
+    .replace(/^1 (?=\S)/, "")                         /* altes Präfix "1 BPZ 213" */
+    .replace(/^\d\. (BPGr|EGr)\. /i, "")              /* "3. BPGr. BPZ 212" */
+    .replace(/ o\. 1 (BPGr|EGr)\.$/i, "");            /* "BPZ 213 o. 1 BPGr." */
+  var m;
+  if((m = /^BPH ?(\d+)(\s*\/\s*FüG)?$/i.exec(n))) return { key: "BPH " + m[1], stufe: 0 };
+  if((m = /^BPZ ?(\d+)(\d)$/i.exec(n))) return { key: "BPH " + m[1], stufe: +m[2] };
+  if(/^BFHU/i.test(n)) return { key: "BFHU", stufe: 0 };
+  if((m = /^BFE ?(\d)/i.exec(n))) return { key: "BFHU", stufe: +m[1] };
+  if(/^IZD (HuFüG|EHU)\b/i.test(n)) return { key: "EHU", stufe: 0 };
+  if((m = /^IZD Zug ?\((\d)\)/i.exec(n))) return { key: "EHU", stufe: +m[1] };
+  if(/^IZD BFE\b/i.test(n)) return { key: "EHU", stufe: 3 };
+  if(/^AHuFüG\b/i.test(n)) return { key: "AHU", stufe: 0 };
+  if((m = /^AZ ?\((\d)\)/i.exec(n))) return { key: "AHU", stufe: +m[1] };
+  if(/^AS\b/i.test(n)) return { key: "AS", stufe: /\(\d\)/.test(n) ? 2 : 1, neutral: true };
+  return null;
+}
+function regelFarbe(name){
+  var f = familieAusName(name);
+  if(!f) return null;
+  if(f.neutral) return hslZuHex(40, 22, [70, 80, 86, 90][Math.min(f.stufe, 3)]); /* Abschiebung: Sandton */
+  return familienFarbe(familienTon(f.key), f.stufe);
+}
+/* Farbregel auf alle Einheiten anwenden: Präsenz immer blau; sonst die Farbe der
+   Hundertschaft, solange die Farbe nicht von Hand gewählt wurde. */
+function farbregelAnwenden(st){
+  var sectionById = {};
+  st.sections.forEach(function(s){ sectionById[s.id] = s; });
+  st.units.forEach(function(u){
+    var sec = sectionById[u.sectionId];
+    var p = sec ? praesenzFarbe(sec.name) : null;
+    if(p){
+      if(u.color !== p && u.color !== PRAESENZ_FARBE_TAG && u.color !== PRAESENZ_FARBE_NACHT) u.farbeVorPraesenz = u.color;
+      u.color = p;
+      return;
+    }
+    var regel = u.farbeManuell ? null : regelFarbe(u.name);
+    if(regel) u.color = regel;
+    else if((u.color === PRAESENZ_FARBE_TAG || u.color === PRAESENZ_FARBE_NACHT) && u.farbeVorPraesenz) u.color = u.farbeVorPraesenz;
+  });
+}
+
 function importFarben(blocks){
   var names = blocks.map(function(b){ return b.unit.trim(); });
   var familien = hundertschaftenErmitteln(blocks).map(function(d){
@@ -2367,6 +2426,7 @@ function importFarben(blocks){
     f.kopf.forEach(function(n){ farben[n] = familienFarbe(ton, 0); });
     f.mitglieder.forEach(function(n, k){ farben[n] = familienFarbe(ton, k + 1); });
   });
+  names.forEach(function(n){ var r = regelFarbe(n); if(r) farben[n] = r; });
   farben["Vorinformation"] = "#D9D9D9";
   return farben;
 }
