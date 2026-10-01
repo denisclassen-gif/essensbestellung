@@ -2061,6 +2061,18 @@ function zugFamilie(einheitName){
   if(/^IZD\s+(Zug|BFE)\b/i.test(n) || /^EZ\b/i.test(n)) return { gruppe:"EGr.", zugTyp:"", zug: IMPORT_EZ_STAERKE, grTyp:"EGr", gr: importKatalogStaerke("EGr") };
   return null;
 }
+/* "BPH 21/FüG" -> "BPH-FüG - BPH 21", "BFHUSN/FüG" -> "BFHU-FüG - BFHU SN",
+   "1. BPA/FüG" -> "BPA-FüG - 1. BPA"; andere Namen bleiben unverändert */
+function fuehrungsAnzeige(einheitName){
+  var m = /^(.+?)\s*\/\s*FüG$/i.exec(String(einheitName || "").trim());
+  if(!m) return einheitName;
+  var teil = m[1].replace(/\s+/g, " ");
+  var k = /^(BPH|BFHU)/i.exec(teil) || /\b(BPA)\b/i.exec(teil);
+  if(!k) return einheitName;
+  var kuerzel = k[1].toUpperCase();
+  if(kuerzel === "BFHU") teil = teil.replace(/^BFHU\s*(\S*)/i, function(_, r){ return "BFHU" + (r ? " " + r : ""); });
+  return kuerzel + "-FüG - " + teil;
+}
 function fuehrungsTyp(einheitName){
   if(/^BPH\s*\d+\s*\/\s*FüG$/i.test(einheitName)) return "BPH-FüGr";
   if(/^IZD\s+HuFüG\b/i.test(einheitName)) return "EHu-FührungsGr";
@@ -2113,7 +2125,8 @@ function resolveZugGruppen(parsed, gridObj){
     var fam = (block && (block.end - block.start + 1) === 6 && !/FüG/i.test(einheitName)) ? zugFamilie(einheitName) : null;
     if(!fam){
       var fTyp = block ? fuehrungsTyp(einheitName) : "";
-      push(list, einheitName, einheitName, block && /FüG/i.test(einheitName) ? "fuehrung" : "einheit",
+      var istFuehrung = block && /FüG/i.test(einheitName);
+      push(list, istFuehrung ? fuehrungsAnzeige(einheitName) : einheitName, einheitName, istFuehrung ? "fuehrung" : "einheit",
         { typ: fTyp, strength: importKatalogStaerke(fTyp) });
       return;
     }
@@ -2421,6 +2434,7 @@ function alteNamenAnpassen(st){
       n = m[1] + ". - " + m[2];
     }
     n = n.replace(/^1 (?=[A-ZÄÖÜ])/, "").replace(/ o\. 1 (BPGr\.|EGr\.)$/, " o. 1x $1");
+    n = fuehrungsAnzeige(n);
     if(n !== alt) u.name = n;
   });
 }
@@ -2475,6 +2489,7 @@ function andereFarbtoene(){ return FAMILIEN_FARBTOENE.slice(1); }
 function familieAusName(name){
   var n = String(name || "").replace(/\s+/g, " ").trim()
     .replace(/^\d+x? (?=\S)/, "")                      /* Anzahl/altes Präfix "1 BPZ 213" */
+    .replace(/^(BPH|BFHU|BPA)-FüG - /i, "")              /* "BPH-FüG - BPH 21" */
     .replace(/^(\d\. )?(BPGr|EGr)\. (- )?/i, "")      /* "BPGr. - BPZ 212", alt "3. BPGr. BPZ 212" */
     .replace(/ o\. \d+x? (BPGr\.|EGr\.|BPZ|BFE|EZ)$/i, ""); /* "BPZ 213 o. 1x BPGr.", "BPH 21 o. 1x BPZ" */
   var m;
