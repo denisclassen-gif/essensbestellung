@@ -76,6 +76,8 @@
   .ribbon-date{font-size:1rem; font-weight:600; margin-top:.2rem; padding:.15rem .2rem;}
 
   .meta-line{color:var(--muted); font-size:.85rem; padding:.6rem 1.3rem 0;}
+  .epm-hinweis{display:none; margin:.5rem 1.3rem 0; padding:.35rem .65rem; border-left:4px solid #E8BC00; background:#FFF8DC; color:#4a4000; font-size:.82rem; border-radius:4px;}
+  .epm-hinweis.show{display:block;}
 
   /* ---------- Board ---------- */
   .board-wrapper{padding:.8rem 1rem 0; overflow-x:auto;}
@@ -351,6 +353,7 @@
   </div>
 </div>
 <div class="meta-line" id="metaLine"></div>
+<div class="epm-hinweis" id="epmHinweis">Hinweis: Bei den aus EPM (Excel) importierten Kräften sind die angegebenen Zeiten <strong>Dienstzeiten</strong>, keine Einsatzzeiten.</div>
 <div class="totals-bar" id="totalsBar"></div>
 <div class="hidden-bar no-print" id="hiddenBar"></div>
 
@@ -958,7 +961,9 @@ var authorInput = $("authorInput");
 
 /* ---------------- Rendering ---------------- */
 function render(){
+  alteNamenAnpassen(state);
   praesenzZuerst(state);
+  epmHinweisAnzeigen(state);
   farbregelAnwenden(state);
   titleInput.value = state.title || "";
   authorInput.value = state.author || "";
@@ -2405,6 +2410,34 @@ function praesenzFarbe(name){
   var r = praesenzRang(name);
   return r === 0 ? PRAESENZ_FARBE_TAG : r === 1 ? PRAESENZ_FARBE_NACHT : null;
 }
+/* Lagen aus älteren Versionen auf die aktuelle Schreibweise bringen:
+   "3. EGr. IZD Zug (1)" -> "EGr. - IZD Zug (1)" (Bemerkung "3. EGr."),
+   "1 BPZ 213" -> "BPZ 213", "BPZ 213 o. 1 BPGr." -> "BPZ 213 o. 1x BPGr." */
+function alteNamenAnpassen(st){
+  var praesenzIds = {};
+  st.sections.forEach(function(s){ if(praesenzRang(s.name) < 2) praesenzIds[s.id] = true; });
+  st.units.forEach(function(u){
+    var n = String(u.name || ""), m, alt = n;
+    /* alte EPM-Importe erkennen (alte Schreibweise oder P/T bzw. P/N), damit der Dienstzeit-Hinweis erscheint */
+    if(!u.quelle && (praesenzIds[u.sectionId] || /^(\d\. )?(BPGr|EGr)\. |^1 [A-ZÄÖÜ]| o\. 1 (BPGr|EGr)\.$/.test(n))) u.quelle = "EPM";
+    if((m = /^(\d)\. (BPGr|EGr)\. (?!- )(.+)$/.exec(n))){
+      var gr = m[1] + ". " + m[2] + ".";
+      n = m[2] + ". - " + m[3];
+      if(String(u.remark || "").indexOf(gr) !== 0) u.remark = [gr, u.remark].filter(Boolean).join(" – ");
+    } else if((m = /^(BPGr|EGr)\. (?!- )(.+)$/.exec(n))){
+      n = m[1] + ". - " + m[2];
+    }
+    n = n.replace(/^1 (?=[A-ZÄÖÜ])/, "").replace(/ o\. 1 (BPGr\.|EGr\.)$/, " o. 1x $1");
+    if(n !== alt) u.name = n;
+  });
+}
+function epmHinweisAnzeigen(st){
+  var el = document.getElementById("epmHinweis");
+  if(!el) return;
+  var sichtbar = {};
+  st.sections.forEach(function(s){ if(!s.hidden) sichtbar[s.id] = true; });
+  el.classList.toggle("show", st.units.some(function(u){ return u.quelle === "EPM" && sichtbar[u.sectionId]; }));
+}
 function praesenzZuerst(st){
   /* einheitliche Schreibweise "Präsenz Tag" / "Präsenz Nacht" (auch für ältere Lagen) */
   st.sections.forEach(function(s){
@@ -2588,7 +2621,7 @@ function applyImportGroups(groups, farben){
         start: entry.start, end: entry.end,
         color: fixedColor || colorByUnit[colorKey], remark: entry.remark,
         count: 1, typ: entry.typ || "", strength: entry.strength || emptyStrength(),
-        order: nextOrderForSection(section.id)
+        quelle: "EPM", order: nextOrderForSection(section.id)
       });
       added++;
     });
@@ -2613,7 +2646,8 @@ async function importZeeGeesRoster(gridObj){
     return "- 1x " + a.unit + (a.remark ? " (" + a.remark + ")" : "") + ": " + a.label + " – " + a.date.split("-").reverse().join(".");
   });
   if(verbaende.length) summary += "\n\nZusammengefasste Hundertschaften / Züge:\n" + verbaende.join("\n");
-  var msg = "Excel-Import: " + assignments.length + " Einträge in " + names.length + " Abschnitt(en) gefunden:\n\n" + summary +
+  var msg = "Excel-Import (EPM): " + assignments.length + " Einträge in " + names.length + " Abschnitt(en) gefunden:\n\n" + summary +
+    "\n\nHinweis: Die Zeiten aus EPM sind Dienstzeiten, keine Einsatzzeiten." +
     "\n\nVorhandene Abschnitte mit gleichem Namen (z. B. „Präsenz Tag“/„Präsenz Nacht“) werden ergänzt, fehlende Abschnitte werden neu angelegt.\n" +
     "Hinweis: Bereits vorhandene Kacheln werden dabei nicht entfernt oder abgeglichen – bei mehrfachem Import derselben Datei können doppelte Kacheln entstehen.\n\nJetzt importieren?";
   if(!confirm(msg)) return;
@@ -2979,7 +3013,7 @@ function buildPrintPages(){
   var pageW = (size.w - 18) * mmPx, pageH = (size.h - 18) * mmPx * 0.96;
   var colW = state.colWidth || 200, gap = 11, stapelAbstand = 26;
   var perPage = Math.max(1, Math.floor((pageW + gap) / (colW + gap)));
-  var topH = outerHeightPx(document.querySelector(".brand-header")) + outerHeightPx($("metaLine")) + outerHeightPx($("totalsBar")) + 8;
+  var topH = outerHeightPx(document.querySelector(".brand-header")) + outerHeightPx($("metaLine")) + outerHeightPx($("epmHinweis")) + outerHeightPx($("totalsBar")) + 8;
   var footH = outerHeightPx(document.querySelector(".author-bar")) + outerHeightPx(document.querySelector(".copyright-note"));
 
   /* Abschnitte mit gemessenen Höhen (Bedienknöpfe zählen im Druck nicht mit) */
