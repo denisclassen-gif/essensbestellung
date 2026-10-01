@@ -34,6 +34,11 @@
         "Stichtag: 12.06.2026 – seitdem gelten GEAS-Verordnungen unmittelbar.",
         "EU-Verordnungen gehen nationalem Recht vor; das AufenthG/AsylG ergänzt und konkretisiert.",
         "Die Landespolizei ist vor allem bei Aufgriff, Screening im Inland, Festnahme und Vollzug von Rückführungen gefordert."
+      ],
+      "beispiele": [
+        {
+          "text": "Am 20.07.2026 trifft eine Streife einen syrischen Staatsangehörigen an, der am Vortag ohne Kontrolle über die tschechische Grenze gekommen ist. Für ihn gelten die GEAS-Verordnungen unmittelbar – vor allem die Screening-VO (Überprüfung) und die Eurodac-VO (Fingerabdrücke)."
+        }
       ]
     },
     {
@@ -75,6 +80,16 @@
         "Inland: max. 3 Tage, Außengrenze: max. 7 Tage.",
         "Festhalten über das Ende des Folgetages hinaus nur mit richterlicher Entscheidung.",
         "Screening ist kein Asylverfahren – Asylgesuche bleiben jederzeit möglich."
+      ],
+      "beispiele": [
+        {
+          "titel": "Screening",
+          "text": "Ein Mann ohne Papiere wird in der Innenstadt kontrolliert. INPOL, AZR und Fast-ID ohne Treffer, er sei vor zwei Tagen über Serbien und Ungarn gekommen. Unerlaubter Grenzübertritt ohne Kontrolle an der Außengrenze → Screening im Inland, höchstens 3 Tage ab Aufgriff."
+        },
+        {
+          "titel": "Kein Screening",
+          "text": "Eine Frau ist mit einem Schengen-Visum eingereist, das gestern abgelaufen ist. Sie wurde an der Außengrenze kontrolliert → kein Screening, sondern Rückkehrverfahren über die Ausländerbehörde."
+        }
       ]
     },
     {
@@ -100,6 +115,11 @@
         "Eurodac ab 6 Jahren – Fingerabdrücke + Gesichtsbild.",
         "Aliaspersonalien vollständig dokumentieren.",
         "Datenträgerauswertung nur unter den engen Voraussetzungen des § 48 Abs. 3a AufenthG."
+      ],
+      "beispiele": [
+        {
+          "text": "Die Fast-ID ergibt einen Eurodac-Treffer aus Österreich in der Kategorie Asyl: Die Person hat dort schon Asyl beantragt. Den Treffer dokumentieren – er ist für die Zuständigkeitsprüfung nach der AMM-VO wichtig. Fingerabdrücke werden ab 6 Jahren genommen: ein 7-jähriges Kind ja, ein 5-jähriges nicht."
+        }
       ]
     },
     {
@@ -133,6 +153,11 @@
         "Jedes erkennbare Schutzersuchen ist ein Asylgesuch – aufnehmen, dokumentieren, weiterleiten.",
         "Die Polizei prüft keine Asylgründe.",
         "Grenzverfahren: max. 12 Wochen. Beschleunigt: 3 Monate. Regulär: 6 Monate."
+      ],
+      "beispiele": [
+        {
+          "text": "Während der Kontrolle sagt eine Person auf Arabisch, sie habe Angst, nach Syrien zurückzumüssen. Das ist ein Asylgesuch – auch ohne das Wort „Asyl“. Wortlaut notieren, Belehrung nach §§ 15, 20 AsylG, Weiterleitung an die Aufnahmeeinrichtung."
+        }
       ]
     },
     {
@@ -162,6 +187,11 @@
         "Überstellungsfrist 6 Monate – bei Flucht bis 3 Jahre, bei Haft bis 1 Jahr.",
         "Ersteinreisestaat bleibt 20 Monate zuständig.",
         "Sekundärmigrationszentrum Dresden seit 01.07.2026 (LDS)."
+      ],
+      "beispiele": [
+        {
+          "text": "Eurodac zeigt: Die Person wurde vor drei Monaten bei der unerlaubten Einreise in Kroatien erfasst und stellt nun in Leipzig ein Asylgesuch. Ob Kroatien zuständig ist, prüft das BAMF nach der AMM-VO – die Streife dokumentiert den Treffer und leitet weiter."
+        }
       ]
     },
     {
@@ -196,6 +226,11 @@
         "Abschiebungstermin nie ankündigen.",
         "Durchsuchung der Wohnung: Richtervorbehalt; Nachtzeit nur bei drohender Vereitelung.",
         "Bei Asylgesuch, Krankheit, Suizidalität: sofort Rücksprache mit der ZAB/LDS."
+      ],
+      "beispiele": [
+        {
+          "text": "Ein Albaner bleibt nach den 90 visumfreien Tagen weiter in Leipzig, eine Ausreisefrist hat er nicht. Er ist vollziehbar ausreisepflichtig. Die Streife sichert Pass und Identität und unterrichtet die Ausländerbehörde; die Abschiebung organisiert die zuständige Behörde."
+        }
       ]
     },
     {
@@ -230,6 +265,11 @@
         "Ausreisegewahrsam: max. 28 Tage.",
         "Sicherungshaft: 6 Monate, max. 18 Monate.",
         "Mildere Mittel immer zuerst prüfen und dokumentieren."
+      ],
+      "beispiele": [
+        {
+          "text": "Eine vollziehbar ausreisepflichtige Person erklärt bei der Kontrolle, sie werde untertauchen. Ein Haftbeschluss liegt nicht vor, ein Richter ist vorher nicht zu erreichen. Festhalten nur, wenn alle drei Voraussetzungen des § 62 Abs. 5 AufenthG vorliegen – dann unverzüglich dem Richter vorführen."
+        }
       ]
     },
     {
@@ -263,6 +303,11 @@
         "Zweifel am Alter → als minderjährig behandeln, Jugendamt informieren.",
         "Neue gesundheitliche Beschwerden im Einsatz → Arzt + Rücksprache ZAB.",
         "Kinder nie als Dolmetscher."
+      ],
+      "beispiele": [
+        {
+          "text": "Ein 15-jähriger Afghane reist allein. Unbegleiteter Minderjähriger: Jugendamt sofort verständigen. Das Screening findet trotzdem statt – kindgerecht und im Beisein der Vertretung."
+        }
       ]
     },
     {
@@ -292,6 +337,16 @@
         "Geduldete machen sich nicht nach § 95 Abs. 1 Nr. 2 strafbar.",
         "Laufendes Ermittlungsverfahren → Einvernehmen der StA vor Abschiebung (§ 72 Abs. 4).",
         "Art. 31 GFK beachten (§ 95 Abs. 5)."
+      ],
+      "beispiele": [
+        {
+          "titel": "Mit Visum eingereist",
+          "text": "Ein Tunesier reist mit gültigem Schengen-Visum ein und stellt eine Woche später ein Asylgesuch. Keine Anzeige wegen unerlaubter Einreise: Er hatte einen gültigen Titel. Erschlichen ist das Visum nur, wenn dafür Tatsachen feststehen (§ 95 Abs. 6 AufenthG)."
+        },
+        {
+          "titel": "Ohne Visum eingereist",
+          "text": "Ein Marokkaner ohne Papiere und ohne Visum wird kurz nach dem Grenzübertritt angetroffen → Anzeige wegen unerlaubter Einreise und unerlaubten Aufenthalts (§ 95 AufenthG). Ob die Strafe wegen Art. 31 der Genfer Flüchtlingskonvention entfällt, entscheidet die Staatsanwaltschaft."
+        }
       ]
     },
     {
@@ -317,6 +372,11 @@
         "ZAB der LDS organisiert Abschiebungen – Polizei leistet Vollzugshilfe.",
         "Luftweg und Flughafen: Bundespolizei.",
         "Eilrechtsschutz: VG – Rückmeldung immer über die Ausländerbehörde."
+      ],
+      "beispiele": [
+        {
+          "text": "Die Streife weiß nicht, welche Ausländerbehörde zuständig ist. Im AZR steht die zuständige Behörde – z. B. die Zentrale Ausländerbehörde der Landesdirektion Sachsen oder die Ausländerbehörde einer Stadt. Außerhalb der Geschäftszeiten über die eigene Führung abstimmen."
+        }
       ]
     },
     {
@@ -346,6 +406,11 @@
         "Wörtlich dokumentieren, was die Person sagt – vor allem Asylgesuche.",
         "Fesselung: nur bei konkreter Gefahr und dokumentiert.",
         "Keine Kinder/Mitbewohner als Dolmetscher."
+      ],
+      "beispiele": [
+        {
+          "text": "Kontrolle um 02:10 Uhr: Aufgriffszeit notieren. Wird die Person festgehalten, muss bis zum Ende des folgenden Tages (23:59 Uhr) eine richterliche Entscheidung vorliegen, sonst ist sie freizulassen. Das Screening muss spätestens drei Tage nach dem Aufgriff abgeschlossen sein."
+        }
       ]
     }
   ],

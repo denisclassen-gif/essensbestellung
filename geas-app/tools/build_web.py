@@ -59,7 +59,7 @@ def mische_intern(c, i):
     c["kontakte"] = i.get("kontakte", c["kontakte"])
     c["kapitel"] += i.get("kapitel_zusatz", [])
     c["checklisten"] += i.get("checklisten_zusatz", [])
-    for schluessel in ("ablauf", "dokumentauswahl", "vorlagen", "uma_hilfe", "sidas", "einsatz", "leitfaeden", "handreichungen", "quellen_leitfaden", "screening_uebergaenge", "festhalten"):
+    for schluessel in ("ablauf", "dokumentauswahl", "vorlagen", "uma_hilfe", "sidas", "einsatz", "leitfaeden", "handreichungen", "quellen_leitfaden", "screening_uebergaenge", "festhalten", "einstellungen", "weisungen"):
         if schluessel in i:
             c[schluessel] = i[schluessel]
     # Eingebaute Word-Vorlagen und Merkblätter (nur interne Ausgabe, Ordner content/intern/vorlagen/ ist ignoriert)
