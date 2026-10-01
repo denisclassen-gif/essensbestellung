@@ -108,10 +108,11 @@
   .gridline{position:absolute; top:0; bottom:0; width:1px; background:var(--line);}
   .gridline.strong{background:var(--line-strong); width:1px;}
   .gridline.day{background:#8b8b82; width:1.5px;}
-  .now-line{position:absolute; top:0; bottom:0; width:2px; background:var(--danger); z-index:3;}
+  .now-line{position:absolute; top:0; bottom:0; width:2px; background:var(--danger);}
   .now-flag{position:absolute; top:-16px; transform:translateX(-50%); font-size:.65rem; color:var(--danger); font-weight:700; white-space:nowrap;}
 
-  .lanes{position:relative; border-bottom:1px solid var(--line);}
+  /* Balkenebene liegt immer über den Hilfslinien, damit keine Linie einen Balken durchschneidet */
+  .lanes{position:relative; z-index:1; border-bottom:1px solid var(--line);}
   .bar{
     position:absolute; top:3px; height:calc(var(--lane-h) - 6px); border-radius:6px;
     border:1px solid rgba(0,0,0,.25); box-shadow:0 1px 2px rgba(0,0,0,.15);

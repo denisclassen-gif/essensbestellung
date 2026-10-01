@@ -272,23 +272,17 @@
     .author-bar{padding:.6rem 0 0; max-width:none;}
     .author-input{border:none !important; background:transparent !important; padding:0;}
     .board-wrapper{padding:.4rem 0 0; overflow:visible;}
-    /* Druck im Zeitungsspalten-Layout: Die Abschnitte laufen von oben nach unten
-       und füllen erst eine Spalte, dann die nächste und erst danach die nächste
-       Seite. So entstehen keine halb leeren Seiten, wie sie ein Raster mit
-       Zeilen erzeugt, wenn ein langer Abschnitt umbricht. Kacheln werden nie
-       zerteilt; kurze Abschnitte bleiben möglichst zusammen. Flex-Container
-       fragmentieren in Chromium nicht zuverlässig, daher hier Block-Layout. */
-    .board{
-      display:block !important; column-width:var(--col-w); column-gap:.7rem; column-fill:balance;
-      min-height:0; padding-bottom:0;
-    }
-    .column{display:block; width:auto; margin:0 0 .7rem;}
-    .column.print-kurz{break-inside:avoid; page-break-inside:avoid;}
-    .col-head{break-after:avoid; page-break-after:avoid; break-inside:avoid;}
-    .col-body{display:block; min-height:0;}
-    .col-body > *{margin-bottom:.4rem;}
-    .tile, .origin-ghost, .group-head{break-inside:avoid; page-break-inside:avoid;}
-    .group-head{break-after:avoid; page-break-after:avoid;}
+    /* Druck über vorberechnete Seiten (siehe buildPrintPages): jeder Abschnitt
+       beginnt oben auf der Seite in einer eigenen Spalte, lange Abschnitte laufen
+       in der nächsten Spalte mit wiederholtem Kopf weiter, Kacheln werden nie
+       zerteilt. Nur Präsenztag/-nacht dürfen untereinander stehen. */
+    body.print-paged #board{display:none !important;}
+    body.print-paged #printBoard{display:block !important;}
+    .print-page{display:flex; gap:.7rem; align-items:flex-start;}
+    .print-page + .print-page{break-before:page; page-break-before:always;}
+    .print-slot{flex:0 0 var(--col-w); width:var(--col-w); display:flex; flex-direction:column; gap:.7rem;}
+    .print-slot .column{width:auto; flex:none;}
+    .tile, .origin-ghost, .group-head, .column{break-inside:avoid; page-break-inside:avoid;}
     .copyright-note{padding:.6rem 0 0; break-inside:avoid; page-break-inside:avoid;}
   }
 </style>
@@ -362,6 +356,7 @@
 
 <div class="board-wrapper">
   <div class="board" id="board"></div>
+  <div id="printBoard" style="display:none;"></div>
 </div>
 
 <div class="author-bar">
@@ -1231,7 +1226,7 @@ function renderBoard(){
 
   visibleSections.forEach(function(section, idx){
     var col = document.createElement("div");
-    col.className = "column" + (unitsOfSection(section.id).length <= 5 ? " print-kurz" : "");
+    col.className = "column";
     col.dataset.sectionId = section.id;
 
     var head = document.createElement("div");
@@ -2889,6 +2884,108 @@ function updatePageFormatStyle(){
   var size = PAGE_SIZES_MM[state.printFormat] || PAGE_SIZES_MM.A3;
   $("dynamicPageStyle").textContent = "@page{size:" + size.w + "mm " + size.h + "mm; margin:9mm;}";
 }
+
+/* ---------------- Druckseiten aufbauen ----------------
+   Misst Köpfe und Kacheln der Bildschirmansicht und verteilt sie auf Spalten
+   und Seiten: Jede Spalte beginnt oben mit einem Kopf; passt ein Abschnitt
+   nicht in die Seitenhöhe, geht er in der nächsten Spalte mit „(Forts.)“
+   weiter. Präsenztag und Präsenznacht dürfen sich eine Spalte teilen. */
+function outerHeightPx(el){
+  if(!el) return 0;
+  var cs = getComputedStyle(el);
+  return el.offsetHeight + (parseFloat(cs.marginTop)||0) + (parseFloat(cs.marginBottom)||0);
+}
+function buildPrintPages(){
+  clearPrintPages(); /* beforeprint kann mehrfach kommen – immer an der Bildschirmansicht messen */
+  var size = PAGE_SIZES_MM[state.printFormat] || PAGE_SIZES_MM.A3;
+  var mmPx = 96/25.4;
+  var pageW = (size.w - 18) * mmPx, pageH = (size.h - 18) * mmPx * 0.96;
+  var colW = state.colWidth || 200, gap = 11;
+  var perPage = Math.max(1, Math.floor((pageW + gap) / (colW + gap)));
+  var topH = outerHeightPx(document.querySelector(".brand-header")) + outerHeightPx($("metaLine")) + outerHeightPx($("totalsBar")) + 8;
+  var footH = outerHeightPx(document.querySelector(".author-bar")) + outerHeightPx(document.querySelector(".copyright-note"));
+
+  /* Abschnitte mit gemessenen Höhen (Bedienknöpfe zählen im Druck nicht mit) */
+  var sections = [];
+  board.querySelectorAll(".column").forEach(function(col){
+    var head = col.querySelector(".col-head");
+    var ctrl = head.querySelector(".col-controls");
+    var body = col.querySelector(".col-body");
+    var items = Array.prototype.map.call(body.children, function(el){ return { el: el, h: outerHeightPx(el) + 6 }; });
+    sections.push({ head: head, headH: head.offsetHeight - outerHeightPx(ctrl) + 12, items: items,
+      name: (head.querySelector(".col-name") || {}).textContent || "" });
+  });
+
+  function layout(reserveFromPage){
+    var pages = [[]], slot = null;
+    function avail(pi){ return pageH - (pi === 0 ? topH : 0) - (pi >= reserveFromPage ? footH : 0); }
+    function newSlot(){
+      if(pages[pages.length-1].length >= perPage) pages.push([]);
+      slot = { parts: [], h: 0 };
+      pages[pages.length-1].push(slot);
+    }
+    sections.forEach(function(sec, si){
+      var gesamt = sec.headH + sec.items.reduce(function(a, it){ return a + it.h; }, 0);
+      var vorher = si > 0 ? sections[si-1] : null;
+      var stapeln = slot && praesenzRang(sec.name) < 2 && vorher && praesenzRang(vorher.name) < 2 &&
+        slot.h + gap + gesamt <= avail(pages.length-1);
+      if(!stapeln) newSlot();
+      else slot.h += gap;
+      var part = { sec: sec, items: [], forts: false };
+      slot.parts.push(part); slot.h += sec.headH;
+      sec.items.forEach(function(it){
+        if(slot.h + it.h > avail(pages.length-1) && part.items.length){
+          newSlot();
+          part = { sec: sec, items: [], forts: true };
+          slot.parts.push(part); slot.h += sec.headH;
+        }
+        part.items.push(it); slot.h += it.h;
+      });
+    });
+    return pages;
+  }
+  var pages = layout(Infinity);
+  var last = pages.length - 1;
+  var lastMax = Math.max.apply(null, pages[last].map(function(sl){ return sl.h; }).concat([0]));
+  if(lastMax + footH > pageH - (last === 0 ? topH : 0)) pages = layout(last);
+
+  var out = $("printBoard");
+  out.innerHTML = "";
+  pages.forEach(function(pg){
+    var pageEl = document.createElement("div");
+    pageEl.className = "print-page";
+    pg.forEach(function(sl){
+      var slotEl = document.createElement("div");
+      slotEl.className = "print-slot";
+      sl.parts.forEach(function(part){
+        var col = document.createElement("div");
+        col.className = "column";
+        var head = part.sec.head.cloneNode(true);
+        if(part.forts){
+          var nm = head.querySelector(".col-name");
+          if(nm) nm.textContent = part.sec.name + " (Forts.)";
+          var sum = head.querySelector(".col-sum");
+          if(sum) sum.remove();
+        }
+        col.appendChild(head);
+        var body = document.createElement("div");
+        body.className = "col-body";
+        part.items.forEach(function(it){ body.appendChild(it.el.cloneNode(true)); });
+        col.appendChild(body);
+        slotEl.appendChild(col);
+      });
+      pageEl.appendChild(slotEl);
+    });
+    out.appendChild(pageEl);
+  });
+  document.body.classList.add("print-paged");
+}
+function clearPrintPages(){
+  document.body.classList.remove("print-paged");
+  $("printBoard").innerHTML = "";
+}
+window.addEventListener("beforeprint", buildPrintPages);
+window.addEventListener("afterprint", clearPrintPages);
 
 var printFilterBackup = null;
 function openPrintOptionsModal(){
