@@ -88,6 +88,25 @@ def mische_intern(c, i):
             for f in st["felder"]:
                 if f["id"] == "formularsprache":
                     f["optionen"] = [x[0].upper() + x[1:] for x in sprachen]
+    # Landesspezifische Formulierungen: exakte Textersetzungen nur in der internen Ausgabe
+    ersetzungen = i.get("text_patch", [])
+    def ersetze(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                o[k] = ersetze(v)
+        elif isinstance(o, list):
+            o[:] = [ersetze(v) for v in o]
+        elif isinstance(o, str):
+            for e in ersetzungen:
+                if e["alt"] in o:
+                    o = o.replace(e["alt"], e["neu"])
+                    e["_treffer"] = e.get("_treffer", 0) + 1
+        return o
+    if ersetzungen:
+        ersetze(c)
+        for e in ersetzungen:
+            if not e.pop("_treffer", 0):
+                print("Hinweis: text_patch ohne Treffer:", e["alt"][:60])
     # Dienstlogo nur in der internen Ausgabe (Dateien liegen im ignorierten Ordner content/intern/)
     for schluessel, datei in (("logo", "logo_pdl.png"), ("stern", "stern.png")):
         bild = root / "content" / "intern" / datei

@@ -698,8 +698,8 @@
     },
     {
       "was": "Screening im Inland",
-      "frist": "max. 3 Tage ab Aufgriff",
-      "grundlage": "Art. 8 Abs. 4 Screening-VO, § 15b AufenthG"
+      "frist": "max. 3 Tage – Tag des Aufgriffs zählt nicht, mind. 2 Arbeitstage",
+      "grundlage": "Art. 8 Abs. 4 Screening-VO, § 15b AufenthG; Art. 3 VO (EWG, Euratom) Nr. 1182/71"
     },
     {
       "was": "Festhalten ohne Richter (Screening)",
@@ -2813,7 +2813,7 @@
         "id": "abfragen",
         "titel": "Abfragen",
         "icon": "magnifyingglass",
-        "beschreibung": "Identitätsprüfung und Sicherheitskontrolle (Art. 14, 15 Screening-VO). Die Ergebnisse gehören in eine interne Anlage, nicht in die Unterlagen für die Person.",
+        "beschreibung": "Identitätsprüfung und Sicherheitskontrolle (Art. 14, 15 Screening-VO). Die Ergebnisse gehören in eine interne Anlage, nicht in die Unterlagen für die Person. Antworten wie im Screeningformular: „Treffer“ = Ja, „Kein Treffer“ = Nein, „Keine Antwort bis zum Ende der Überprüfung“ (abgefragt, Ergebnis kommt nicht rechtzeitig) oder „Abfrage zum Zeitpunkt der Überprüfung nicht möglich“ (z. B. System nicht erreichbar).",
         "felder": [
           {
             "id": "abfrage_inpol",
@@ -2821,9 +2821,10 @@
             "typ": "auswahl",
             "pflicht": true,
             "optionen": [
-              "Kein Treffer",
               "Treffer",
-              "Nicht durchgeführt"
+              "Kein Treffer",
+              "Keine Antwort bis zum Ende der Überprüfung",
+              "Abfrage zum Zeitpunkt der Überprüfung nicht möglich"
             ]
           },
           {
@@ -2832,9 +2833,10 @@
             "typ": "auswahl",
             "pflicht": true,
             "optionen": [
-              "Kein Treffer",
               "Treffer",
-              "Nicht durchgeführt"
+              "Kein Treffer",
+              "Keine Antwort bis zum Ende der Überprüfung",
+              "Abfrage zum Zeitpunkt der Überprüfung nicht möglich"
             ]
           },
           {
@@ -2843,9 +2845,10 @@
             "typ": "auswahl",
             "pflicht": true,
             "optionen": [
-              "Kein Treffer",
               "Treffer",
-              "Nicht durchgeführt"
+              "Kein Treffer",
+              "Keine Antwort bis zum Ende der Überprüfung",
+              "Abfrage zum Zeitpunkt der Überprüfung nicht möglich"
             ]
           },
           {
@@ -2854,9 +2857,10 @@
             "typ": "auswahl",
             "pflicht": true,
             "optionen": [
-              "Kein Treffer",
               "Treffer",
-              "Nicht durchgeführt"
+              "Kein Treffer",
+              "Keine Antwort bis zum Ende der Überprüfung",
+              "Abfrage zum Zeitpunkt der Überprüfung nicht möglich"
             ]
           },
           {
@@ -2865,9 +2869,10 @@
             "typ": "auswahl",
             "pflicht": true,
             "optionen": [
-              "Kein Treffer",
               "Treffer",
-              "Nicht durchgeführt"
+              "Kein Treffer",
+              "Keine Antwort bis zum Ende der Überprüfung",
+              "Abfrage zum Zeitpunkt der Überprüfung nicht möglich"
             ]
           },
           {
@@ -2876,9 +2881,10 @@
             "typ": "auswahl",
             "pflicht": true,
             "optionen": [
-              "Kein Treffer",
               "Treffer",
-              "Nicht durchgeführt"
+              "Kein Treffer",
+              "Keine Antwort bis zum Ende der Überprüfung",
+              "Abfrage zum Zeitpunkt der Überprüfung nicht möglich"
             ]
           },
           {

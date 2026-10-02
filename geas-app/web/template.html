@@ -309,9 +309,14 @@
   .dok footer { margin-top: 18px; border-top: 0.5px solid #c7c7cc; padding-top: 6px; color: #8e8e93; font-size: 11px; }
   .dok.neu { margin-top: 36px; padding-top: 24px; border-top: 1px dashed #c7c7cc; }
   #druck { display: none; }
+  /* Word-Vorschau: freien Platz nicht zwischen fortlaufende Abschnitte verteilen (nur der letzte schiebt die Fußzeile nach unten) */
+  section.docx > article:not(:last-of-type) { margin-bottom: 0 !important; }
   @media print {
     #druck.docxdruck .docx-wrapper { background: none !important; padding: 0 !important; }
     #druck.docxdruck section.docx { box-shadow: none !important; margin: 0 !important; page-break-after: always; }
+    /* Zellschattierungen, Kopfbalken und Wasserzeichen wie im Original mitdrucken */
+    #druck.docxdruck section.docx > article:not(:last-of-type) { margin-bottom: 0 !important; }
+    #druck.docxdruck, #druck.docxdruck * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
   @media print {
     body { background: #fff; padding: 0; }
@@ -494,9 +499,9 @@
     #druck .hr-kopf img { height: 34pt; }
     #druck .hr-titel { font-size: 17pt; color: #002664; margin: 6pt 0 2pt; }
     #druck .hr-unter { margin: 0 0 8pt; color: #333; }
-    #druck h2 { font-size: 12pt; color: #002664; margin: 10pt 0 3pt; break-after: avoid; }
-    #druck ul, #druck ol { margin: 0; padding-left: 16pt; }
-    #druck li { margin-bottom: 3pt; break-inside: avoid; }
+    #druck:not(.docxdruck) h2 { font-size: 12pt; color: #002664; margin: 10pt 0 3pt; break-after: avoid; }
+    #druck:not(.docxdruck) ul, #druck:not(.docxdruck) ol { margin: 0; padding-left: 16pt; }
+    #druck:not(.docxdruck) li { margin-bottom: 3pt; break-inside: avoid; }
     #druck li.hr-wichtig { list-style: none; margin-left: -16pt; border-left: 3pt solid #e08600; background: #fff3dc; padding: 3pt 6pt; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     #druck .hr-quellen { font-size: 8.5pt; color: #333; border-top: 1px solid #999; margin-top: 10pt; padding-top: 4pt; }
     #druck .hr-fuss { font-size: 8pt; color: #555; margin-top: 8pt; }
@@ -926,7 +931,29 @@ const rowtile = (attr, titel, sub, ic, i, end = "") => `<button class="rowtile g
 const fmtDatum = d => d.toLocaleString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " Uhr";
 const lokalISO = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 const richterFrist = a => new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1, 23, 59);
-const screeningFrist = a => { const e = new Date(a.getTime()); e.setDate(e.getDate() + 3); return e; };
+// Fristberechnung nach Art. 3 VO (EWG, Euratom) Nr. 1182/71 mit den gesetzlichen Feiertagen in Sachsen (Art. 2 Abs. 1)
+const ostersonntag = j => { const a = j % 19, b = Math.floor(j / 100), c = j % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451), monat = Math.floor((h + l - 7 * m + 114) / 31), tag = ((h + l - 7 * m + 114) % 31) + 1; return new Date(j, monat - 1, tag); };
+const FEIERTAGE = {};
+const feiertageSachsen = j => FEIERTAGE[j] || (FEIERTAGE[j] = (() => {
+  const o = ostersonntag(j), os = n => new Date(j, o.getMonth(), o.getDate() + n);
+  const bb = new Date(j, 10, 22); while (bb.getDay() !== 3) bb.setDate(bb.getDate() - 1); // Buß- und Bettag: Mittwoch vor dem 23. November
+  return Object.fromEntries([[new Date(j, 0, 1), "Neujahr"], [os(-2), "Karfreitag"], [os(1), "Ostermontag"], [new Date(j, 4, 1), "1. Mai"], [os(39), "Christi Himmelfahrt"], [os(50), "Pfingstmontag"], [new Date(j, 9, 3), "Tag der Deutschen Einheit"], [new Date(j, 9, 31), "Reformationstag"], [bb, "Buß- und Bettag"], [new Date(j, 11, 25), "1. Weihnachtstag"], [new Date(j, 11, 26), "2. Weihnachtstag"]].map(([d, n]) => [d.toDateString(), n]));
+})());
+const feiertag = d => feiertageSachsen(d.getFullYear())[d.toDateString()];
+const arbeitstag = d => d.getDay() !== 0 && d.getDay() !== 6 && !feiertag(d);
+const WTAG = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+// Inland: 3 Tage (Art. 8 Abs. 4 Screening-VO). Tag des Aufgriffs zählt nicht (Art. 3 Abs. 1 UAbs. 2), Ende mit Ablauf des letzten Tages (Abs. 2 Buchst. b),
+// Ende an Sa/So/Feiertag → Ablauf des folgenden Arbeitstags (Abs. 4), mindestens zwei Arbeitstage (Abs. 5).
+function screeningFristInfo(a) {
+  const tag = n => new Date(a.getFullYear(), a.getMonth(), a.getDate() + n);
+  const tage = n => Array.from({ length: n }, (_, i) => tag(i + 1)).filter(arbeitstag).length;
+  let n = 3; const grund = [];
+  if (!arbeitstag(tag(n))) { const d = tag(n); while (!arbeitstag(tag(n))) n++; grund.push(`regulär ${WTAG[d.getDay()]}${feiertag(d) ? ` (${feiertag(d)})` : ""} → nächster Arbeitstag`); }
+  if (tage(n) < 2) { do n++; while (!arbeitstag(tag(n)) || tage(n) < 2); grund.push("verlängert auf mindestens zwei Arbeitstage"); }
+  const ende = tag(n); ende.setHours(23, 59);
+  return { ende, grund: grund.join("; ") };
+}
+const screeningFrist = a => screeningFristInfo(a).ende;
 
 function fristenHTML(wert) {
   return `<div class="frist glass"><label class="small" for="fa"><b>Aufgriff (Datum und Uhrzeit)</b></label><br>
@@ -934,12 +961,13 @@ function fristenHTML(wert) {
     <div class="row">${ico("columns", 2, "sm")}<div><div class="small"><b>Richterliche Entscheidung spätestens</b></div><div class="d" style="color:var(--coral)" id="f1"></div>
       <div class="small">Nur wenn die Person festgehalten wird: richterliche Entscheidung unverzüglich herbeiführen; ohne Entscheidung bis zum Ende des Tages nach dem Ergreifen freilassen (§ 15b Abs. 1 AufenthG).</div></div></div>
     <div class="row">${ico("hourglass", 3, "sm")}<div><div class="small"><b>Screening abgeschlossen spätestens</b></div><div class="d" style="color:#e08600" id="f2"></div>
-      <div class="small">Höchstdauer des Screenings im Inland: 3 Tage ab Aufgriff (Art. 8 Abs. 4 Screening-VO). Die LDS braucht einen Teil dieser Zeit für ihre Maßnahmen – Screeningformular deshalb unverzüglich anlegen und versenden.</div></div></div>
+      <div class="small" id="f2g" style="font-weight:700"></div>
+      <div class="small">Höchstdauer im Inland: 3 Tage (Art. 8 Abs. 4 Screening-VO). Der Tag des Aufgriffs zählt nicht mit; die Frist endet mit Ablauf des dritten Tages. Endet sie an einem Samstag, Sonntag oder Feiertag, läuft sie bis zum Ablauf des nächsten Arbeitstags; sie umfasst immer mindestens zwei Arbeitstage (Art. 3 Abs. 1, 4 und 5 VO (EWG, Euratom) Nr. 1182/71; Feiertage in Sachsen). Grundsätzlich gilt: so schnell wie möglich weiterleiten – die LDS braucht einen Teil dieser Zeit für ihre Maßnahmen.</div></div></div>
     <div class="small">Hilfsrechnung ohne Gewähr. Im Zweifel gilt die frühere Frist; mit der Dienstgruppenleitung abstimmen.</div></div>`;
 }
 function fristenBind() {
   const inp = $("fa"); if (!inp) return;
-  const upd = () => { const a = new Date(inp.value); if (isNaN(a)) return; $("f1").textContent = fmtDatum(richterFrist(a)); $("f2").textContent = fmtDatum(screeningFrist(a)); };
+  const upd = () => { const a = new Date(inp.value); if (isNaN(a)) return; $("f1").textContent = fmtDatum(richterFrist(a)); const fi = screeningFristInfo(a); $("f2").textContent = fmtDatum(fi.ende); $("f2g").textContent = fi.grund ? "Hinweis: " + fi.grund + "." : ""; };
   inp.oninput = upd; upd();
 }
 
@@ -1118,7 +1146,7 @@ function FallUebersicht() {
           .map(([t, s, ic], i) => `<div class="rowtile glass reveal" style="cursor:default">${ico(ic, i + 1, "sm")}<span class="txt"><span class="t">${t}</span><br><span class="s">${s}</span></span></div>`).join("")}
         <button class="btn" id="fn">${svg("plus", 2.4)} Neuen Fall anlegen</button>
         <div class="note glass">${svg("lock").replace("<svg", '<svg style="color:var(--green)"')}<span class="small">${esc(C.fall.hinweis)}</span></div></div>`,
-      bind: () => $("fn").onclick = () => { vibrate(); F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()) } }; fallSpeichern(); go(Erfassung(0)); }
+      bind: () => $("fn").onclick = () => { vibrate(); F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } }; fallSpeichern(); go(Erfassung(0)); }
     };
   }
   const sch = C.fall.schritte, fertig = sch.filter(s => offenIn(s).length === 0).length;
@@ -1689,6 +1717,51 @@ function onboarding(erneut = false) {
 // Die Vorlagen werden NICHT in der App gespeichert – sie werden bei jedem Fall neu ausgewählt.
 const W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const WP_NS = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
+const A_NS = "http://schemas.openxmlformats.org/drawingml/2006/main";
+const WPG_NS = "http://schemas.microsoft.com/office/word/2010/wordprocessingGroup";
+const WPS_NS = "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
+const emuPt = n => (+n || 0) / 12700;
+// Farbe aus DrawingML (srgbClr / schemeClr mit Helligkeitsfaktor) – vereinfacht für Vordrucke
+function dmlFarbe(fill) {
+  if (!fill) return null;
+  const c = Array.from(fill.children)[0]; if (!c) return null;
+  let rgb = c.localName === "srgbClr" ? c.getAttribute("val") : ({ bg1: "FFFFFF", lt1: "FFFFFF", tx1: "000000", dk1: "000000" })[c.getAttribute("val")] || "000000";
+  const lm = Array.from(c.children).find(k => k.localName === "lumMod");
+  if (lm) { const f = +lm.getAttribute("val") / 100000; rgb = [0, 2, 4].map(i => Math.round(parseInt(rgb.substr(i, 2), 16) * f).toString(16).padStart(2, "0")).join(""); }
+  return "#" + rgb;
+}
+// Form oder Gruppe in eine einfache Beschreibung übersetzen (Koordinaten in Punkt, Gruppen mit eigenem Kind-Koordinatensystem)
+function formBeschreiben(el) {
+  const kind = (e, n) => Array.from(e.children).find(k => k.localName === n);
+  const pr = kind(el, el.localName === "wsp" ? "spPr" : "grpSpPr");
+  const xf = pr && kind(pr, "xfrm"), off = xf && kind(xf, "off"), ex = xf && kind(xf, "ext");
+  const f = { x: emuPt(off && off.getAttribute("x")), y: emuPt(off && off.getAttribute("y")), w: emuPt(ex && ex.getAttribute("cx")), h: emuPt(ex && ex.getAttribute("cy")), rot: xf ? (+(xf.getAttribute("rot") || 0)) / 60000 : 0 };
+  if (el.localName !== "wsp") {
+    const co = xf && kind(xf, "chOff"), ce = xf && kind(xf, "chExt");
+    Object.assign(f, { typ: "g", cx: emuPt(co && co.getAttribute("x")), cy: emuPt(co && co.getAttribute("y")), cw: emuPt(ce && ce.getAttribute("cx")) || f.w, ch: emuPt(ce && ce.getAttribute("cy")) || f.h });
+    f.kinder = Array.from(el.children).filter(k => k.localName === "wsp" || k.localName === "grpSp").map(formBeschreiben);
+    return f;
+  }
+  f.typ = "s";
+  const geo = pr && kind(pr, "prstGeom"); f.geom = geo ? geo.getAttribute("prst") : (pr && kind(pr, "custGeom") ? "frei" : "rect");
+  const ln = pr && kind(pr, "ln"); f.linie = ln && !kind(ln, "noFill") && kind(ln, "solidFill") ? { pt: emuPt(ln.getAttribute("w") || 9525), farbe: dmlFarbe(kind(ln, "solidFill")) } : null;
+  const fl = pr && kind(pr, "solidFill"); f.fuellung = fl ? dmlFarbe(fl) : null;
+  const tb = el.getElementsByTagNameNS(W_NS, "txbxContent")[0], bp = kind(el, "bodyPr");
+  if (tb && wText(tb).trim()) {
+    const ins = n => bp && bp.getAttribute(n) != null ? emuPt(bp.getAttribute(n)) : (n === "lIns" || n === "rIns" ? 7.2 : 3.6);
+    f.text = { ins: [ins("lIns"), ins("tIns"), ins("rIns"), ins("bIns")], vert: bp ? bp.getAttribute("vert") || "" : "", anker: bp ? bp.getAttribute("anchor") || "t" : "t",
+      absaetze: Array.from(tb.getElementsByTagNameNS(W_NS, "p")).map(q => {
+        const pPr = wKinder(q, "pPr")[0], jc = pPr && wKinder(pPr, "jc")[0], mark = pPr && wKinder(pPr, "rPr")[0];
+        return { jc: jc ? (jc.getAttributeNS(W_NS, "val") || jc.getAttribute("w:val")) : "", laeufe: Array.from(q.getElementsByTagNameNS(W_NS, "r")).map(r => {
+          const rp = wKinder(r, "rPr")[0] || mark, an = n => rp && wKinder(rp, n).length && !/^(0|false)$/.test((wKinder(rp, n)[0].getAttributeNS(W_NS, "val") || wKinder(rp, n)[0].getAttribute("w:val") || ""));
+          const sz = rp && wKinder(rp, "sz")[0], col = rp && wKinder(rp, "color")[0];
+          return { t: Array.from(r.childNodes).map(n => n.localName === "t" ? n.textContent : n.localName === "br" ? "\n" : n.localName === "tab" ? "\t" : "").join(""), b: an("b"), i: an("i"), u: an("u"),
+            pt: sz ? +(sz.getAttributeNS(W_NS, "val") || sz.getAttribute("w:val")) / 2 : 0, farbe: col ? (col.getAttributeNS(W_NS, "val") || col.getAttribute("w:val")) : "" };
+        }) };
+      }) };
+  }
+  return f;
+}
 const W14_NS = "http://schemas.microsoft.com/office/word/2010/wordml";
 const XML_NS = "http://www.w3.org/XML/1998/namespace";
 
@@ -1760,16 +1833,22 @@ function sdtInfo(sdt) {
 
 function laufText(sdt, text) {
   const doc = sdt.ownerDocument, pr = wKinder(sdt, "sdtPr")[0], inhalt = wKinder(sdt, "sdtContent")[0];
+  const platzhalter = wKinder(pr, "showingPlcHdr").length > 0;
   wKinder(pr, "showingPlcHdr").forEach(n => pr.removeChild(n));
   const erster = inhalt.getElementsByTagNameNS(W_NS, "r")[0];
-  let rPr = erster && wKinder(erster, "rPr")[0];
+  // Wie in Word: Statt des Platzhalters eingegebener Text erhält die Formatierung des Steuerelements (sdtPr/rPr), nicht die des Platzhalters
+  let rPr = (platzhalter && wKinder(pr, "rPr")[0]) || (erster && wKinder(erster, "rPr")[0]);
   rPr = rPr ? rPr.cloneNode(true) : null;
   if (rPr) wKinder(rPr, "rStyle").forEach(n => rPr.removeChild(n));
+  // Graue Pseudo-Platzhalter („Textfeld“, „Datum“): eingetragene Werte wie getippter Text in Schwarz
+  if (rPr) wKinder(rPr, "color").filter(c => /^(808080|7f7f7f|a6a6a6|bfbfbf)$/i.test(c.getAttributeNS(W_NS, "val") || c.getAttribute("w:val") || "") || (c.getAttributeNS(W_NS, "themeShade") || c.getAttribute("w:themeShade"))).forEach(n => rPr.removeChild(n));
   let ziel = inhalt;
   if (!wKinder(inhalt, "r").length) {
     const ps = Array.from(inhalt.getElementsByTagNameNS(W_NS, "p"));
     if (ps.length) { ziel = ps[0]; ps.slice(1).forEach(p => p.parentNode.removeChild(p)); }
   }
+  // Leerzeilen im Feld (z. B. Behörde/Dienststelle: „Textfeld“ + 4 Zeilenumbrüche) bestimmen die Höhe im Original – Anzahl beibehalten
+  const altUmbrueche = Array.from(ziel.getElementsByTagNameNS(W_NS, "br")).filter(b => !(b.getAttributeNS(W_NS, "type") || b.getAttribute("w:type"))).length;
   Array.from(ziel.childNodes).filter(n => n.localName === "r").forEach(n => ziel.removeChild(n));
   const r = doc.createElementNS(W_NS, "w:r");
   if (rPr) r.appendChild(rPr);
@@ -1780,6 +1859,7 @@ function laufText(sdt, text) {
     t.textContent = zeile;
     r.appendChild(t);
   });
+  for (let k = String(text).split("\n").length - 1; k < altUmbrueche; k++) r.appendChild(doc.createElementNS(W_NS, "w:br"));
   ziel.appendChild(r);
 }
 
@@ -2117,6 +2197,7 @@ async function vorlageBefuellen(datei, korrekturen = {}, vorgabe = null) {
   // Nur für die Bildschirm-Vorschau: Inhaltssteuerelemente „auspacken“ (die Vorschau zeigt sie in Tabellenzellen sonst nicht an).
   // Die gespeicherte Word-Datei bleibt unverändert.
   const vdoc = doc.cloneNode(true);
+  const koerper = vdoc.getElementsByTagNameNS(W_NS, "body")[0];
   for (const sdt of Array.from(vdoc.getElementsByTagNameNS(W_NS, "sdt")).reverse()) {
     const inhalt = wKinder(sdt, "sdtContent")[0];
     if (inhalt) while (inhalt.firstChild) sdt.parentNode.insertBefore(inhalt.firstChild, sdt);
@@ -2140,10 +2221,181 @@ async function vorlageBefuellen(datei, korrekturen = {}, vorgabe = null) {
     let nach = p;
     for (const q of neu) { nach.parentNode.insertBefore(q, nach.nextSibling); nach = q; }
   }
-  const vorschauBlob = await zipSchreiben(dateien.map(d => d === eintrag ? { name: d.name, daten: new TextEncoder().encode(new XMLSerializer().serializeToString(vdoc)) } : d), DOCX);
+  // Mehrspaltige Abschnitte (Kopfblock des Screeningformulars: zwei ungleich breite Spalten, Inhalt nur links) zeigt die Vorschau
+  // als zwei gleich breite Spalten – nur für die Vorschau einspaltig setzen, die Positionen der linken Spalte bleiben gleich.
+  for (const cols of Array.from(vdoc.getElementsByTagNameNS(W_NS, "cols"))) {
+    if (+(cols.getAttributeNS(W_NS, "num") || cols.getAttribute("w:num") || 1) <= 1) continue;
+    cols.removeAttributeNS(W_NS, "num"); cols.removeAttribute("w:num"); while (cols.firstChild) cols.removeChild(cols.firstChild);
+    // Leere Absätze nach dem Spaltenumbruch stehen in Word in der rechten Spalte neben dem Inhalt – einspaltig würden sie darunter Platz einnehmen
+    let ende = cols.parentNode; while (ende && ende.localName !== "p" && ende.localName !== "body") ende = ende.parentNode;
+    const absaetze = []; for (let q = ende; q && q.localName === "p"; q = q.previousSibling) { absaetze.unshift(q); if (Array.from(q.getElementsByTagNameNS(W_NS, "br")).some(b => (b.getAttributeNS(W_NS, "type") || b.getAttribute("w:type")) === "column")) break; while (q.previousSibling && q.previousSibling.nodeType !== 1) q = q.previousSibling; }
+    const erster = absaetze[0];
+    if (!erster || !Array.from(erster.getElementsByTagNameNS(W_NS, "br")).some(b => (b.getAttributeNS(W_NS, "type") || b.getAttribute("w:type")) === "column")) continue;
+    absaetze.forEach((q, k) => {
+      for (const b of Array.from(q.getElementsByTagNameNS(W_NS, "br"))) if ((b.getAttributeNS(W_NS, "type") || b.getAttribute("w:type")) === "column") b.parentNode.removeChild(b);
+      if (wText(q).trim()) return;
+      let pPr = wKinder(q, "pPr")[0]; if (!pPr) { pPr = vdoc.createElementNS(W_NS, "w:pPr"); q.insertBefore(pPr, q.firstChild); }
+      wKinder(pPr, "spacing").forEach(n => pPr.removeChild(n));
+      const sp = vdoc.createElementNS(W_NS, "w:spacing");
+      sp.setAttributeNS(W_NS, "w:before", "0"); sp.setAttributeNS(W_NS, "w:after", "0"); sp.setAttributeNS(W_NS, "w:line", "20"); sp.setAttributeNS(W_NS, "w:lineRule", "exact");
+      const vor = wKinder(pPr, "ind")[0] || wKinder(pPr, "rPr")[0] || wKinder(pPr, "sectPr")[0] || null;
+      pPr.insertBefore(sp, vor);
+    });
+  }
+  // WordArt-Wasserzeichen (z. B. „keine Herausgabe“ auf der Anlage): als Marke, nach dem Rendern grau und gedreht über die Seite legen
+  for (const anker of Array.from(vdoc.getElementsByTagNameNS(WP_NS, "anchor"))) {
+    const body = Array.from(anker.getElementsByTagNameNS("*", "bodyPr")).find(b => b.getAttribute("fromWordArt") === "1");
+    const tb = anker.getElementsByTagNameNS(W_NS, "txbxContent")[0];
+    if (!body || !tb) continue;
+    const xfrm = anker.getElementsByTagNameNS(A_NS, "xfrm")[0], ext = anker.getElementsByTagNameNS(WP_NS, "extent")[0];
+    const rot = xfrm ? (+(xfrm.getAttribute("rot") || 0) / 60000) : 0;
+    const alpha = anker.getElementsByTagNameNS(W14_NS, "alpha")[0];
+    const deckkraft = alpha ? 1 - (+(alpha.getAttributeNS(W14_NS, "val") || alpha.getAttribute("w14:val") || 0) / 100000) : 1;
+    let r = anker.parentNode; while (r && r.localName !== "r") r = r.parentNode;
+    if (!r) continue;
+    const marke = vdoc.createElementNS(W_NS, "w:r"), t = vdoc.createElementNS(W_NS, "w:t");
+    t.textContent = `⟦W|${wText(tb).trim()}|${rot > 180 ? rot - 360 : rot}|${ext ? (+ext.getAttribute("cx") / 12700).toFixed(0) : 500}|${deckkraft.toFixed(2)}⟧`;
+    marke.appendChild(t); r.parentNode.replaceChild(marke, r);
+  }
+  // Beschriftungsfelder in Tabellenzellen (Gruppe aus Linie + Textfeld darunter, z. B. 6.3 „(Art) (Type)“): Die Vorschau zeigt sie nicht.
+  // Als Unterstrich des Absatzes und eigene, zentrierte Beschriftungszeile darstellen – Lage wie im Original.
+  for (const anker of Array.from(vdoc.getElementsByTagNameNS(WP_NS, "anchor"))) {
+    if (anker.getAttribute("layoutInCell") !== "1" || !anker.getElementsByTagNameNS(WPG_NS, "wgp").length) continue;
+    const tbs = Array.from(anker.getElementsByTagNameNS(W_NS, "txbxContent")).filter(tb => wText(tb).trim());
+    if (tbs.length !== 1) continue;
+    let r = anker.parentNode; while (r && r.localName !== "r") r = r.parentNode;
+    let q = r && r.parentNode; while (q && q.localName !== "p") q = q.parentNode;
+    let zelle = q && q.parentNode; while (zelle && zelle.localName !== "tc") zelle = zelle.parentNode;
+    if (!r || !q || !zelle) continue;
+    const hatLinie = Array.from(anker.getElementsByTagNameNS(A_NS, "ln")).some(ln => !ln.getElementsByTagNameNS(A_NS, "noFill").length && ln.parentNode && ln.parentNode.parentNode && ln.parentNode.parentNode.getElementsByTagNameNS(W_NS, "txbxContent").length === 0);
+    const kopien = Array.from(wKinder(tbs[0], "p")).map(x => x.cloneNode(true));
+    r.parentNode.removeChild(r);
+    if (hatLinie) {
+      let pPr = wKinder(q, "pPr")[0]; if (!pPr) { pPr = vdoc.createElementNS(W_NS, "w:pPr"); q.insertBefore(pPr, q.firstChild); }
+      const bdr = vdoc.createElementNS(W_NS, "w:pBdr"), u = vdoc.createElementNS(W_NS, "w:bottom");
+      u.setAttributeNS(W_NS, "w:val", "single"); u.setAttributeNS(W_NS, "w:sz", "4"); u.setAttributeNS(W_NS, "w:space", "1"); u.setAttributeNS(W_NS, "w:color", "231F20");
+      bdr.appendChild(u); pPr.insertBefore(bdr, wKinder(pPr, "spacing")[0] || wKinder(pPr, "ind")[0] || wKinder(pPr, "rPr")[0] || null);
+    }
+    let nach = q;
+    for (const k of kopien) { nach.parentNode.insertBefore(k, nach.nextSibling); nach = k; }
+  }
+  // Verankerte Linien (z. B. Unterschrifts- und Trennlinien als Zeichnungsform) zeichnet die Vorschau nicht:
+  // durch eine Marke ersetzen, die nach dem Rendern als Linie an derselben Stelle gezeichnet wird.
+  for (const anker of Array.from(vdoc.getElementsByTagNameNS(WP_NS, "anchor"))) {
+    const ext = anker.getElementsByTagNameNS(WP_NS, "extent")[0], posH = anker.getElementsByTagNameNS(WP_NS, "positionH")[0], posV = anker.getElementsByTagNameNS(WP_NS, "positionV")[0];
+    const ln = anker.getElementsByTagNameNS(A_NS, "ln")[0];
+    if (!ext || !posH || !posV || !ln || anker.getElementsByTagNameNS(W_NS, "txbxContent").length) continue;
+    const emu = n => (+n || 0) / 12700, cx = emu(ext.getAttribute("cx")), cy = emu(ext.getAttribute("cy"));
+    if (cy > 1.5 || cx < 20) continue; // nur waagerechte Linien
+    const offH = posH.getElementsByTagNameNS(WP_NS, "posOffset")[0], offV = posV.getElementsByTagNameNS(WP_NS, "posOffset")[0];
+    if (!offH || !offV) continue;
+    let r = anker.parentNode; while (r && r.localName !== "r") r = r.parentNode;
+    if (!r) continue;
+    const marke = vdoc.createElementNS(W_NS, "w:r"), t = vdoc.createElementNS(W_NS, "w:t");
+    t.textContent = `⟦L|${posH.getAttribute("relativeFrom")}|${emu(offH.textContent).toFixed(1)}|${posV.getAttribute("relativeFrom")}|${emu(offV.textContent).toFixed(1)}|${cx.toFixed(1)}|${(emu(ln.getAttribute("w") || 9525)).toFixed(2)}⟧`;
+    marke.appendChild(t); r.parentNode.replaceChild(marke, r);
+  }
+  // Übrige verankerte Formen und Gruppen (Lichtbild-Rahmen, QR-Code-Feld, senkrechtes AZR-Kammfeld, Textkästen): Die Vorschau zeichnet sie
+  // nicht oder an falscher Stelle. Beschreibung merken, Marke setzen, nach dem Rendern an der Word-Position zeichnen (docxKaesten).
+  const kaesten = [];
+  for (const anker of Array.from(vdoc.getElementsByTagNameNS(WP_NS, "anchor"))) {
+    const gd = anker.getElementsByTagNameNS(A_NS, "graphicData")[0];
+    if (!gd || !/wordprocessing(Shape|Group)/.test(gd.getAttribute("uri") || "")) continue;
+    const wurzel = Array.from(gd.children).find(c => c.localName === "wsp" || c.localName === "wgp");
+    let r = anker.parentNode; while (r && r.localName !== "r") r = r.parentNode;
+    if (!wurzel || !r || !r.parentNode) continue;
+    const posH = anker.getElementsByTagNameNS(WP_NS, "positionH")[0], posV = anker.getElementsByTagNameNS(WP_NS, "positionV")[0], ext = anker.getElementsByTagNameNS(WP_NS, "extent")[0];
+    const lage = el => { if (!el) return { rel: "column", align: "", off: 0 }; const a = el.getElementsByTagNameNS(WP_NS, "align")[0], o = el.getElementsByTagNameNS(WP_NS, "posOffset")[0]; return { rel: el.getAttribute("relativeFrom"), align: a ? a.textContent : "", off: o ? emuPt(o.textContent) : 0 }; };
+    kaesten.push({ h: lage(posH), v: lage(posV), w: emuPt(ext && ext.getAttribute("cx")), hh: emuPt(ext && ext.getAttribute("cy")), hinten: anker.getAttribute("behindDoc") === "1", zelle: anker.getAttribute("layoutInCell") === "1", form: formBeschreiben(wurzel) });
+    const marke = vdoc.createElementNS(W_NS, "w:r"), mt = vdoc.createElementNS(W_NS, "w:t");
+    mt.textContent = `⟦K|${kaesten.length - 1}⟧`; marke.appendChild(mt); r.parentNode.replaceChild(marke, r);
+  }
+  // Abschnittsanfänge markieren (⟦S|Nr|Start⟧): Die Vorschau ordnet Seiten an Abschnittsgrenzen teils die falsche Fußzeile zu
+  // und kennt keine Seitenzahlen – beides wird nach dem Rendern anhand der Marken korrigiert (docxSeiten).
+  {
+    const sects = Array.from(vdoc.getElementsByTagNameNS(W_NS, "sectPr"));
+    const absatzVon = sp => { let q = sp.parentNode; while (q && q.localName !== "p" && q.localName !== "body") q = q.parentNode; return q && q.localName === "p" ? q : null; };
+    const alleP = Array.from(koerper.getElementsByTagNameNS(W_NS, "p")).filter(q => { for (let x = q.parentNode; x && x !== koerper; x = x.parentNode) if (x.localName === "tbl" || x.localName === "txbxContent") return false; return true; });
+    let start = 0;
+    sects.forEach((sp, k) => {
+      const ende = absatzVon(sp), endeIdx = ende ? alleP.indexOf(ende) : alleP.length - 1;
+      const erster = alleP[start];
+      if (erster) {
+        const pn = wKinder(sp, "pgNumType")[0], st = pn ? (pn.getAttributeNS(W_NS, "start") || pn.getAttribute("w:start") || "") : "";
+        const marke = vdoc.createElementNS(W_NS, "w:r"), mt = vdoc.createElementNS(W_NS, "w:t");
+        mt.textContent = `⟦S|${k}|${st}⟧`; marke.appendChild(mt);
+        const pPr = wKinder(erster, "pPr")[0]; erster.insertBefore(marke, pPr ? pPr.nextSibling : erster.firstChild);
+      }
+      start = endeIdx + 1;
+    });
+  }
+  // Kopf- und Fußzeilen: Abschnitte ohne eigene Angabe übernehmen in Word die des vorherigen Abschnitts – die Vorschau zeigt sonst keine.
+  const kopfFuss = {};
+  for (const sp of Array.from(vdoc.getElementsByTagNameNS(W_NS, "sectPr"))) {
+    for (const art of ["headerReference", "footerReference"]) {
+      const eigene = wKinder(sp, art);
+      const typen = new Set(eigene.map(r => r.getAttributeNS(W_NS, "type") || r.getAttribute("w:type")));
+      for (const [schluessel, ref] of Object.entries(kopfFuss)) {
+        const [a, typ] = schluessel.split("|");
+        if (a === art && !typen.has(typ)) sp.insertBefore(ref.cloneNode(true), sp.firstChild);
+      }
+      for (const r of wKinder(sp, art)) kopfFuss[art + "|" + (r.getAttributeNS(W_NS, "type") || r.getAttribute("w:type"))] = r;
+    }
+  }
+  // Tabstopps: Die Bibliothek setzt Tabulatoren zeitversetzt und unzuverlässig. Stopps als Marke an den Absatzanfang schreiben,
+  // die Vorschau berechnet die Tabulatorbreiten danach selbst (docxTabs).
+  const stilTabs = {};
+  const stilDatei = dateien.find(d => d.name === "word/styles.xml");
+  if (stilDatei) {
+    const sdoc = new DOMParser().parseFromString(new TextDecoder().decode(stilDatei.daten), "application/xml");
+    for (const st of Array.from(sdoc.getElementsByTagNameNS(W_NS, "style"))) {
+      const tabs = st.getElementsByTagNameNS(W_NS, "tabs")[0];
+      if (tabs) stilTabs[st.getAttributeNS(W_NS, "styleId") || st.getAttribute("w:styleId")] = Array.from(wKinder(tabs, "tab"));
+    }
+  }
+  const tabWert = (t, n) => t.getAttributeNS(W_NS, n) || t.getAttribute("w:" + n) || "";
+  const tabMarken = xdoc => {
+    for (const q of Array.from(xdoc.getElementsByTagNameNS(W_NS, "p"))) {
+      if (!q.getElementsByTagNameNS(W_NS, "tab").length) continue;
+      const pPr = wKinder(q, "pPr")[0], ps = pPr && wKinder(pPr, "pStyle")[0];
+      const eigene = pPr && wKinder(pPr, "tabs")[0] ? Array.from(wKinder(wKinder(pPr, "tabs")[0], "tab")) : [];
+      const geerbt = ps ? stilTabs[tabWert(ps, "val")] || [] : [];
+      const stopps = new Map();
+      for (const t of [...geerbt, ...eigene]) { const pos = +tabWert(t, "pos"); if (tabWert(t, "val") === "clear") stopps.delete(pos); else stopps.set(pos, tabWert(t, "val") || "left"); }
+      const marke = xdoc.createElementNS(W_NS, "w:r"), mt = xdoc.createElementNS(W_NS, "w:t");
+      mt.textContent = "⟦T|" + [...stopps].sort((x, y) => x[0] - y[0]).map(([pos, art]) => pos + ":" + art).join(",") + "⟧";
+      marke.appendChild(mt);
+      q.insertBefore(marke, pPr ? pPr.nextSibling : q.firstChild);
+    }
+  };
+  tabMarken(vdoc);
+  // Schwebende Tabellen (w:tblpPr, z. B. Kopfblock rechts oben): Position merken, die Vorschau setzt sie nach dem Rendern an die Stelle wie in Word
+  const schwebend = [];
+  const aussen = t => { for (let x = t.parentNode; x && x !== koerper; x = x.parentNode) if (x.localName === "tbl" || x.localName === "txbxContent") return false; return true; };
+  Array.from(koerper.getElementsByTagNameNS(W_NS, "tbl")).filter(aussen).forEach((t, nr) => {
+    const tblPr = wKinder(t, "tblPr")[0], pp = tblPr && wKinder(tblPr, "tblpPr")[0];
+    if (!pp) return;
+    const a = n => pp.getAttributeNS(W_NS, n) || pp.getAttribute("w:" + n) || "";
+    schwebend.push({ nr, x: +a("tblpX") || 0, y: +a("tblpY") || 0, h: a("horzAnchor") || "text", v: a("vertAnchor") || "margin", xs: a("tblpXSpec"), ys: a("tblpYSpec") });
+  });
+  const vorschauDateien = dateien.map(d => {
+    if (d === eintrag) return { name: d.name, daten: new TextEncoder().encode(new XMLSerializer().serializeToString(vdoc)) };
+    if (!/^word\/(header|footer)\d*\.xml$/.test(d.name)) return d;
+    const hdoc = new DOMParser().parseFromString(new TextDecoder().decode(d.daten), "application/xml");
+    if (hdoc.getElementsByTagName("parsererror").length) return d;
+    const felder = seitenFelderMarkieren(hdoc);
+    if (!felder && !hdoc.getElementsByTagNameNS(W_NS, "tab").length) return d;
+    tabMarken(hdoc);
+    return { name: d.name, daten: new TextEncoder().encode(new XMLSerializer().serializeToString(hdoc)) };
+  });
+  // Die Vorschau hängt verknüpfte Zeichenformate („Überschrift 1 Zchn“) an die Absatzformate an – falsche Größe, Kursivschrift, Theme-Schrift.
+  // Word wendet sie auf Absätze nicht an: nur für die Vorschau die Verknüpfung entfernen.
+  const stile = vorschauDateien.findIndex(d => d.name === "word/styles.xml");
+  if (stile >= 0) vorschauDateien[stile] = { name: "word/styles.xml", daten: new TextEncoder().encode(new TextDecoder().decode(vorschauDateien[stile].daten).replace(/<w:link w:val="[^"]*"\s*\/>/g, "")) };
+  const vorschauBlob = await zipSchreiben(vorschauDateien, DOCX);
   // Dateiname nach Vorgabe: AZR-Nr_Name_Vorname_Geburtsdatum (weitere Formulare mit Zusatz der Formularart)
   const name = dateiBasis() + (art === "screening" ? "" : "_" + dateiSicher(ART_KURZ[art] || datei.name.replace(/\.docx$/i, ""))) + (fremd ? "_" + dateiSicher(vorgabe.sprache) : "") + ".docx";
-  return { art, bericht, blob, vorschauBlob, name, original: datei.name, sprache: fremd ? vorgabe.sprache : "" };
+  return { art, bericht, blob, vorschauBlob, schwebend, kaesten, name, original: datei.name, sprache: fremd ? vorgabe.sprache : "" };
 }
 
 function speichern(blob, name) {
@@ -2243,7 +2495,7 @@ function Originalformulare() {
         ${VORLAGEN_DATEIEN.length ? `<p class="small" style="margin:8px 0 0">Geladen: ${VORLAGEN_DATEIEN.map(f => esc(f.name)).join(", ")}</p>` : ""}
       </details>`,
     bind: () => {
-      if (!F) { $("vNeu").onclick = () => { vibrate(); F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()) } }; fallSpeichern(); go(Erfassung(0)); }; return; }
+      if (!F) { $("vNeu").onclick = () => { vibrate(); F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } }; fallSpeichern(); go(Erfassung(0)); }; return; }
       const e2 = $("vErg2"); if (e2) e2.onclick = () => { vibrate(); const i = C.fall.schritte.findIndex(st => offenIn(st).length); go(Erfassung(i < 0 ? 0 : i)); };
       $("vd").onchange = async e => { VORLAGEN_DATEIEN = Array.from(e.target.files || []); VORLAGEN_STAND = ""; await vorlagenVerarbeiten(); };
       const alle = $("vAlle");
@@ -2295,6 +2547,321 @@ async function vorlagenVerarbeiten() {
   neuZeichnen();
 }
 
+// Seitenzahl-Felder (PAGE, NUMPAGES) in Kopf-/Fußzeilen: gespeicherter Wert durch Marke ersetzen, die Vorschau setzt die echte Zahl je Seite
+function seitenFelderMarkieren(xdoc) {
+  let n = 0;
+  for (const fs of Array.from(xdoc.getElementsByTagNameNS(W_NS, "fldSimple"))) {
+    const instr = (fs.getAttributeNS(W_NS, "instr") || fs.getAttribute("w:instr") || "").trim().split(/\s+/)[0].toUpperCase();
+    if (instr !== "PAGE" && instr !== "NUMPAGES") continue;
+    const ts = fs.getElementsByTagNameNS(W_NS, "t"); if (!ts.length) continue;
+    ts[0].textContent = instr === "PAGE" ? "⟦P⟧" : "⟦N⟧"; for (let k = ts.length - 1; k > 0; k--) ts[k].textContent = ""; n++;
+  }
+  for (const q of Array.from(xdoc.getElementsByTagNameNS(W_NS, "p"))) {
+    let zustand = 0, art = "", ergebnis = [];
+    for (const r of Array.from(q.getElementsByTagNameNS(W_NS, "r"))) {
+      const fc = r.getElementsByTagNameNS(W_NS, "fldChar")[0], typ = fc ? (fc.getAttributeNS(W_NS, "fldCharType") || fc.getAttribute("w:fldCharType")) : "";
+      if (typ === "begin") { zustand = 1; art = ""; ergebnis = []; continue; }
+      if (typ === "separate") { zustand = 2; continue; }
+      if (typ === "end") {
+        if ((art === "PAGE" || art === "NUMPAGES") && ergebnis.length) { ergebnis[0].textContent = art === "PAGE" ? "⟦P⟧" : "⟦N⟧"; ergebnis.slice(1).forEach(t => t.textContent = ""); n++; }
+        zustand = 0; continue;
+      }
+      if (zustand === 1) { const it = r.getElementsByTagNameNS(W_NS, "instrText")[0]; if (it) art += it.textContent; art = art.trim().split(/\s+/)[0].toUpperCase(); }
+      else if (zustand === 2) ergebnis.push(...Array.from(r.getElementsByTagNameNS(W_NS, "t")));
+    }
+  }
+  return n;
+}
+// Seitenumbruch: Word speichert in manchen Vordrucken (Fragebögen) keine Seitenumbrüche – die Vorschau zeigt dann eine überlange Seite.
+// Inhalt, der über den Satzspiegel hinausgeht, auf neue Seiten mit derselben Kopf- und Fußzeile verschieben; Tabellen zeilenweise teilen.
+function docxUmbruch(ziel) {
+  for (const start of [...ziel.querySelectorAll("section.docx")]) {
+    let sec = start;
+    for (let schutz = 0; schutz < 40; schutz++) {
+      const hoehe = (parseFloat(sec.style.minHeight) || 842) * 4 / 3;
+      // Geringer Überstand kommt von abweichender Schriftmetrik – die Seite wird später eingepasst (docxEinpassen), nicht geteilt
+      if (sec.scrollHeight <= hoehe * (sec === start ? 1.15 : 1) + 2) break;
+      const sr = sec.getBoundingClientRect(), fuss = sec.querySelector(":scope > footer");
+      const grenze = sr.top + hoehe - parseFloat(getComputedStyle(sec).paddingBottom || 0) - (fuss ? fuss.offsetHeight : 0);
+      const bloecke = [...sec.querySelectorAll(":scope > article > *")];
+      const k = bloecke.findIndex(b => b.getBoundingClientRect().bottom > grenze + 1);
+      if (k < 0) break;
+      const block = bloecke[k];
+      let teilTabelle = null;
+      if (block.tagName === "TABLE") {
+        const zeilen = [...block.querySelectorAll(":scope > tbody > tr, :scope > tr")];
+        let z = zeilen.findIndex(r => r.getBoundingClientRect().bottom > grenze + 1);
+        // Hohe Zeile über die Seitengrenze: wie Word innerhalb der Zeile teilen (Zellinhalt unterhalb der Grenze in eine Folgezeile)
+        const r0 = zeilen[z];
+        if (r0 && r0.getBoundingClientRect().top < grenze - 40) {
+          const folge = r0.cloneNode(false); let bewegt = false;
+          for (const td of [...r0.children]) {
+            const ntd = td.cloneNode(false); ntd.removeAttribute("rowspan"); folge.appendChild(ntd);
+            const kinder = [...td.children];
+            const ab = kinder.findIndex((c, n) => n > 0 && c.getBoundingClientRect().bottom > grenze + 1);
+            if (ab > 0) { kinder.slice(ab).forEach(c => ntd.appendChild(c)); bewegt = true; }
+          }
+          if (bewegt) { r0.after(folge); zeilen.splice(z + 1, 0, folge); z = z + 1; }
+        }
+        if (z > 0) {
+          teilTabelle = block.cloneNode(false);
+          for (const c of block.children) if (c.tagName === "COLGROUP") teilTabelle.appendChild(c.cloneNode(true));
+          const tb = zeilen[z].parentElement, ntb = tb === block ? teilTabelle : teilTabelle.appendChild(tb.cloneNode(false));
+          zeilen.slice(z).forEach(r => ntb.appendChild(r));
+        }
+      }
+      if (!teilTabelle && k === 0) break; // ein einzelner Block ist höher als die Seite
+      const neu = sec.cloneNode(false);
+      const kopf = sec.querySelector(":scope > header"); if (kopf) neu.appendChild(kopf.cloneNode(true));
+      const arts = [...sec.querySelectorAll(":scope > article")], ab = arts.indexOf(block.parentElement);
+      arts.slice(ab).forEach((a, n) => {
+        const na = a.cloneNode(false); neu.appendChild(na);
+        if (n === 0) { if (teilTabelle) na.appendChild(teilTabelle); let x = teilTabelle ? block.nextSibling : block; while (x) { const w = x.nextSibling; na.appendChild(x); x = w; } }
+        else { while (a.firstChild) na.appendChild(a.firstChild); a.remove(); }
+      });
+      if (fuss) neu.appendChild(fuss.cloneNode(true));
+      sec.after(neu);
+      sec = neu;
+    }
+  }
+}
+// Seiten nachbearbeiten: Kopf-/Fußzeile je Word-Abschnitt vereinheitlichen, Seitenzahlen einsetzen
+function docxSeiten(ziel) {
+  const seiten = [...ziel.querySelectorAll("section.docx")];
+  let aktuell = null, nr = 0;
+  const info = seiten.map(sec => {
+    const marken = [...sec.querySelectorAll("article span")].filter(x => x.childElementCount === 0 && x.textContent.includes("⟦S|"));
+    const art = sec.querySelector("article");
+    let abschnitt = aktuell, start = "";
+    marken.forEach((m, k) => {
+      const mm = m.textContent.match(/⟦S\|(\d+)\|(\d*)⟧/);
+      m.textContent = m.textContent.replace(/⟦S\|[^⟧]*⟧/, "");
+      if (!mm) return;
+      // Beginnt der Abschnitt ganz oben auf der Seite, gilt er für diese Seite
+      const oben = art && m.getBoundingClientRect().top - art.getBoundingClientRect().top < 40;
+      if (k === 0 && (oben || abschnitt === null)) { abschnitt = +mm[1]; start = mm[2]; }
+      aktuell = +mm[1];
+      if (k === 0 && oben && mm[2]) start = mm[2];
+    });
+    return { sec, abschnitt, start };
+  });
+  const erste = {};
+  for (const s of info) {
+    if (!(s.abschnitt in erste)) { erste[s.abschnitt] = s; continue; }
+    const vorbild = erste[s.abschnitt].sec;
+    for (const tag of ["footer", "header"]) {
+      const soll = vorbild.querySelector(":scope > " + tag), ist = s.sec.querySelector(":scope > " + tag);
+      if (soll && ist && soll.innerHTML !== ist.innerHTML) ist.replaceWith(soll.cloneNode(true));
+      else if (soll && !ist) s.sec.appendChild(soll.cloneNode(true));
+    }
+  }
+  for (const s of info) {
+    nr = s.start ? +s.start : nr + 1;
+    for (const el of s.sec.querySelectorAll(":scope > header span, :scope > footer span")) {
+      if (el.childElementCount) continue;
+      if (el.textContent.includes("⟦P⟧")) el.textContent = el.textContent.replace(/⟦P⟧/g, String(nr));
+      if (el.textContent.includes("⟦N⟧")) el.textContent = el.textContent.replace(/⟦N⟧/g, String(seiten.length));
+    }
+  }
+}
+// Word-Dokument im Browser darstellen. Jedes Dokument bekommt einen eigenen Stil-Präfix – sonst überschreiben sich
+// gleichnamige Formatvorlagen mehrerer Dokumente gegenseitig (z. B. „Überschrift 1“ der Belehrung im Screeningformular).
+let DOCX_NR = 0;
+async function docxRendern(blob, ziel, zusatz) {
+  const schwebend = Array.isArray(zusatz) ? zusatz : zusatz && zusatz.schwebend, kaesten = zusatz && !Array.isArray(zusatz) ? zusatz.kaesten : null;
+  const p = "docx" + (++DOCX_NR);
+  await docx.renderAsync(blob, ziel, null, { className: p, inWrapper: true, breakPages: true, ignoreLastRenderedPageBreak: false, renderHeaders: true, renderFooters: true, experimental: true, useBase64URL: true });
+  ziel.querySelectorAll(`.${p}-wrapper`).forEach(w => w.classList.add("docx-wrapper"));
+  ziel.querySelectorAll(`section.${p}`).forEach(sec => sec.classList.add("docx"));
+  docxSchriften(ziel);
+  docxTabs(ziel);
+  docxUmbruch(ziel);
+  docxSeiten(ziel);
+  docxKaestchen(ziel);
+  docxLinien(ziel);
+  docxWasserzeichen(ziel);
+  docxFussnoten(ziel);
+  if (schwebend && schwebend.length) docxSchwebend(ziel, schwebend);
+  docxKaesten(ziel, kaesten || []);
+  docxEinpassen(ziel);
+}
+// Seiten, die wegen abweichender Schriftmetrik etwas länger als A4 sind, gleichmäßig verkleinert einpassen (sonst Zusatzblatt beim Drucken)
+function docxEinpassen(ziel) {
+  for (const sec of ziel.querySelectorAll("section.docx")) {
+    const soll = (parseFloat(sec.style.minHeight) || 842) * 4 / 3, ist = sec.scrollHeight;
+    if (ist <= soll + 1) continue;
+    const f = soll / ist, cs = getComputedStyle(sec);
+    const innen = document.createElement("div");
+    innen.style.cssText = `position:absolute;left:0;top:0;box-sizing:border-box;width:${sec.offsetWidth}px;min-height:${ist}px;padding:${cs.padding};display:flex;flex-flow:column nowrap;transform-origin:0 0;transform:scale(${f})`;
+    while (sec.firstChild) innen.appendChild(sec.firstChild);
+    sec.appendChild(innen);
+    Object.assign(sec.style, { position: "relative", padding: "0", height: soll + "px", overflow: "hidden" });
+  }
+}
+// Tabulatoren selbst setzen: Marke ⟦T|pos:art,…⟧ am Absatzanfang (Positionen in Twips ab Textrand der Spalte/Zelle),
+// danach jeden Tabulator als feste Breite bis zum nächsten Stopp. Ohne passenden Stopp: Standardabstand 1,25 cm.
+function docxTabs(ziel) {
+  for (const sp of [...ziel.querySelectorAll("section.docx span")].filter(x => x.childElementCount === 0 && x.textContent.startsWith("⟦T|"))) {
+    const m = sp.textContent.match(/^⟦T\|([^⟧]*)⟧/); sp.textContent = sp.textContent.replace(/^⟦T\|[^⟧]*⟧/, "");
+    const p = sp.closest("p"); if (!p || !m) continue;
+    const stopps = m[1].split(",").filter(Boolean).map(x => { const [pos, art] = x.split(":"); return { pt: +pos / 20, art }; });
+    const basis = p.getBoundingClientRect().left - parseFloat(getComputedStyle(p).marginLeft || 0) - parseFloat(getComputedStyle(p.parentElement).paddingLeft || 0) * 0;
+    const tabs = [...p.querySelectorAll("span[class$='-tab-stop']")];
+    // Tabstopps jenseits des rechten Textrands (z. B. BAMF-Fußzeile „Stand: …“): Word schreibt in den Seitenrand hinein, kein Umbruch
+    if (stopps.some(x => x.pt > p.getBoundingClientRect().width * 0.75 - 1)) p.style.whiteSpace = "nowrap";
+    tabs.forEach((t, k) => {
+      Object.assign(t.style, { wordSpacing: "normal", display: "inline-block", width: "0pt" });
+      const jetzt = (t.getBoundingClientRect().left - basis) * 0.75;
+      let stop = stopps.find(x => x.pt > jetzt + 0.5);
+      let breite;
+      if (stop && (stop.art === "right" || stop.art === "center")) {
+        // Rechtsbündiger Stopp: folgender Text bis zum nächsten Tabulator endet am Stopp
+        let folgend = 0; for (let n = t.nextSibling || t.parentElement.nextSibling; n && !(n.querySelector && (n.matches?.("span[class$='-tab-stop']") || n.querySelector("span[class$='-tab-stop']"))); n = n.nextSibling) folgend += (n.getBoundingClientRect ? n.getBoundingClientRect().width : 0) * 0.75;
+        breite = Math.max(2, stop.pt - jetzt - (stop.art === "center" ? folgend / 2 : folgend));
+      } else breite = stop ? stop.pt - jetzt : 35.4 - (jetzt % 35.4);
+      t.style.width = Math.max(1, breite) + "pt";
+    });
+  }
+}
+// Kästchen (☐/☒ in „MS Gothic“) stehen oft in eigenen Absätzen neben den Beschriftungen; Word gibt diesen Zeilen das 1,25-fache der Schriftgröße.
+function docxKaestchen(ziel) {
+  for (const sp of ziel.querySelectorAll("section.docx span")) {
+    if (!/MS Gothic|Segoe UI Symbol|MS Mincho/i.test(sp.style.fontFamily || getComputedStyle(sp).fontFamily) || !/^[☐☒☑\s]+$/.test(sp.textContent)) continue;
+    const p = sp.closest("p"), lh = p ? p.style.lineHeight : "";
+    if (lh) { if (/pt$/.test(lh)) sp.style.lineHeight = lh; continue; } // feste Zeilenhöhe aus Word beibehalten
+    sp.style.lineHeight = "1.25";
+    if (p && p.textContent.trim() === sp.textContent.trim()) p.style.lineHeight = "1.25";
+  }
+}
+// Marken ⟦K|n⟧: verankerte Formen/Gruppen an der Word-Position zeichnen (Rahmen, Füllung, Linien, Text, Drehung)
+function docxKaesten(ziel, kaesten) {
+  const zeichnen = (f, eltern) => {
+    const d = document.createElement("div");
+    d.style.cssText = `position:absolute;left:${f.x}pt;top:${f.y}pt;width:${f.w}pt;height:${f.h}pt;box-sizing:border-box;${f.rot ? `transform:rotate(${f.rot}deg);` : ""}`;
+    if (f.typ === "g") {
+      const innen = document.createElement("div"), sx = f.w / (f.cw || 1), sy = f.h / (f.ch || 1);
+      innen.style.cssText = `position:absolute;left:0;top:0;width:${f.cw}pt;height:${f.ch}pt;transform-origin:0 0;transform:scale(${sx},${sy}) translate(${-f.cx}pt,${-f.cy}pt)`;
+      f.kinder.forEach(k => zeichnen(k, innen));
+      d.appendChild(innen);
+    } else if (f.geom === "line" || (f.geom === "frei" && (f.h < 1.5 || f.w < 1.5))) {
+      if (f.linie) d.style[f.w >= f.h ? "borderTop" : "borderLeft"] = `${Math.max(0.5, f.linie.pt)}pt solid ${f.linie.farbe}`;
+    } else {
+      if (f.linie) d.style.border = `${Math.max(0.5, f.linie.pt)}pt solid ${f.linie.farbe}`;
+      if (f.fuellung) d.style.background = f.fuellung;
+      if (f.text) {
+        const t = document.createElement("div"), [l, o, r, u] = f.text.ins;
+        const senkrecht = /vert270|vert$|eaVert/.test(f.text.vert);
+        t.style.cssText = `position:absolute;left:0;top:0;width:${senkrecht ? f.h : f.w}pt;height:${senkrecht ? f.w : f.h}pt;padding:${o}pt ${r}pt ${u}pt ${l}pt;box-sizing:border-box;display:flex;flex-direction:column;justify-content:${f.text.anker === "ctr" ? "center" : f.text.anker === "b" ? "flex-end" : "flex-start"};font-family:Arial, sans-serif;font-size:10pt;line-height:1.15;color:#000;overflow:hidden;${senkrecht ? `transform-origin:0 0;transform:${/270/.test(f.text.vert) ? `translateY(${f.h}pt) rotate(-90deg)` : `translateX(${f.w}pt) rotate(90deg)`};` : ""}`;
+        for (const a of f.text.absaetze) {
+          const p = document.createElement("div"); p.style.textAlign = ({ center: "center", right: "right", end: "right", both: "justify" })[a.jc] || "left"; p.style.whiteSpace = "pre-wrap";
+          for (const lf of a.laeufe) { const sp = document.createElement("span"); sp.textContent = lf.t; if (lf.b) sp.style.fontWeight = "700"; if (lf.i) sp.style.fontStyle = "italic"; if (lf.u) sp.style.textDecoration = "underline"; if (lf.pt) sp.style.fontSize = lf.pt + "pt"; if (lf.farbe && lf.farbe !== "auto") sp.style.color = "#" + lf.farbe; p.appendChild(sp); }
+          if (!p.textContent) p.innerHTML = "&nbsp;";
+          t.appendChild(p);
+        }
+        d.appendChild(t);
+      }
+    }
+    eltern.appendChild(d);
+    return d;
+  };
+  for (const sp of [...ziel.querySelectorAll("section.docx span")].filter(x => x.childElementCount === 0 && x.textContent.includes("⟦K|"))) {
+    const m = sp.textContent.match(/⟦K\|(\d+)⟧/); sp.textContent = sp.textContent.replace(/⟦K\|\d+⟧/g, "");
+    const k = m && kaesten[+m[1]], sec = sp.closest("section.docx"); if (!k || !sec) continue;
+    sec.style.position = "relative";
+    const pt = px => px * 0.75, sr = sec.getBoundingClientRect(), cs = getComputedStyle(sec);
+    const p = sp.closest("p") || sp.parentElement, pr = p.getBoundingClientRect(), td = k.zelle ? sp.closest("td") : null, tdr = td && td.getBoundingClientRect();
+    const pl = pt(parseFloat(cs.paddingLeft)), prr = pt(parseFloat(cs.paddingRight)), po = pt(parseFloat(cs.paddingTop)), pu = pt(parseFloat(cs.paddingBottom)), bw = pt(sr.width), bh = pt(sr.height);
+    // Bezugsrahmen horizontal/vertikal (in einer Tabellenzelle: die Zelle)
+    const rahmenH = td ? [pt(tdr.left - sr.left), pt(tdr.right - sr.left)] : ({ page: [0, bw], leftMargin: [0, pl], rightMargin: [bw - prr, bw], insideMargin: [0, pl], outsideMargin: [bw - prr, bw] })[k.h.rel] || [pl, bw - prr];
+    const rahmenV = k.v.rel === "paragraph" || k.v.rel === "line" ? [pt(pr.top - sr.top), pt(pr.bottom - sr.top)] : td ? [pt(tdr.top - sr.top), pt(tdr.bottom - sr.top)] : ({ page: [0, bh], topMargin: [0, po], bottomMargin: [bh - pu, bh] })[k.v.rel] || [po, bh - pu];
+    const setze = (lage, [a, b], groesse) => lage.align === "right" || lage.align === "bottom" ? b - groesse : lage.align === "center" ? (a + b - groesse) / 2 : lage.align === "left" || lage.align === "top" ? a : a + lage.off;
+    const box = document.createElement("div");
+    box.style.cssText = `position:absolute;left:${setze(k.h, rahmenH, k.w)}pt;top:${setze(k.v, rahmenV, k.hh)}pt;width:${k.w}pt;height:${k.hh}pt;z-index:${k.hinten ? 0 : 2};pointer-events:none`;
+    zeichnen(Object.assign({}, k.form, { x: 0, y: 0, w: k.w, h: k.hh }), box);
+    sec.appendChild(box);
+  }
+}
+// Fußnoten wie in Word: kurze Trennlinie, hochgestellte Nummer statt großer Listenziffer, am Seitenende über der Fußzeile
+function docxFussnoten(ziel) {
+  for (const ol of ziel.querySelectorAll("section.docx > ol")) {
+    Object.assign(ol.style, { listStyle: "none", paddingLeft: "0", margin: "auto 0 4pt", position: "relative", paddingTop: "4pt" });
+    const trenner = document.createElement("div");
+    trenner.style.cssText = "position:absolute;top:0;left:0;width:144pt;border-top:0.5pt solid #000";
+    ol.prepend(trenner);
+    [...ol.children].filter(li => li.tagName === "LI").forEach((li, k) => {
+      li.style.margin = "0";
+      const z = li.querySelector("span[class$='_funotenzeichen'], span[class$='_footnotereference']") || li.querySelector("p > span");
+      if (z && !z.textContent.trim()) { const sup = document.createElement("sup"); sup.textContent = String(k + 1); z.appendChild(sup); }
+    });
+    const f = ol.nextElementSibling; if (f && f.tagName === "FOOTER") f.style.marginTop = "0";
+  }
+}
+// Marken ⟦W|Text|Drehung|Breite|Deckkraft⟧: Wasserzeichen mittig über die Seite legen, auf die vorgegebene Breite eingepasst
+function docxWasserzeichen(ziel) {
+  for (const sp of [...ziel.querySelectorAll("section.docx span")].filter(x => x.childElementCount === 0 && x.textContent.includes("⟦W|"))) {
+    const m = sp.textContent.match(/⟦W\|([^|]*)\|(-?[\d.]+)\|([\d.]+)\|([\d.]+)⟧/);
+    sp.textContent = sp.textContent.replace(/⟦W\|[^⟧]*⟧/, "");
+    const sec = sp.closest("section.docx"); if (!m || !sec) continue;
+    sec.style.position = "relative";
+    const w = document.createElement("div");
+    w.textContent = m[1];
+    w.style.cssText = `position:absolute;left:50%;top:50%;white-space:nowrap;font:48pt Arial, sans-serif;color:rgba(0,0,0,${m[4]});pointer-events:none;z-index:3;transform-origin:center`;
+    sec.appendChild(w);
+    const breite = w.getBoundingClientRect().width * 0.75 || 1;
+    w.style.fontSize = (48 * (+m[3] / breite)) + "pt";
+    w.style.transform = `translate(-50%,-50%) rotate(${m[2]}deg)`;
+  }
+}
+// Marken ⟦L|…⟧ (siehe Vorschau-Aufbereitung) als Linie an der Word-Position zeichnen
+function docxLinien(ziel) {
+  for (const sp of [...ziel.querySelectorAll("section.docx span")].filter(x => x.childElementCount === 0 && x.textContent.includes("⟦L|"))) {
+    const m = sp.textContent.match(/⟦L\|(\w+)\|(-?[\d.]+)\|(\w+)\|(-?[\d.]+)\|([\d.]+)\|([\d.]+)⟧/);
+    if (!m) continue;
+    const sec = sp.closest("section.docx"), p = sp.closest("p") || sp.parentElement;
+    sec.style.position = "relative";
+    const sr = sec.getBoundingClientRect(), pr = p.getBoundingClientRect(), cs = getComputedStyle(sec), pt = px => px * 0.75;
+    const links = (m[1] === "page" ? 0 : pt(parseFloat(cs.paddingLeft))) + +m[2];
+    const oben = (m[3] === "page" ? 0 : m[3] === "margin" ? pt(parseFloat(cs.paddingTop)) : pt(pr.top - sr.top)) + +m[4];
+    sp.textContent = "";
+    const l = document.createElement("div");
+    l.style.cssText = `position:absolute;left:${links}pt;top:${oben}pt;width:${m[5]}pt;border-top:${Math.max(0.5, +m[6])}pt solid #231f20;pointer-events:none`;
+    sec.appendChild(l);
+  }
+}
+// Fehlt eine Schrift (z. B. „BundesSans Office“ der BAMF-Vordrucke), nimmt Word eine serifenlose Ersatzschrift – der Browser sonst Times.
+const SERIFEN = /times|cambria|georgia|garamond|serif|book antiqua|palatino/i;
+function docxSchriften(ziel) {
+  const mitErsatz = f => /(^|,)\s*(sans-serif|serif|monospace)\s*$/i.test(f) ? f : `${f}, ${SERIFEN.test(f) ? "serif" : "Arial, sans-serif"}`;
+  for (const st of ziel.querySelectorAll("style")) st.textContent = st.textContent.replace(/font-family:\s*([^;}]+)/g, (m, f) => "font-family: " + mitErsatz(f.trim()));
+  for (const el of ziel.querySelectorAll("section.docx [style*='font-family']")) el.style.fontFamily = mitErsatz(el.style.fontFamily);
+  // Aufzählungszeichen aus Symbol/Wingdings (privater Unicode-Bereich) kennt der Browser nicht – durch gleich aussehende Zeichen ersetzen
+  const SYM = { "\uF0B7": "•", "\uF0A7": "▪", "\uF0D8": "➢", "\uF076": "❖", "\uF0FC": "✓", "\uF06E": "■", "\uF0A8": "□", "\uF0E0": "→", "\uF0D2": "®" };
+  const ersetzeSym = t => t.replace(/[\uF000-\uF0FF]/g, c => SYM[c] || "•");
+  for (const st of ziel.querySelectorAll("style")) if (/[\uF000-\uF0FF]|\\f0[0-9a-f]{2}/i.test(st.textContent)) st.textContent = ersetzeSym(st.textContent.replace(/\\(f0[0-9a-f]{2})\s?/gi, (m, h) => String.fromCharCode(parseInt(h, 16))));
+  const w = document.createTreeWalker(ziel, NodeFilter.SHOW_TEXT);
+  for (let n = w.nextNode(); n; n = w.nextNode()) if (/[\uF000-\uF0FF]/.test(n.nodeValue)) n.nodeValue = ersetzeSym(n.nodeValue);
+}
+// Schwebende Tabellen wie in Word positionieren (horizontal zur Seite/zum Rand, vertikal zum folgenden Absatz/zur Seite)
+function docxSchwebend(ziel, schwebend) {
+  const tabellen = [...ziel.querySelectorAll("section.docx article table")].filter(t => !t.parentElement.closest("table"));
+  for (const s of schwebend) {
+    // Tabellen „im Text“ ohne nennenswerten Versatz (z. B. BAMF-Vordrucke: Personalien links, „Lichtbild“ rechts daneben) bleiben umflossen wie von der Vorschau gesetzt
+    if (s.h !== "page" && s.v === "text" && Math.abs(s.y) <= 100 && Math.abs(s.x) <= 100 && !s.xs) continue;
+    const t = tabellen[s.nr]; if (!t) continue;
+    const sec = t.closest("section.docx"); if (!sec) continue;
+    sec.style.position = "relative";
+    const cs = getComputedStyle(sec), pt = px => px * 0.75;
+    const sr = sec.getBoundingClientRect(), tr = t.getBoundingClientRect();
+    const randL = pt(parseFloat(cs.paddingLeft)), randR = pt(parseFloat(cs.paddingRight)), randO = pt(parseFloat(cs.paddingTop)), breite = pt(sr.width), tb = pt(tr.width);
+    let links = (s.h === "page" ? 0 : randL) + s.x / 20;
+    if (s.xs === "right") links = s.h === "page" ? breite - tb : breite - randR - tb;
+    else if (s.xs === "center") links = s.h === "page" ? (breite - tb) / 2 : randL + (breite - randL - randR - tb) / 2;
+    else if (s.xs === "left") links = s.h === "page" ? 0 : randL;
+    const oben = s.v === "page" ? s.y / 20 : s.v === "margin" ? randO + s.y / 20 : pt(tr.top - sr.top) + s.y / 20;
+    Object.assign(t.style, { position: "absolute", left: links + "pt", top: Math.max(0, oben) + "pt", float: "none", margin: "0" });
+  }
+}
+
 // ================= SIDAS-PDF: alle nötigen Unterlagen in einer PDF-Datei =================
 // Die ausgefüllten Word-Dateien werden unsichtbar gerendert, Seite für Seite als Bild erfasst und zu einer PDF zusammengesetzt.
 async function seitenBilder(liste, fortschritt) {
@@ -2306,7 +2873,7 @@ async function seitenBilder(liste, fortschritt) {
     for (const [k, e] of liste.entries()) {
       fortschritt && fortschritt(`Seite wird erstellt … (${k + 1}/${liste.length})`);
       const div = document.createElement("div"); box.appendChild(div);
-      await docx.renderAsync(e.vorschauBlob || e.blob, div, null, { className: "docx", inWrapper: true, breakPages: true, ignoreLastRenderedPageBreak: false, renderHeaders: true, renderFooters: true, experimental: true, useBase64URL: true });
+      await docxRendern(e.vorschauBlob || e.blob, div, e);
       for (const sec of div.querySelectorAll("section.docx")) {
         sec.style.margin = "0"; sec.style.boxShadow = "none";
         const cv = await html2canvas(sec, { scale: 1.5, backgroundColor: "#ffffff", logging: false, useCORS: true });
@@ -2369,7 +2936,7 @@ async function allesDrucken(liste, knopf) {
   const alt = knopf.innerHTML; knopf.innerHTML = "Druck wird vorbereitet …"; knopf.disabled = true;
   const d = document.getElementById("druck");
   d.innerHTML = ""; d.classList.add("docxdruck");
-  for (const e of liste) { const div = document.createElement("div"); d.appendChild(div); await docx.renderAsync(e.vorschauBlob || e.blob, div, null, { className: "docx", inWrapper: true, breakPages: true, ignoreLastRenderedPageBreak: false, renderHeaders: true, renderFooters: true, experimental: true, useBase64URL: true }); }
+  for (const e of liste) { const div = document.createElement("div"); d.appendChild(div); await docxRendern(e.vorschauBlob || e.blob, div, e); }
   knopf.innerHTML = alt; knopf.disabled = false;
   window.print();
   setTimeout(() => d.classList.remove("docxdruck"), 1000);
@@ -2416,7 +2983,7 @@ function Vorschau(i) {
       try {
         ziel.innerHTML = "";
         const innen = document.createElement("div"); ziel.appendChild(innen);
-        await docx.renderAsync(e.vorschauBlob || e.blob, innen, null, { className: "docx", inWrapper: true, breakPages: true, ignoreLastRenderedPageBreak: false, renderHeaders: true, renderFooters: true, experimental: true, useBase64URL: true });
+        await docxRendern(e.vorschauBlob || e.blob, innen, e);
         const passen = () => { const seite = innen.querySelector("section.docx"); if (!seite) return; innen.style.zoom = ""; const z = Math.min(1, (ziel.clientWidth - 4) / (seite.offsetWidth + 20)); innen.style.zoom = z; };
         passen(); window.addEventListener("resize", passen, { passive: true });
       } catch (err) { ziel.innerHTML = `<p class="small" style="color:#fff;padding:12px">Vorschau nicht möglich (${esc(err.message)}) – bitte speichern und in Word öffnen.</p>`; }
@@ -2912,7 +3479,7 @@ function Einsatz(nr) {
       const eP = $("eP"); if (eP) eP.onclick = () => { vibrate(); go(ScreeningWizard(einsatzErgebnis)); };
       const eF = $("eF"); if (eF) eF.onclick = () => {
         vibrate();
-        if (!F) { F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()) } }; fallSpeichern(); }
+        if (!F) { F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } }; fallSpeichern(); }
         go(Erfassung(0, st.erfassen));
       };
       app.querySelectorAll("#eU").forEach(b => b.onclick = () => { vibrate(); go(Originalformulare); });
@@ -3046,7 +3613,7 @@ function Ablauf() {
         vibrate();
         const akt = b.dataset.akt;
         if (akt === "pruefung") go(ScreeningWizard());
-        if (akt === "fall") { if (!F) { F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()) } }; fallSpeichern(); } go(FallUebersicht); }
+        if (akt === "fall") { if (!F) { F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } }; fallSpeichern(); } go(FallUebersicht); }
         if (akt === "vorlagen") go(Originalformulare);
       });
       const fk = $("fk"); if (fk) fk.onclick = () => { vibrate(); go(FallUebersicht); };
