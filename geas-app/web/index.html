@@ -1831,6 +1831,10 @@ function formBeschreiben(el) {
   const geo = pr && kind(pr, "prstGeom"); f.geom = geo ? geo.getAttribute("prst") : (pr && kind(pr, "custGeom") ? "frei" : "rect");
   const ln = pr && kind(pr, "ln"); f.linie = ln && !kind(ln, "noFill") && kind(ln, "solidFill") ? { pt: emuPt(ln.getAttribute("w") || 9525), farbe: dmlFarbe(kind(ln, "solidFill")) } : null;
   const fl = pr && kind(pr, "solidFill"); f.fuellung = fl ? dmlFarbe(fl) : null;
+  // Ohne eigene Linie/Füllung gilt der Formstil (wps:style lnRef/fillRef, Designfarben) – z. B. Kasten „QR Code“ mit schwarzem Rahmen und weißer Füllung
+  const stil = kind(el, "style"), lr = stil && kind(stil, "lnRef"), fr = stil && kind(stil, "fillRef");
+  if (!f.linie && !(ln && kind(ln, "noFill")) && lr && +lr.getAttribute("idx") > 0) f.linie = { pt: +lr.getAttribute("idx") >= 2 ? 1.5 : 0.75, farbe: dmlFarbe(lr) };
+  if (!f.fuellung && !(pr && kind(pr, "noFill")) && fr && +fr.getAttribute("idx") > 0) f.fuellung = dmlFarbe(fr);
   const tb = el.getElementsByTagNameNS(W_NS, "txbxContent")[0], bp = kind(el, "bodyPr");
   if (tb && wText(tb).trim()) {
     const ins = n => bp && bp.getAttribute(n) != null ? emuPt(bp.getAttribute(n)) : (n === "lIns" || n === "rIns" ? 7.2 : 3.6);
@@ -2180,17 +2184,27 @@ function kopfdatenBefuellen(doc, cfg, opt = {}) {
 // Textfelder (Word-Textboxen, z. B. Namensfeld der Belehrung): Reihenfolge im Dokument, Choice- und Fallback-Variante gemeinsam
 function textfelderBefuellen(doc, regeln, bericht) {
   const gruppen = [];
+  // Ein Textfeld steht in Word doppelt (DrawingML + VML-Ersatz) im selben Lauf <w:r> – danach gruppieren, nicht nach paraId
+  // (in vielen Sprachfassungen haben Original und Ersatz verschiedene paraIds)
   for (const tb of Array.from(doc.getElementsByTagNameNS(W_NS, "txbxContent"))) {
-    const p = tb.getElementsByTagNameNS(W_NS, "p")[0];
-    const id = p ? p.getAttributeNS(W14_NS, "paraId") : "";
-    let g = gruppen.find(x => id && x.id === id);
-    if (!g) gruppen.push(g = { id, boxen: [] });
+    let r = tb.parentNode; while (r && !(r.localName === "r" && r.namespaceURI === W_NS)) r = r.parentNode;
+    let g = gruppen.find(x => r && x.r === r);
+    if (!g) gruppen.push(g = { r, boxen: [] });
     g.boxen.push(tb);
   }
   for (const regel of regeln || []) {
     const g = gruppen[regel.index];
     const v = regel.wert.map(id => wert(id).trim()).filter(Boolean).join(regel.trenner || " ");
-    if (!g || !v || g.boxen.some(tb => wText(tb).trim())) continue;
+    if (!g || !v) continue;
+    if (regel.ziel === "tabelle_danach") {
+      // Erste Tabelle nach dem Absatz mit dem Textfeld (z. B. Kasten „bei folgender Aufnahmeeinrichtung“ – sprachunabhängig)
+      let p = g.r; while (p && p.localName !== "p") p = p.parentNode;
+      let n = p && p.nextSibling; while (n && n.localName !== "tbl") { if (n.localName === "p" && n.getElementsByTagNameNS(W_NS, "txbxContent").length) { n = null; break; } n = n.nextSibling; }
+      const tc = n && n.getElementsByTagNameNS(W_NS, "tc")[0];
+      if (tc && !wText(tc).trim() && zelleSetzen(tc, v, tc)) bericht.gesetzt++;
+      continue;
+    }
+    if (g.boxen.some(tb => wText(tb).trim())) continue;
     g.boxen.forEach(tb => zelleSetzen(tb, v, tb));
     bericht.gesetzt++;
   }
@@ -2275,6 +2289,25 @@ async function vorlageBefuellen(datei, korrekturen = {}, vorgabe = null) {
     if (!x.startsWith("<?xml")) x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n' + x;
     kz.daten = new TextEncoder().encode(x);
   }
+  // Fußzeilen mit „AZR-Nummer:“ (z. B. jede Seite des Überprüfungsformulars): Nummer dahinter eintragen
+  const azr = wert("azr_nummer").trim();
+  if (azr) for (const fz of dateien.filter(d => /^word\/footer\d*\.xml$/.test(d.name))) {
+    const fdoc = new DOMParser().parseFromString(new TextDecoder().decode(fz.daten), "application/xml");
+    if (fdoc.getElementsByTagName("parsererror").length) continue;
+    let geaendert = false;
+    for (const q of Array.from(fdoc.getElementsByTagNameNS(W_NS, "p"))) {
+      if (!/AZR-?\s*Nummer:\s*$/.test(wText(q))) continue;
+      const laeufe = Array.from(q.getElementsByTagNameNS(W_NS, "r")), letzter = laeufe[laeufe.length - 1];
+      const r = fdoc.createElementNS(W_NS, "w:r"), rp = letzter && wKinder(letzter, "rPr")[0];
+      if (rp) r.appendChild(rp.cloneNode(true));
+      const t = fdoc.createElementNS(W_NS, "w:t"); t.setAttributeNS(XML_NS, "xml:space", "preserve"); t.textContent = (wText(q).endsWith(" ") ? "" : " ") + azr; r.appendChild(t);
+      q.appendChild(r); geaendert = true;
+    }
+    if (!geaendert) continue;
+    let x = new XMLSerializer().serializeToString(fdoc);
+    if (!x.startsWith("<?xml")) x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n' + x;
+    fz.daten = new TextEncoder().encode(x); bericht.gesetzt++;
+  }
   let neu = new XMLSerializer().serializeToString(doc);
   if (!neu.startsWith("<?xml")) neu = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n' + neu;
   eintrag.daten = new TextEncoder().encode(neu);
@@ -2297,16 +2330,30 @@ async function vorlageBefuellen(datei, korrekturen = {}, vorgabe = null) {
     if (pPr && wKinder(pPr, "numPr").length) m.parentNode.removeChild(m);
   }
   // Schwebende Textfelder, die die Vorschau über den Text legt (z. B. Name in der Belehrung § 15/20): in der Vorschau als eigene Zeile zeigen
-  if ((C.vorlagen.textfeld_anker || {})[art]) for (const tb of Array.from(vdoc.getElementsByTagNameNS(W_NS, "txbxContent"))) {
-    if (!wText(tb).trim()) continue;
+  // Regel "vorschau":"zeilenende": Inhalt des Textfelds an das Ende der Zeile setzen (z. B. Datum hinter „spätestens bis zum“)
+  const ankerRegeln = (C.vorlagen.textfeld_anker || {})[art];
+  if (ankerRegeln) { let nr = -1; const gesehen = new Set(); for (const tb of Array.from(vdoc.getElementsByTagNameNS(W_NS, "txbxContent"))) {
     let r = tb.parentNode; while (r && r.localName !== "r") r = r.parentNode;
+    if (!r || gesehen.has(r)) continue; gesehen.add(r); nr++;
+    if (!wText(tb).trim()) continue;
     let p = r && r.parentNode; while (p && p.localName !== "p") p = p.parentNode;
-    if (!r || !p || !p.parentNode || !r.parentNode) continue;
+    if (!p || !p.parentNode || !r.parentNode) continue;
+    const regel = ankerRegeln.find(x => x.index === nr) || {};
     const neu = Array.from(wKinder(tb, "p")).map(x => x.cloneNode(true));
     r.parentNode.removeChild(r);
+    if (regel.vorschau === "zeilenende") {
+      const brs = Array.from(wKinder(p, "r")).filter(x => wKinder(x, "br").length && !wText(x).trim());
+      const vor = brs.length ? brs[brs.length - 1] : null;
+      for (const q of neu) for (const lauf of Array.from(wKinder(q, "r"))) {
+        let rp = wKinder(lauf, "rPr")[0]; if (!rp) { rp = vdoc.createElementNS(W_NS, "w:rPr"); lauf.insertBefore(rp, lauf.firstChild); }
+        if (!wKinder(rp, "b").length) rp.appendChild(vdoc.createElementNS(W_NS, "w:b"));
+        p.insertBefore(lauf, vor);
+      }
+      continue;
+    }
     let nach = p;
     for (const q of neu) { nach.parentNode.insertBefore(q, nach.nextSibling); nach = q; }
-  }
+  } }
   // Mehrspaltige Abschnitte (Kopfblock des Screeningformulars: zwei ungleich breite Spalten, Inhalt nur links) zeigt die Vorschau
   // als zwei gleich breite Spalten – nur für die Vorschau einspaltig setzen, die Positionen der linken Spalte bleiben gleich.
   for (const cols of Array.from(vdoc.getElementsByTagNameNS(W_NS, "cols"))) {
@@ -2785,8 +2832,16 @@ async function docxRendern(blob, ziel, zusatz) {
 // Seiten, die wegen abweichender Schriftmetrik etwas länger als A4 sind, gleichmäßig verkleinert einpassen (sonst Zusatzblatt beim Drucken)
 function docxEinpassen(ziel) {
   for (const sec of ziel.querySelectorAll("section.docx")) {
-    const soll = (parseFloat(sec.style.minHeight) || 842) * 4 / 3, ist = sec.scrollHeight;
-    if (ist <= soll + 1) continue;
+    const soll = (parseFloat(sec.style.minHeight) || 842) * 4 / 3;
+    // Nur der Textfluss zählt: frei positionierte Formen (z. B. senkrechtes AZR-Kästchenfeld) ragen evtl. über den Rand – abschneiden statt verkleinern
+    const r0 = sec.getBoundingClientRect().top, pb = parseFloat(getComputedStyle(sec).paddingBottom) || 0;
+    let ist = 0;
+    for (const k of sec.querySelectorAll(":scope > article, :scope > header, :scope > footer, :scope > *:not([style*='absolute'])")) {
+      if (getComputedStyle(k).position === "absolute") continue;
+      ist = Math.max(ist, k.getBoundingClientRect().bottom - r0);
+    }
+    ist = Math.max(ist + pb, 1);
+    if (ist <= soll + 1) { if (sec.scrollHeight > soll + 1) sec.style.overflow = "hidden"; continue; }
     const f = soll / ist, cs = getComputedStyle(sec);
     const innen = document.createElement("div");
     innen.style.cssText = `position:absolute;left:0;top:0;box-sizing:border-box;width:${sec.offsetWidth}px;min-height:${ist}px;padding:${cs.padding};display:flex;flex-flow:column nowrap;transform-origin:0 0;transform:scale(${f})`;
@@ -2873,7 +2928,10 @@ function docxKaesten(ziel, kaesten) {
     const rahmenV = k.v.rel === "paragraph" || k.v.rel === "line" ? [pt(pr.top - sr.top), pt(pr.bottom - sr.top)] : td ? [pt(tdr.top - sr.top), pt(tdr.bottom - sr.top)] : ({ page: [0, bh], topMargin: [0, po], bottomMargin: [bh - pu, bh] })[k.v.rel] || [po, bh - pu];
     const setze = (lage, [a, b], groesse) => lage.align === "right" || lage.align === "bottom" ? b - groesse : lage.align === "center" ? (a + b - groesse) / 2 : lage.align === "left" || lage.align === "top" ? a : a + lage.off;
     const box = document.createElement("div");
-    box.style.cssText = `position:absolute;left:${setze(k.h, rahmenH, k.w)}pt;top:${setze(k.v, rahmenV, k.hh)}pt;width:${k.w}pt;height:${k.hh}pt;z-index:${k.hinten ? 0 : 2};pointer-events:none`;
+    // Wie Word: Formen bleiben auf der Seite – ragt eine Form unten über den Seitenrand (z. B. AZR-Kästchen der Anlaufbescheinigung), hochziehen
+    const seiteH = (parseFloat(sec.style.minHeight) || 842);
+    const oben = Math.max(0, Math.min(setze(k.v, rahmenV, k.hh), seiteH - k.hh - 6));
+    box.style.cssText = `position:absolute;left:${setze(k.h, rahmenH, k.w)}pt;top:${oben}pt;width:${k.w}pt;height:${k.hh}pt;z-index:${k.hinten ? 0 : 2};pointer-events:none`;
     zeichnen(Object.assign({}, k.form, { x: 0, y: 0, w: k.w, h: k.hh }), box);
     sec.appendChild(box);
   }
