@@ -427,7 +427,10 @@
         },
         {
           "text": "Information nach Art. 11 Screening-VO in verständlicher Sprache erteilt",
-          "hinweis": "Zweck, Dauer, Rechte, Pflichten, Asylrecht, Datenschutz"
+          "hinweis": "Zweck, Dauer, Rechte, Pflichten, Asylrecht, Datenschutz",
+          "dokumente": [
+            "info11"
+          ]
         },
         {
           "text": "Minderjährigkeit/Vulnerabilität geprüft, ggf. Jugendamt informiert"
@@ -530,7 +533,11 @@
           "text": "ED-Behandlung (§ 16 AsylG) / Eurodac, falls nicht erfolgt"
         },
         {
-          "text": "Information der Person über das weitere Verfahren (Merkblatt in Landessprache)"
+          "text": "Information der Person über das weitere Verfahren (Merkblatt in Landessprache)",
+          "dokumente": [
+            "belehrung15",
+            "merkblatt"
+          ]
         },
         {
           "text": "Weiterleitung an die zuständige Aufnahmeeinrichtung (vgl. § 19 AsylG)"
@@ -2100,7 +2107,10 @@
           },
           {
             "text": "Person in verständlicher Sprache belehren: Überprüfung nach Screening-VO.",
-            "hinweis": "Dolmetscher, keine Kinder oder Mitbewohner"
+            "hinweis": "Dolmetscher, keine Kinder oder Mitbewohner",
+            "dokumente": [
+              "info11"
+            ]
           },
           {
             "text": "Minderjährig oder besonders schutzbedürftig? → Jugendamt bzw. Fachstelle einbinden, kindgerecht vorgehen.",
@@ -2398,7 +2408,10 @@
           },
           {
             "text": "Person in verständlicher Sprache belehren: Überprüfung nach Screening-VO.",
-            "hinweis": "Dolmetscher, keine Kinder oder Mitbewohner"
+            "hinweis": "Dolmetscher, keine Kinder oder Mitbewohner",
+            "dokumente": [
+              "info11"
+            ]
           },
           {
             "text": "Minderjährig oder besonders schutzbedürftig? → Jugendamt bzw. Fachstelle einbinden, kindgerecht vorgehen.",

@@ -229,6 +229,9 @@
   .result svg { width: 48px; height: 48px; animation: pop .7s var(--spring) .1s both; }
   .result h2 { margin: 10px 0 8px; font-size: 32px; line-height: 1.1; letter-spacing: -0.01em; }
   @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+  .dokrow { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 12px 14px; }
+  .dokrow .btn { width: auto; margin: 0; padding: 9px 14px; font-size: 15px; }
+  .dokrow .entfaellt { font-size: 14px; color: var(--muted); padding: 4px 0; }
   .step { display: flex; gap: 14px; align-items: flex-start; padding: 14px; border-radius: 20px; width: 100%; border: 0; text-align: left; margin-bottom: 10px; }
   .step .dot { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; font-weight: 800; font-size: 14px; color: var(--green); background: var(--line); transition: background .3s, color .3s, transform .4s var(--spring); }
   .step.on .dot { background: linear-gradient(135deg, #0a7a68, #004f44); color: #fff; transform: scale(1.08); }
@@ -1087,7 +1090,7 @@ function ScreeningWizard(imEinsatz) {
         ${k.schritte && k.schritte.length && !(imEinsatz && k.ergebnis === "screening") ? `<h3 class="sec">Das musst du jetzt tun <small>${erledigt.size}/${k.schritte.length}</small></h3>
           ${k.schritte.map((st, i) => `<button class="step glass press ${erledigt.has(i) ? "on" : ""}" data-st="${i}" role="checkbox" aria-checked="${erledigt.has(i)}">
             <span class="dot">${erledigt.has(i) ? svg("check", 3) .replace("<svg", '<svg style="width:16px;height:16px"') : i + 1}</span>
-            <span class="txt"><span>${esc(st.text)}</span>${st.hinweis ? `<span class="s">${esc(st.hinweis)}</span>` : ""}</span></button>`).join("")}` : ""}
+            <span class="txt"><span>${esc(st.text)}</span>${st.hinweis ? `<span class="s">${esc(st.hinweis)}</span>` : ""}</span></button>${dokZeile(st)}`).join("")}` : ""}
         ${k.fristen ? `<h3 class="sec">Fristen</h3>${fristenHTML()}` : ""}
         ${k.rechtsgrundlage ? `<p class="small" style="margin:16px 4px"><b>Rechtsgrundlage:</b> ${esc(k.rechtsgrundlage)}</p>` : ""}
         <h3 class="sec">Prüfprotokoll</h3>
@@ -1104,7 +1107,7 @@ function ScreeningWizard(imEinsatz) {
           el.querySelector(".dot").innerHTML = erledigt.has(i) ? svg("check", 3).replace("<svg", '<svg style="width:16px;height:16px"') : i + 1;
           const h = app.querySelector("h3.sec small"); if (h) h.textContent = `${erledigt.size}/${k.schritte.length}`;
         });
-        fristenBind();
+        fristenBind(); dokBinden();
         $("wc").onclick = () => {
           const knopf = $("wc");
           const ok = () => { knopf.innerHTML = svg("check") + " Kopiert"; };
@@ -1400,7 +1403,7 @@ function Checkliste(id) {
     title: l.titel,
     html: `<p class="small" style="font-size:15px">${esc(l.kontext)}</p>${bar(set.size / l.punkte.length)}<div style="height:12px"></div>
       ${l.punkte.map((p, i) => `${p.abschnitt ? `<h3 class="sec">${esc(p.abschnitt)}</h3>` : ""}<button class="step glass press check ${set.has(i) ? "on" : ""}" data-i="${i}" role="checkbox" aria-checked="${set.has(i)}">
-        <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">${esc(p.hinweis)}</span>` : ""}</span></button>`).join("")}
+        <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">${esc(p.hinweis)}</span>` : ""}</span></button>${dokZeile(p)}`).join("")}
       <p class="small">Abgehakte Punkte werden nur lokal gespeichert. Keine Personendaten eintragen.</p>
       <button class="btn glassy danger" id="cr">${svg("rotate")} Checkliste zurücksetzen</button>`,
     bind: () => {
@@ -1410,6 +1413,7 @@ function Checkliste(id) {
         el.classList.toggle("on", set.has(i)); el.setAttribute("aria-checked", set.has(i));
         app.querySelector(".bar > div").style.width = (set.size / l.punkte.length) * 100 + "%";
       });
+      dokBinden();
       $("cr").onclick = () => { if (confirm("Alle Haken entfernen?")) { S.checklisten[id] = []; save(); neuZeichnen(); } };
     }
   };
@@ -2569,7 +2573,7 @@ function Originalformulare() {
       const dr = $("vDruckAlle"); if (dr) dr.onclick = () => { vibrate(); allesDrucken(fertig, dr); };
       ergebnisBinden();
       // Automatisch (neu) erstellen, sobald sich Angaben, Auswahl oder Vorlagen geändert haben
-      const stand = JSON.stringify([F.werte, KORREKTUREN, VORLAGEN_DATEIEN.map(f => f.name + f.size)]);
+      const stand = vorlagenStand();
       if ((auto || VORLAGEN_DATEIEN.length) && stand !== VORLAGEN_STAND && !VORLAGEN_LAEUFT) { VORLAGEN_STAND = stand; vorlagenVerarbeiten(); }
     }
   };
@@ -2994,6 +2998,46 @@ async function sidasPdf(ergebnisse, fortschritt) {
 }
 
 // Alle Unterlagen in einem Druckauftrag (Bildschirmvorschau; für exakten Druck die Word-Dateien nutzen)
+// Druck-Knöpfe direkt an Checklisten-Punkten: p.dokumente = Formular-Arten (z. B. ["belehrung15","belehrung48"]) oder "merkblatt"
+const vorlagenStand = () => JSON.stringify([F && F.werte, KORREKTUREN, VORLAGEN_DATEIEN.map(f => f.name + f.size)]);
+function dokZeile(p) {
+  if (!p || !p.dokumente || !C.vorlagen_eingebaut || !C.vorlagen_eingebaut.length) return "";
+  if (!F) return `<div class="dokrow"><button class="btn glassy" data-doknf="1">${svg("plus", 2.4)} Fall anlegen – dann hier direkt drucken</button></div>`;
+  const noetig = dokumenteImFall().map(d => d.erkennung);
+  const arten = p.dokumente.filter(a => a !== "merkblatt" && noetig.includes(a));
+  const merk = p.dokumente.includes("merkblatt") ? beilagenImFall() : [];
+  if (!arten.length && !merk.length) return `<div class="dokrow"><span class="entfaellt">Entfällt in diesem Fall.</span></div>`;
+  return `<div class="dokrow">${arten.map(a => `<button class="btn" data-dok="${esc(a)}">${svg("print")} ${esc(ART_NAMEN[a] || a)} drucken</button>`).join("")}
+    ${merk.map((b, k) => `<button class="btn glassy" data-dokm="${k}">${svg("print")} ${esc(b.titel)} öffnen</button>`).join("")}</div>`;
+}
+async function dokDrucken(art, knopf) {
+  vibrate();
+  const d = dokumenteImFall().find(x => x.erkennung === art);
+  const fehlt = d && d.pflichtfelder ? offenDok(d) : [];
+  if (fehlt.length && !confirm(`Für „${ART_NAMEN[art] || art}“ fehlen noch Angaben: ${fehlt.map(f => f.label).join(", ")}.\n\nTrotzdem drucken? (Sonst erst im Fall ergänzen.)`)) return;
+  const alt = knopf.innerHTML; knopf.disabled = true; knopf.innerHTML = "Formular wird ausgefüllt …";
+  try {
+    if (VORLAGEN_LAEUFT) while (VORLAGEN_LAEUFT) await new Promise(r => setTimeout(r, 200));
+    const stand = vorlagenStand();
+    if (stand !== VORLAGEN_STAND || !VORLAGEN_ERGEBNIS.some(e => e.art === art && e.blob)) { VORLAGEN_STAND = stand; await vorlagenVerarbeiten(); }
+  } finally { knopf.disabled = false; knopf.innerHTML = alt; }
+  const liste = VORLAGEN_ERGEBNIS.filter(e => e.art === art && e.blob);   // deutsche Fassung und ggf. Sprachfassung
+  if (!liste.length) { alert("Das Formular konnte nicht erstellt werden. Bitte unter „Alle Unterlagen“ prüfen."); return; }
+  const ziel = document.querySelector(`[data-dok="${art}"]`) || knopf;
+  await allesDrucken(liste, ziel);
+  ziel.innerHTML = svg("check", 2.6) + " Gedruckt – erneut drucken";
+}
+function dokBinden() {
+  app.querySelectorAll("[data-dok]").forEach(b => b.onclick = ev => { ev.stopPropagation(); dokDrucken(b.dataset.dok, b); });
+  app.querySelectorAll("[data-dokm]").forEach(b => b.onclick = ev => {
+    ev.stopPropagation(); vibrate();
+    const bl = beilagenImFall()[+b.dataset.dokm]; if (!bl) return;
+    const url = URL.createObjectURL(new Blob([Uint8Array.from(atob(bl.daten), c => c.charCodeAt(0))], { type: "application/pdf" }));
+    if (!window.open(url, "_blank")) speichern(new Blob([Uint8Array.from(atob(bl.daten), c => c.charCodeAt(0))], { type: "application/pdf" }), bl.name);
+  });
+  app.querySelectorAll("[data-doknf]").forEach(b => b.onclick = () => { vibrate(); neuerFall(); go(Erfassung(0)); });
+}
+
 async function allesDrucken(liste, knopf) {
   if (typeof docx === "undefined") { alert("Drucken aus der App ist hier nicht möglich – bitte „Alle speichern“ und in Word drucken."); return; }
   const alt = knopf.innerHTML; knopf.innerHTML = "Druck wird vorbereitet …"; knopf.disabled = true;
@@ -3526,7 +3570,7 @@ function Einsatz(nr) {
       ${(st.info || []).map(t => `<div class="note glass">${svg("info").replace("<svg", '<svg style="color:#0082c4"')}<span class="small" style="color:var(--text)">${esc(t)}</span></div>`).join("")}
       ${st.punkte.length ? `<h3 class="sec" style="margin-top:18px">Das machst du jetzt <small>${haken.size}/${st.punkte.length}</small></h3>
         ${st.punkte.map((p, i) => `<button class="step glass press check ${haken.has(i) ? "on" : ""}" data-eh="${i}" role="checkbox" aria-checked="${haken.has(i)}">
-          <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">ⓘ ${esc(p.hinweis)}</span>` : ""}</span></button>`).join("")}` : ""}
+          <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">ⓘ ${esc(p.hinweis)}</span>` : ""}</span></button>${dokZeile(p)}`).join("")}` : ""}
       ${st.aktion === "pruefung" ? `<button class="btn" id="eP" style="font-size:19px;padding:20px">${svg("shieldcheck")} ${e.pruefung ? "Prüfung erneut durchführen" : "Prüfung starten"}</button>
         ${e.pruefung ? `<div class="note glass" style="border:2px solid ${e.pruefung === "ja" ? "#e75113" : "#008444"}"><span><b>Ergebnis:</b> ${esc(e.ergebnis)}</span></div>` : ""}` : ""}
       ${st.erfassen ? `<button class="btn" id="eF" style="font-size:18px;padding:18px">${svg("pencil")} ${F ? "Angaben erfassen" : "Fall anlegen und erfassen"}${F ? ` <span style="font-weight:600;opacity:.85">(${offenSchritt ? offenSchritt + " offen" : "vollständig ✓"})</span>` : ""}</button>` : ""}
@@ -3551,6 +3595,7 @@ function Einsatz(nr) {
         const h = app.querySelector("h3.sec small"); if (h) h.textContent = `${haken.size}/${st.punkte.length}`;
       });
       app.querySelectorAll("[data-ph]").forEach(b => b.onclick = () => gehe(liste.findIndex(x => x.phase === b.dataset.ph)));
+      dokBinden();
       const eZ = $("eZ"); if (eZ) eZ.onclick = () => gehe(nr - 1);
       const eW = $("eW"); if (eW) eW.onclick = () => gehe(nr + 1);
       const eS = $("eS"); if (eS) eS.onclick = () => { vibrate(); zeigeTab("start"); };
