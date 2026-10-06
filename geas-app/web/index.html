@@ -1115,6 +1115,11 @@ function ScreeningWizard(imEinsatz) {
         const wE = $("wE"); if (wE) wE.onclick = () => { vibrate(); imEinsatz("ja", k.titel); };
         const wLF = $("wLF"); if (wLF) wLF.onclick = () => { vibrate(); go(ue.knoten ? Leitfaden(ue.leitfaden, ue.knoten) : () => LeitfadenStart(ue.leitfaden)); };
         const wHR = $("wHR"); if (wHR) wHR.onclick = () => { vibrate(); go(() => Handreichung(ue.handreichung)); };
+        if (k.ergebnis === "screening" || k.ergebnis === "kein") {
+          const antwort = k.ergebnis === "screening" ? "ja" : "nein";
+          S.pruefErgebnis = { antwort, zeit: Date.now() }; save();
+          if (!imEinsatz && F && !F.werte.screening_fall) pruefungUebernehmen(antwort);
+        }
         if (imEinsatz && k.ergebnis !== "screening") imEinsatz("nein", k.titel, true);
         $("wn").onclick = neu;
       }
@@ -1153,6 +1158,20 @@ const relevant = d => erfuellt(d.bedingung);
 const istUma = () => wert("uma") === "Ja" || auswahl("vulnerabilitaet").includes("Unbegleitete:r Minderjährige:r");
 // Screening-Fall? Angabe im Fall, sonst Ergebnis der Prüfung im geführten Einsatz – ohne Angabe gilt: Screening
 const istScreening = () => { const w = wert("screening_fall"); if (w) return !w.startsWith("Nein"); return !(S.einsatz && S.einsatz.pruefung === "nein"); };
+// Ergebnis der Screening-Prüfung in den Fall übernehmen, damit „Screening-Fall?“ nicht noch einmal gefragt wird
+const SF_JA = "Ja – Screening durch die Landespolizei", SF_NEIN = "Nein – Aufgriff ohne Screening";
+function pruefungUebernehmen(antwort) {
+  if (!F || !C.intern || !antwort) return;
+  F.werte.screening_fall = antwort === "nein" ? SF_NEIN : SF_JA; F.screeningAusPruefung = true; fallSpeichern();
+}
+function bekannteAntwort() {
+  if (S.einsatz && S.einsatz.pruefung) return S.einsatz.pruefung;
+  const p = S.pruefErgebnis; return p && Date.now() - p.zeit < 12 * 3600e3 ? p.antwort : null;
+}
+function neuerFall() {
+  F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } };
+  fallSpeichern(); pruefungUebernehmen(bekannteAntwort());
+}
 // Betreff der Aufgriffsmeldung an das BAMF (Checkliste Meldeverfahren)
 const bamfBetreff = () => `${wert("haft") === "Ja" ? "HAFT – " : ""}${istUma() ? "Aufgriff uM" : wert("asyl") === "Ja" ? "Asyl" : "Aufgriff"} – ${wert("azr_nummer").trim() || "[AZR-Nummer]"}`;
 const aufgriff = () => { const w = wert("aufgriff_zeit"); return w ? new Date(w) : null; };
@@ -1168,7 +1187,7 @@ function FallUebersicht() {
           .map(([t, s, ic], i) => `<div class="rowtile glass reveal" style="cursor:default">${ico(ic, i + 1, "sm")}<span class="txt"><span class="t">${t}</span><br><span class="s">${s}</span></span></div>`).join("")}
         <button class="btn" id="fn">${svg("plus", 2.4)} Neuen Fall anlegen</button>
         <div class="note glass">${svg("lock").replace("<svg", '<svg style="color:var(--green)"')}<span class="small">${esc(C.fall.hinweis)}</span></div></div>`,
-      bind: () => $("fn").onclick = () => { vibrate(); F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } }; fallSpeichern(); go(Erfassung(0)); }
+      bind: () => $("fn").onclick = () => { vibrate(); neuerFall(); fallSpeichern(); go(Erfassung(0)); }
     };
   }
   const sch = C.fall.schritte, fertig = sch.filter(s => offenIn(s).length === 0).length;
@@ -1252,7 +1271,7 @@ function Erfassung(start, nur) {
           <div><h2 class="rounded" style="margin:0;font-size:30px">${esc(s.titel)}</h2>
           <div class="small" id="offen" style="font-weight:700;color:${o ? "var(--coral)" : "var(--ok)"}">${o ? `${o} Pflichtangabe${o === 1 ? "" : "n"} offen` : "Alle Pflichtangaben erfasst"}</div></div></div>
         <p class="small" style="font-size:15px">${esc(s.beschreibung)}</p>
-        <div id="felder">${s.felder.filter(sichtbar).map(feldHTML).join("")}</div>
+        <div id="felder">${s.felder.filter(sichtbar).map(f => f.id === "screening_fall" && F.screeningAusPruefung && !leer(f.id) ? `<div class="note glass" style="border:2px solid ${wert(f.id).startsWith("Nein") ? "#008444" : "#c0392b"}"><span><b>${esc(f.label)}</b> ${esc(wert(f.id))}<br><span class="small">Aus der Screening-Prüfung übernommen.</span></span><button class="btn glassy" id="sfAendern" style="width:auto;margin:0;padding:8px 14px">Ändern</button></div>` : feldHTML(f)).join("")}</div>
         <div class="platz-unten"></div>
         <div class="bottombar fest">
           ${index > 0 ? `<button class="btn glassy" id="ep" style="flex:.6">${svg("chevl", 2.2)} Zurück</button>` : ""}
@@ -1266,6 +1285,7 @@ function Erfassung(start, nur) {
         const en = $("en"); if (en) en.onclick = () => gehe(index + 1);
         const ez = $("ez"); if (ez) ez.onclick = () => { vibrate(); zurueck(); };
         const ef = $("ef"); if (ef) ef.onclick = () => { vibrate(); stack.pop(); if (stack[stack.length - 1] !== FallUebersicht) stack.push(FallUebersicht); uebergang("back", anim => render(anim ? "enter-back" : "")); };
+        const sfA = $("sfAendern"); if (sfA) sfA.onclick = () => { vibrate(); delete F.screeningAusPruefung; fallSpeichern(); render(); };
         verdrahten();
       }
     };
@@ -2525,7 +2545,7 @@ function Originalformulare() {
         ${VORLAGEN_DATEIEN.length ? `<p class="small" style="margin:8px 0 0">Geladen: ${VORLAGEN_DATEIEN.map(f => esc(f.name)).join(", ")}</p>` : ""}
       </details>`,
     bind: () => {
-      if (!F) { $("vNeu").onclick = () => { vibrate(); F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } }; fallSpeichern(); go(Erfassung(0)); }; return; }
+      if (!F) { $("vNeu").onclick = () => { vibrate(); neuerFall(); fallSpeichern(); go(Erfassung(0)); }; return; }
       const e2 = $("vErg2"); if (e2) e2.onclick = () => { vibrate(); const i = C.fall.schritte.findIndex(st => offenIn(st).length); go(Erfassung(i < 0 ? 0 : i)); };
       $("vd").onchange = async e => { VORLAGEN_DATEIEN = Array.from(e.target.files || []); VORLAGEN_STAND = ""; await vorlagenVerarbeiten(); };
       const alle = $("vAlle");
@@ -3472,7 +3492,7 @@ function einsatzErgebnis(antwort, titel, nurMerken) {
   const e = ES();
   if (e.pruefung === antwort && e.ergebnis === titel && nurMerken) return;
   e.pruefung = antwort; e.ergebnis = titel; save();
-  if (F && C.intern) { F.werte.screening_fall = antwort === "nein" ? "Nein – Aufgriff ohne Screening" : "Ja – Screening durch die Landespolizei"; fallSpeichern(); }
+  pruefungUebernehmen(antwort);
   if (nurMerken) return;
   const i = einsatzSchritte().findIndex(x => x.id === "pruefung");
   e.i = i + 1; save();
@@ -3537,7 +3557,7 @@ function Einsatz(nr) {
       const eP = $("eP"); if (eP) eP.onclick = () => { vibrate(); go(ScreeningWizard(einsatzErgebnis)); };
       const eF = $("eF"); if (eF) eF.onclick = () => {
         vibrate();
-        if (!F) { F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } }; fallSpeichern(); }
+        if (!F) { neuerFall(); fallSpeichern(); }
         go(Erfassung(0, st.erfassen));
       };
       app.querySelectorAll("#eU").forEach(b => b.onclick = () => { vibrate(); go(Originalformulare); });
@@ -3671,7 +3691,7 @@ function Ablauf() {
         vibrate();
         const akt = b.dataset.akt;
         if (akt === "pruefung") go(ScreeningWizard());
-        if (akt === "fall") { if (!F) { F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } }; fallSpeichern(); } go(FallUebersicht); }
+        if (akt === "fall") { if (!F) { neuerFall(); fallSpeichern(); } go(FallUebersicht); }
         if (akt === "vorlagen") go(Originalformulare);
       });
       const fk = $("fk"); if (fk) fk.onclick = () => { vibrate(); go(FallUebersicht); };
