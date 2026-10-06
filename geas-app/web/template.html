@@ -1045,7 +1045,7 @@ function fallKarte() {
 const SP = C.screening;
 function maxTiefe(id) { const k = SP.knoten[id]; return k.typ !== "frage" ? 0 : 1 + Math.max(...k.antworten.map(a => maxTiefe(a.ziel))); }
 function ScreeningWizard(imEinsatz) {
-  let verlauf = [], aktuell = SP.start, erledigt = new Set();
+  let verlauf = [], aktuell = SP.start, erledigt = new Set(), uebernahmeGefragt = false;
   const tiefe = maxTiefe(SP.start);
   if (imEinsatz) bereich("screening");
   const protokoll = k => {
@@ -1085,8 +1085,14 @@ function ScreeningWizard(imEinsatz) {
         ${ue && ue.handreichung && C.handreichungen && C.handreichungen[ue.handreichung] ? `<button class="btn glassy" id="wHR">${svg("print")} Handreichung „${esc(C.handreichungen[ue.handreichung].titel.replace(/^Handreichung:\s*/, ""))}“</button>` : ""}
         ${imEinsatz ? (k.ergebnis === "screening"
           ? `<button class="btn" id="wE" style="font-size:19px;padding:20px">${svg("arrowr", 2.4)} Weiter: Screening durchführen</button>`
-          : `<div class="note glass" style="border:2px solid #008444"><span><b>Kein Screening.</b> Arbeite die Punkte unten ab – dann ist der Einsatz für die Screening-Hilfe beendet.</span></div>`)
-          : k.ergebnis === "screening" ? `<button class="btn" id="wa">${svg("docs")} Unterlagen-Assistent starten</button>` : ""}
+          : k.einsatz_ohne_screening
+            ? `<div class="note glass" style="border:2px solid #e08600"><span><b>Kein Screening. Jetzt entscheiden:</b> Hält sich die Person unerlaubt auf und wird sie an die Aufnahmeeinrichtung (Asylgesuch) oder die Ausländerbehörde verwiesen? Dann weiter als <b>„Aufgriff ohne Screening“</b>: ED-Behandlung, Belehrung, Unterlagen und Aufgriffsmeldung an das BAMF – kein Überprüfungsformular, kein SiDaS. Sonst: Einsatz beenden und mit dem Leitfaden oben weiterarbeiten.</span></div>
+               <button class="btn" id="wE2" style="font-size:18px;padding:18px">${svg("arrowr", 2.4)} Unerlaubter Aufenthalt: weiter als Aufgriff ohne Screening</button>
+               <button class="btn glassy" id="wEnde">${svg("check", 2.4)} Kein Aufgriff – Einsatz beenden</button>`
+            : `<div class="note glass" style="border:2px solid #008444"><span><b>Kein Screening.</b> Der geführte Screening-Einsatz endet hier. Arbeite die Punkte unten ab und nutze den Leitfaden oben.</span></div>
+               <button class="btn glassy" id="wEnde">${svg("check", 2.4)} Einsatz beenden</button>`)
+          : k.ergebnis === "screening" ? `<button class="btn" id="wa">${svg("docs")} Unterlagen starten (Screening)</button>`
+          : k.einsatz_ohne_screening && C.intern ? `<div class="note glass" style="border:1.5px solid #e08600"><span class="small">Unerlaubter Aufenthalt und Verweisung an Aufnahmeeinrichtung oder Ausländerbehörde? Dann Unterlagen als „Aufgriff ohne Screening“ erstellen (BAMF-Meldung, kein SiDaS).</span></div><button class="btn glassy" id="wOS">${svg("docs")} Unterlagen: Aufgriff ohne Screening</button>` : ""}
         ${k.schritte && k.schritte.length && !(imEinsatz && k.ergebnis === "screening") ? `<h3 class="sec">Das musst du jetzt tun <small>${erledigt.size}/${k.schritte.length}</small></h3>
           ${k.schritte.map((st, i) => `<button class="step glass press ${erledigt.has(i) ? "on" : ""}" data-st="${i}" role="checkbox" aria-checked="${erledigt.has(i)}">
             <span class="dot">${erledigt.has(i) ? svg("check", 3) .replace("<svg", '<svg style="width:16px;height:16px"') : i + 1}</span>
@@ -1118,12 +1124,29 @@ function ScreeningWizard(imEinsatz) {
         const wE = $("wE"); if (wE) wE.onclick = () => { vibrate(); imEinsatz("ja", k.titel); };
         const wLF = $("wLF"); if (wLF) wLF.onclick = () => { vibrate(); go(ue.knoten ? Leitfaden(ue.leitfaden, ue.knoten) : () => LeitfadenStart(ue.leitfaden)); };
         const wHR = $("wHR"); if (wHR) wHR.onclick = () => { vibrate(); go(() => Handreichung(ue.handreichung)); };
-        if (k.ergebnis === "screening" || k.ergebnis === "kein") {
-          const antwort = k.ergebnis === "screening" ? "ja" : "nein";
+        const antwort = k.ergebnis === "screening" ? "ja" : null;
+        if (antwort) {
           S.pruefErgebnis = { antwort, zeit: Date.now() }; save();
-          if (!imEinsatz && F && !F.werte.screening_fall) pruefungUebernehmen(antwort);
+          if (!imEinsatz && F && !uebernahmeGefragt) {
+            uebernahmeGefragt = true;
+            const neu = antwort === "nein" ? SF_NEIN : SF_JA;
+            if (!F.werte.screening_fall || F.screeningAusPruefung) pruefungUebernehmen(antwort);
+            else if (F.werte.screening_fall !== neu && confirm(`Im gespeicherten Fall steht „${F.werte.screening_fall}“. Das neue Prüfergebnis übernehmen?`)) pruefungUebernehmen(antwort);
+          }
+          if (imEinsatz) imEinsatz(antwort, k.titel, true);
         }
-        if (imEinsatz && k.ergebnis !== "screening") imEinsatz("nein", k.titel, true);
+        const ohneMerken = () => { S.pruefErgebnis = { antwort: "nein", zeit: Date.now() }; save(); };
+        const wE2 = $("wE2"); if (wE2) wE2.onclick = () => { vibrate(); ohneMerken(); imEinsatz("nein", k.titel); };
+        const wOS = $("wOS"); if (wOS) wOS.onclick = () => {
+          vibrate(); ohneMerken();
+          if (F) { if (!F.werte.screening_fall || F.screeningAusPruefung || confirm(`Im gespeicherten Fall steht „${F.werte.screening_fall}“. Auf „Aufgriff ohne Screening“ ändern?`)) pruefungUebernehmen("nein"); }
+          else neuerFall();
+          go(FallUebersicht);
+        };
+        const wEnde = $("wEnde"); if (wEnde) wEnde.onclick = () => {
+          if (F && !confirm("Einsatz beenden? Der angelegte Fall wird gelöscht – vorher ggf. Unterlagen im Vorgang ablegen.")) return;
+          vibrate(); fallUndEinsatzZuruecksetzen(); zeigeTab("start");
+        };
         $("wn").onclick = neu;
       }
     };
@@ -1143,7 +1166,8 @@ function ScreeningWizard(imEinsatz) {
 // ================= Unterlagen-Assistent =================
 const FELDER = Object.fromEntries(C.fall.schritte.flatMap(s => s.felder).map(f => [f.id, f]));
 const TRENNER = "; ";
-const wert = id => (F && F.werte[id]) || "";
+// Ausgeblendete Felder (Bedingung nicht erfüllt) zählen als leer – auch in Formularen, Fristen und Kettenbedingungen
+const wert = id => { const v = (F && F.werte[id]) || ""; if (!v) return ""; const f = FELDER[id]; return f && f.bedingung && !erfuellt(f.bedingung) ? "" : v; };
 const auswahl = id => wert(id).split(TRENNER).filter(Boolean);
 function setze(id, v) { if (!F) return; if (v) F.werte[id] = v; else delete F.werte[id]; fallSpeichern(); }
 function erfuellt(b) {
@@ -1170,6 +1194,13 @@ function pruefungUebernehmen(antwort) {
 function bekannteAntwort() {
   if (S.einsatz && S.einsatz.pruefung) return S.einsatz.pruefung;
   const p = S.pruefErgebnis; return p && Date.now() - p.zeit < 12 * 3600e3 ? p.antwort : null;
+}
+function fallUndEinsatzZuruecksetzen() {
+  F = null; fallSpeichern();
+  if (C.vorlagen) { VORLAGEN_ERGEBNIS = []; VORLAGEN_DATEIEN = []; KORREKTUREN = {}; VORLAGEN_STAND = ""; }
+  S.einsatz = null; delete S.pruefErgebnis;
+  if (C.ablauf) C.ablauf.forEach(x => delete S.checklisten["ablauf-" + x.nr]);
+  save();
 }
 function neuerFall() {
   F = { angelegt: Date.now(), werte: { aufgriff_zeit: lokalISO(new Date()), screening_zeit: lokalISO(new Date()) } };
@@ -1208,7 +1239,7 @@ function FallUebersicht() {
         <button class="btn" id="fw">${svg("pencil")} ${fertig === sch.length ? "Angaben prüfen" : "Weiter erfassen"}</button></div>
       ${a ? `<div class="fristen2">
         <div class="glass reveal"><div class="small"><b>Richter bis</b></div>${fest ? `<b style="color:var(--coral)">${fmtDatum(richterFrist(a))}</b>` : `<span class="small">nur bei Festhalten</span>`}</div>
-        <div class="glass reveal"><div class="small"><b>Screening bis</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b></div></div>` : ""}
+        <div class="glass reveal"><div class="small"><b>Screening bis</b></div>${istScreening() ? `<b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b>` : `<span class="small">entfällt – Aufgriff ohne Screening</span>`}</div></div>` : ""}
       <h3 class="sec">Erfassung <small>${fertig}/${sch.length} vollständig</small></h3>
       ${sch.map((s, i) => { const o = offenIn(s).length; return rowtile(`data-s="${i}"`, `${i + 1}. ${s.titel}`, o ? `${o} Pflichtangabe${o === 1 ? "" : "n"} offen` : "Vollständig", o ? s.icon : "check", o ? i + 1 : 0); }).join("")}
       ${C.vorlagen ? `<h3 class="sec">Originalformulare <small>Word</small></h3>
@@ -1228,11 +1259,17 @@ function FallUebersicht() {
         $("fa2").onclick = () => { vibrate(); go(() => Dokument(docs, "Alle Unterlagen")); };
       }
       if ($("fo")) $("fo").onclick = () => { vibrate(); go(Originalformulare); };
-      $("fl").onclick = () => { if (confirm("Fall und alle Daten endgültig löschen? Vorher die Unterlagen in das Vorgangsbearbeitungssystem übernehmen.")) { F = null; fallSpeichern(); if (C.vorlagen) { VORLAGEN_ERGEBNIS = []; VORLAGEN_DATEIEN = []; KORREKTUREN = {}; } neuZeichnen(); } };
+      $("fl").onclick = () => { if (confirm("Fall und alle Daten endgültig löschen? Vorher die Unterlagen in das Vorgangsbearbeitungssystem übernehmen.")) { fallUndEinsatzZuruecksetzen(); neuZeichnen(); } };
     }
   };
 }
 
+// Felder eines Erfassungsschritts; „Screening-Fall?“ erscheint als Hinweis, wenn aus der Prüfung übernommen
+function felderHTML(s) {
+  const l = s.felder.filter(sichtbar);
+  if (!l.length) return `<div class="note glass"><span>In diesem Fall gibt es hier nichts zu erfassen${s.id === "festhalten" ? " – Festhalten nach Art. 8 Screening-VO gibt es nur beim Screening. Ohne Screening: Festnahme nur bei Haftgrund (§ 62 Abs. 5 AufenthG) – dafür die „Festhalteanordnung“ unter „Mehr“." : "."}</span></div>`;
+  return l.map(f => f.id === "screening_fall" && F.screeningAusPruefung && !leer(f.id) ? `<div class="note glass" style="border:2px solid ${wert(f.id).startsWith("Nein") ? "#008444" : "#c0392b"}"><span><b>${esc(f.label)}</b> ${esc(wert(f.id))}<br><span class="small">Aus der Screening-Prüfung übernommen.</span></span><button class="btn glassy" id="sfAendern" style="width:auto;margin:0;padding:8px 14px">Ändern</button></div>`  : feldHTML(f)).join("");
+}
 function feldHTML(f) {
   const v = wert(f.id);
   const pf = f.pflicht ? `<span class="pflicht ${v ? "ok" : ""}">Pflicht</span>` : "";
@@ -1267,14 +1304,14 @@ function Erfassung(start, nur) {
     bereich("screening");
     const s = sch[index], o = offenIn(s).length;
     return {
-      title: `Schritt ${index + 1} von ${sch.length}`,
+      title: nur ? `Einsatz · ${s.titel}` : `Schritt ${index + 1} von ${sch.length}`,
       html: `${bar((index + 1) / sch.length)}
         <div class="stepper" id="stp">${sch.map((x, i) => `<button class="${i === index ? "cur" : offenIn(x).length ? "" : "done"}" data-g="${i}">${offenIn(x).length ? icon(x.icon) : svg("check", 2.6)}${esc(x.titel)}</button>`).join("")}</div>
         <div style="display:flex;gap:14px;align-items:center;margin:8px 0 6px">${ico(s.icon, index + 1, "lg")}
           <div><h2 class="rounded" style="margin:0;font-size:30px">${esc(s.titel)}</h2>
           <div class="small" id="offen" style="font-weight:700;color:${o ? "var(--coral)" : "var(--ok)"}">${o ? `${o} Pflichtangabe${o === 1 ? "" : "n"} offen` : "Alle Pflichtangaben erfasst"}</div></div></div>
         <p class="small" style="font-size:15px">${esc(s.beschreibung)}</p>
-        <div id="felder">${s.felder.filter(sichtbar).map(f => f.id === "screening_fall" && F.screeningAusPruefung && !leer(f.id) ? `<div class="note glass" style="border:2px solid ${wert(f.id).startsWith("Nein") ? "#008444" : "#c0392b"}"><span><b>${esc(f.label)}</b> ${esc(wert(f.id))}<br><span class="small">Aus der Screening-Prüfung übernommen.</span></span><button class="btn glassy" id="sfAendern" style="width:auto;margin:0;padding:8px 14px">Ändern</button></div>` : feldHTML(f)).join("")}</div>
+        <div id="felder">${felderHTML(s)}</div>
         <div class="platz-unten"></div>
         <div class="bottombar fest">
           ${index > 0 ? `<button class="btn glassy" id="ep" style="flex:.6">${svg("chevl", 2.2)} Zurück</button>` : ""}
@@ -1297,7 +1334,7 @@ function Erfassung(start, nur) {
       const o = offenIn(sch[index]).length, el = $("offen");
       el.textContent = o ? `${o} Pflichtangabe${o === 1 ? "" : "n"} offen` : "Alle Pflichtangaben erfasst";
       el.style.color = o ? "var(--coral)" : "var(--ok)";
-      if (struktur) { $("felder").innerHTML = sch[index].felder.filter(sichtbar).map(feldHTML).join(""); verdrahten(); }
+      if (struktur) { $("felder").innerHTML = felderHTML(sch[index]); verdrahten(); const sfA = $("sfAendern"); if (sfA) sfA.onclick = () => { vibrate(); delete F.screeningAusPruefung; fallSpeichern(); render(); }; }
       app.querySelectorAll(".pflicht").forEach(p => { const f = p.closest(".field, .box")?.querySelector("[data-f],[data-dt],[data-chip],[data-now],[data-sel]"); const id = f && (f.dataset.f || f.dataset.dt || f.dataset.chip || f.dataset.now || f.dataset.sel); if (id) p.classList.toggle("ok", !leer(id)); });
       const stp = app.querySelectorAll("#stp button"); sch.forEach((x, i) => { if (i !== index) stp[i].className = offenIn(x).length ? "" : "done"; });
     }
@@ -1331,10 +1368,10 @@ function Erfassung(start, nur) {
 function platzhalter(id) {
   if (id === "heute") return fmtDatum(new Date());
   const a = aufgriff();
-  if (id === "frist_richter") { if (wert("festgehalten") === "Nein") return "entfällt – kein Festhalten"; return a ? fmtDatum(richterFrist(a)) : "—"; }
+  if (id === "frist_richter") { if (wert("festgehalten") !== "Ja") return "entfällt – kein Festhalten"; return a ? fmtDatum(richterFrist(a)) : "—"; }
   if (id === "frist_screening") return a ? fmtDatum(screeningFrist(a)) : "—";
   if (id === "bamf_betreff") return bamfBetreff();
-  if (id === "bamf_anlagen") return ((C.bamf_meldung || {}).anlagen || []).map((x, k) => `${k + 1}. ${x}`).join("\n");
+  if (id === "bamf_anlagen") return ((C.bamf_meldung || {}).anlagen || []).filter(x => istScreening() || !/nur bei Screening/i.test(x)).map((x, k) => `${k + 1}. ${x}`).join("\n");
   const v = wert(id).trim();
   if (!v) return "—";
   if (FELDER[id] && FELDER[id].typ === "datumzeit") { const d = new Date(v); if (!isNaN(d)) return fmtDatum(d); }
@@ -1403,7 +1440,7 @@ function Checkliste(id) {
     title: l.titel,
     html: `<p class="small" style="font-size:15px">${esc(l.kontext)}</p>${bar(set.size / l.punkte.length)}<div style="height:12px"></div>
       ${l.punkte.map((p, i) => `${p.abschnitt ? `<h3 class="sec">${esc(p.abschnitt)}</h3>` : ""}<button class="step glass press check ${set.has(i) ? "on" : ""}" data-i="${i}" role="checkbox" aria-checked="${set.has(i)}">
-        <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">${esc(p.hinweis)}</span>` : ""}</span></button>${dokZeile(p)}`).join("")}
+        <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">${esc(p.hinweis)}</span>` : ""}${entfaelltText(p)}</span></button>${dokZeile(p)}`).join("")}
       <p class="small">Abgehakte Punkte werden nur lokal gespeichert. Keine Personendaten eintragen.</p>
       <button class="btn glassy danger" id="cr">${svg("rotate")} Checkliste zurücksetzen</button>`,
     bind: () => {
@@ -2456,9 +2493,9 @@ function speichern(blob, name) {
 
 // Welche Dokumente braucht dieser Fall?
 function dokumenteImFall() {
-  const asyl = wert("asyl") === "Ja", uma = istUma();
+  const asylW = wert("asyl"), asyl = asylW === "Ja", uma = istUma();
   const hatDokumente = auswahl("dokumente").some(d => !d.startsWith("Kein"));
-  const passt1 = w => w === "immer" || (w === "asyl" && asyl) || (w === "ohne_asyl" && !asyl) || (w === "uma" && uma) || (w === "erwachsen" && !uma) || (w === "dokumente" && hatDokumente) || (w === "ohne_asyl_oder_uma" && (!asyl || uma))
+  const passt1 = w => w === "immer" || (w === "asyl" && asyl) || (w === "ohne_asyl" && asylW === "Nein") || (w === "uma" && uma) || (w === "erwachsen" && !uma) || (w === "dokumente" && hatDokumente) || (w === "ohne_asyl_oder_uma" && (asylW === "Nein" || uma))
     || (w === "kein_rueckkehr" && !wert("weiterleitung").startsWith("Rückkehrverfahren"))
     || (w === "screening" && istScreening()) || (w === "ohne_screening" && !istScreening());
   const passt = w => w.split("+").every(passt1);   // z. B. "asyl+dokumente"
@@ -2509,6 +2546,8 @@ function Originalformulare() {
         <button class="btn" id="vNeu">${svg("plus", 2.4)} Fall anlegen</button>` : `
       ${offen ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span><b>Noch ${offen} Pflichtangabe${offen === 1 ? "" : "n"} offen</b> – die Unterlagen sind erst vollständig, wenn alles erfasst ist.<br><button class="btn" id="vErg2" style="margin:10px 0 0;padding:12px">${svg("pencil")} Angaben ergänzen</button></span></div>`
         : `<div class="note glass" style="border:2px solid #008444">${svg("check", 2.6).replace("<svg", '<svg style="color:#008444"')}<span><b>Alle Pflichtangaben erfasst.</b></span></div>`}
+      ${!wert("asyl") && !istUma() ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span><b>Asylgesuch noch nicht erfasst.</b> Belehrung, Inverwahrung und Abschlusserklärung hängen davon ab – erst „Asylgesuch ja oder nein?“ beantworten.</span></div>` : ""}
+      ${wert("asyl") === "Ja" && wert("weiterleitung").startsWith("Rückkehr") ? `<div class="note glass" style="border:2px solid var(--coral)">${svg("alert").replace("<svg", '<svg style="color:var(--coral)"')}<span><b>Bitte prüfen:</b> Asylgesuch „Ja“, aber Weiterleitung „Rückkehrverfahren“ – das passt nicht zusammen.</span></div>` : ""}
       <div class="casehead" style="margin-bottom:14px">
         <h4 class="rounded" style="font-size:24px">${VORLAGEN_LAEUFT ? "Unterlagen werden erstellt …" : `${fertig.length} Unterlagen fertig ausgefüllt`}</h4>
         <div style="opacity:.9;margin-top:4px">Fall: ${esc(fallText)}</div>
@@ -2998,11 +3037,17 @@ async function sidasPdf(ergebnisse, fortschritt) {
 }
 
 // Alle Unterlagen in einem Druckauftrag (Bildschirmvorschau; für exakten Druck die Word-Dateien nutzen)
+// Checklisten-Punkt mit Bedingung (z. B. "screening", "asyl", "uma") – entfällt im konkreten Fall
+const punktEntfaellt = p => !!(p && p.wann && F && (dokumenteImFall(), dokumenteImFall.passt) && !dokumenteImFall.passt(p.wann));
+const entfaelltText = p => punktEntfaellt(p) ? `<span class="s" style="color:var(--muted);font-weight:700">Entfällt in diesem Fall.</span>` : "";
 // Druck-Knöpfe direkt an Checklisten-Punkten: p.dokumente = Formular-Arten (z. B. ["belehrung15","belehrung48"]) oder "merkblatt"
 const vorlagenStand = () => JSON.stringify([F && F.werte, KORREKTUREN, VORLAGEN_DATEIEN.map(f => f.name + f.size)]);
 function dokZeile(p) {
   if (!p || !p.dokumente || !C.vorlagen_eingebaut || !C.vorlagen_eingebaut.length) return "";
   if (!F) return `<div class="dokrow"><button class="btn glassy" data-doknf="1">${svg("plus", 2.4)} Fall anlegen – dann hier direkt drucken</button></div>`;
+  if (punktEntfaellt(p)) return "";
+  const ASYLABH = ["belehrung15", "belehrung48", "inverwahrung", "inverwahrung50", "abschluss", "abschluss_ohne", "fragebogen"];
+  if (!wert("asyl") && !istUma() && p.dokumente.some(a => ASYLABH.includes(a))) return `<div class="dokrow"><button class="btn glassy" data-dokasyl="1">${svg("pencil")} Erst erfassen: Asylgesuch ja oder nein?</button></div>`;
   const noetig = dokumenteImFall().map(d => d.erkennung);
   const arten = p.dokumente.filter(a => a !== "merkblatt" && noetig.includes(a));
   const merk = p.dokumente.includes("merkblatt") ? beilagenImFall() : [];
@@ -3036,6 +3081,7 @@ function dokBinden() {
     if (!window.open(url, "_blank")) speichern(new Blob([Uint8Array.from(atob(bl.daten), c => c.charCodeAt(0))], { type: "application/pdf" }), bl.name);
   });
   app.querySelectorAll("[data-doknf]").forEach(b => b.onclick = () => { vibrate(); neuerFall(); go(Erfassung(0)); });
+  app.querySelectorAll("[data-dokasyl]").forEach(b => b.onclick = () => { vibrate(); const i = C.fall.schritte.findIndex(st => st.felder.some(f => f.id === "asyl")); go(Erfassung(Math.max(0, i))); });
 }
 
 async function allesDrucken(liste, knopf) {
@@ -3455,7 +3501,9 @@ function Festhalteanordnung() {
   const fehlend = () => K.felder.filter(f => f.pflicht && !(Array.isArray(w[f.id]) ? w[f.id].length : w[f.id])).map(f => f.label);
   const gruppen = [...new Set(K.felder.map(f => f.gruppe))];
   const view = () => {
-    const warn = K.warnungen.filter(x => [].concat(w[x.feld] || []).includes(x.wert));
+    // Warnung greift nur, wenn auch die übrigen Bedingungen (z. B. Rechtslage) erfüllt sind; "sperre" verhindert den Druck
+    const warn = K.warnungen.filter(x => [].concat(w[x.feld] || []).includes(x.wert) && Object.entries(x.wenn || {}).every(([k, v]) => [].concat(w[k] || []).includes(v)));
+    const gesperrt = warn.find(x => x.sperre);
     return {
       title: "Festhalteanordnung",
       html: `<div class="glass" style="padding:18px;border:1.5px solid #002664">
@@ -3464,7 +3512,7 @@ function Festhalteanordnung() {
         </div>
         ${warn.map(x => `<div class="note glass" style="margin-top:12px;border:1.5px solid var(--coral)">${svg("alert").replace("<svg", '<svg style="color:var(--coral)"')}<span><b style="color:var(--coral)">Achtung:</b> ${esc(x.text)}</span></div>`).join("")}
         ${gruppen.map(g => `<h3 class="sec">${esc(g)}</h3>${K.felder.filter(f => f.gruppe === g).map(f => fhFeld(f, w)).join("")}`).join("")}
-        <button class="btn" id="fhD">${svg("print")} Drucken / als PDF speichern</button>
+        ${gesperrt ? `<div class="note glass" style="border:2px solid var(--coral)"><span><b style="color:var(--coral)">Druck gesperrt:</b> ${esc(gesperrt.sperre)}</span></div>` : `<button class="btn" id="fhD">${svg("print")} Drucken / als PDF speichern</button>`}
         <h3 class="sec">Vorschau</h3><div class="fh-vorschau glass"><div class="fh-zoom">${fhBrief(w)}</div></div>
         <button class="btn glassy danger" id="fhX">${svg("rotate")} Formular leeren</button>
         <p class="small">Die Angaben bleiben nur auf diesem Gerät und werden nach 7 Tagen automatisch gelöscht.</p>`,
@@ -3488,7 +3536,7 @@ function Festhalteanordnung() {
           else w[f.id] = w[f.id] === o ? "" : o;
           fhSpeichern(); neuZeichnen();
         });
-        $("fhD").onclick = () => {
+        if ($("fhD")) $("fhD").onclick = () => {
           vibrate();
           const f = fehlend();
           const offen = [...new Set(K.felder.flatMap(x => String(w[x.id] || "").match(/\[[^\]]{1,40}\]/g) || []))];
@@ -3550,6 +3598,9 @@ function Einsatz(nr) {
   nr = Math.max(0, Math.min(nr, liste.length - 1));
   e.i = nr; save();
   const st = liste[nr], haken = new Set(e.haken[st.id] || []);
+  const ohneScr = e.pruefung === "nein" || (F && !istScreening());
+  const phaseName = ph => ohneScr && ph === "Screening durchführen" ? "Aufgriff ohne Screening" : ph;
+  const entfaellt = ohneScr && st.nur === "screening";
   const a = aufgriff();
   const offenSchritt = (st.erfassen || []).reduce((n, id) => { const x = C.fall.schritte.find(y => y.id === id); return n + (x && F ? offenIn(x).length : 0); }, 0);
   const phasen = [...new Set(liste.map(x => x.phase))];
@@ -3558,19 +3609,20 @@ function Einsatz(nr) {
   return {
     title: `Schritt ${nr + 1} von ${liste.length}`,
     html: `${bar((nr + 1) / liste.length)}
-      <div class="stepper">${phasen.map(ph => `<button class="${ph === st.phase ? "cur" : ""}" data-ph="${esc(ph)}">${esc(ph)}</button>`).join("")}</div>
+      <div class="stepper">${phasen.map(ph => `<button class="${ph === st.phase ? "cur" : ""}" data-ph="${esc(ph)}">${esc(phaseName(ph))}</button>`).join("")}</div>
       ${nachPruefung && e.pruefung === "nein" ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span>Die Prüfung ergab <b>kein Screening</b> („${esc(e.ergebnis)}“). Ohne Screening entfallen Überprüfungsformular, Information Art. 11, die Sicherheitskontrolle nach Art. 15 und der SiDaS-Upload. Die übrigen Unterlagen (Belehrung, Anlaufbescheinigung, Inverwahrung, Fragebogen, Abschlusserklärung) erstellt die App weiterhin; gemeldet wird per E-Mail an das BAMF.</span></div>` : ""}
       ${nachPruefung && !e.pruefung ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span>Die Prüfung „Screening ja oder nein?“ wurde noch nicht gemacht.</span></div>` : ""}
-      <div class="small" style="margin:10px 2px 0;font-weight:700;color:var(--green)">${esc(st.phase)}</div>
+      <div class="small" style="margin:10px 2px 0;font-weight:700;color:var(--green)">${esc(phaseName(st.phase))}</div>
       <h2 class="rounded" style="font-size:30px;margin:2px 0 8px;line-height:1.15">${esc(st.titel)}</h2>
       <p style="margin:0 0 14px;font-size:17px">${esc(st.kurz)}</p>
       ${beispielBox(st.beispiel)}
-      ${a && nachPruefung && e.pruefung !== "nein" ? `<div class="fristen2" style="margin:0 0 14px"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b><div class="small" style="margin-top:4px">Formular unverzüglich an Referat 2 senden – die LDS braucht Zeit für ihre Maßnahmen.</div></div>
+      ${a && nachPruefung && istScreening() ? `<div class="fristen2" style="margin:0 0 14px"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b><div class="small" style="margin-top:4px">Formular unverzüglich an Referat 2 senden – die LDS braucht Zeit für ihre Maßnahmen.</div></div>
         <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
       ${(st.info || []).map(t => `<div class="note glass">${svg("info").replace("<svg", '<svg style="color:#0082c4"')}<span class="small" style="color:var(--text)">${esc(t)}</span></div>`).join("")}
-      ${st.punkte.length ? `<h3 class="sec" style="margin-top:18px">Das machst du jetzt <small>${haken.size}/${st.punkte.length}</small></h3>
+      ${entfaellt ? `<div class="note glass" style="border:2px solid #008444"><span><b>Entfällt bei einem Aufgriff ohne Screening.</b> Weiter mit „Weiter“.</span></div>` : ""}
+      ${st.punkte.length && !entfaellt ? `<h3 class="sec" style="margin-top:18px">Das machst du jetzt <small>${haken.size}/${st.punkte.length}</small></h3>
         ${st.punkte.map((p, i) => `<button class="step glass press check ${haken.has(i) ? "on" : ""}" data-eh="${i}" role="checkbox" aria-checked="${haken.has(i)}">
-          <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">ⓘ ${esc(p.hinweis)}</span>` : ""}</span></button>${dokZeile(p)}`).join("")}` : ""}
+          <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">ⓘ ${esc(p.hinweis)}</span>` : ""}${entfaelltText(p)}</span></button>${dokZeile(p)}`).join("")}` : ""}
       ${st.aktion === "pruefung" ? `<button class="btn" id="eP" style="font-size:19px;padding:20px">${svg("shieldcheck")} ${e.pruefung ? "Prüfung erneut durchführen" : "Prüfung starten"}</button>
         ${e.pruefung ? `<div class="note glass" style="border:2px solid ${e.pruefung === "ja" ? "#e75113" : "#008444"}"><span><b>Ergebnis:</b> ${esc(e.ergebnis)}</span></div>` : ""}` : ""}
       ${st.erfassen ? `<button class="btn" id="eF" style="font-size:18px;padding:18px">${svg("pencil")} ${F ? "Angaben erfassen" : "Fall anlegen und erfassen"}${F ? ` <span style="font-weight:600;opacity:.85">(${offenSchritt ? offenSchritt + " offen" : "vollständig ✓"})</span>` : ""}</button>` : ""}
@@ -3608,8 +3660,7 @@ function Einsatz(nr) {
       app.querySelectorAll("#eU").forEach(b => b.onclick = () => { vibrate(); go(Originalformulare); });
       const eL = $("eL"); if (eL) eL.onclick = () => {
         if (!confirm("Fall und alle Daten endgültig löschen? Vorher die Unterlagen im Vorgang ablegen.")) return;
-        F = null; fallSpeichern(); VORLAGEN_ERGEBNIS = []; VORLAGEN_DATEIEN = []; KORREKTUREN = {}; VORLAGEN_STAND = "";
-        S.einsatz = null; if (C.ablauf) C.ablauf.forEach(x => delete S.checklisten["ablauf-" + x.nr]); save();
+        fallUndEinsatzZuruecksetzen();
         zeigeTab("start");
       };
     }
@@ -3640,7 +3691,7 @@ function EinsatzStart() {
         <button class="btn glassy" id="sP">${svg("search")} Nicht sicher, welcher Bereich? Kurz prüfen</button>
         ${laeuft ? `<button class="btn glassy" id="sN" style="margin-top:0">${svg("plus", 2.4)} Neuen Einsatz beginnen</button>` : ""}
         ${F ? `<div style="margin-top:14px">${fallKarte()}</div>` : ""}
-        ${a && e && e.pruefung !== "nein" ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b><div class="small" style="margin-top:4px">Formular unverzüglich an Referat 2 senden – die LDS braucht Zeit für ihre Maßnahmen.</div></div>
+        ${a && e && istScreening() ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b><div class="small" style="margin-top:4px">Formular unverzüglich an Referat 2 senden – die LDS braucht Zeit für ihre Maßnahmen.</div></div>
           <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
         ${istUma() ? umaKarte(true) : ""}
         <h3 class="sec" style="justify-content:flex-start;gap:4px"><span class="stufe">2</span> Wie ausführlich?</h3>
@@ -3661,8 +3712,7 @@ function EinsatzStart() {
       $("sE").onclick = () => { vibrate(); go(() => Einsatz(laeuft ? e.i : 0)); };
       const sN = $("sN"); if (sN) sN.onclick = () => {
         if (!confirm("Neuen Einsatz beginnen? Die Haken werden zurückgesetzt." + (F ? " Der gespeicherte Fall wird gelöscht – vorher die Unterlagen im Vorgang ablegen." : ""))) return;
-        F = null; fallSpeichern(); VORLAGEN_ERGEBNIS = []; VORLAGEN_DATEIEN = []; KORREKTUREN = {}; VORLAGEN_STAND = "";
-        S.einsatz = null; save(); neuZeichnen();
+        fallUndEinsatzZuruecksetzen(); neuZeichnen();
       };
       $("sD").onclick = () => { vibrate(); go(FallUebersicht); };
       app.querySelectorAll("[data-lfs]").forEach(b => b.onclick = () => { vibrate(); go(() => LeitfadenStart(b.dataset.lfs)); });
@@ -3704,7 +3754,7 @@ function Ablauf() {
         <div class="note glass" style="border:1.5px solid var(--coral)">${svg("lock").replace("<svg", '<svg style="color:var(--coral)"')}<span class="small"><b style="color:var(--coral)">Nur für den Dienstgebrauch.</b> ${esc(C.meta.hinweis_intern || "")}</span></div>
         ${fallKarte()}
         ${istUma() ? umaKarte(true) : ""}
-        ${a ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b><div class="small" style="margin-top:4px">Formular unverzüglich an Referat 2 senden – die LDS braucht Zeit für ihre Maßnahmen.</div></div>
+        ${a && istScreening() ? `<div class="fristen2"><div class="glass"><div class="small"><b>Screening endet spätestens</b></div><b style="color:#e08600">${fmtDatum(screeningFrist(a))}</b><div class="small" style="margin-top:4px">Formular unverzüglich an Referat 2 senden – die LDS braucht Zeit für ihre Maßnahmen.</div></div>
           <div class="glass"><div class="small"><b>Richter (nur bei Festhalten)</b></div><b style="color:var(--coral)">${wert("festgehalten") === "Ja" ? fmtDatum(richterFrist(a)) : "—"}</b></div></div>` : ""}
         ${C.ablauf.map(s => {
           const set = new Set(S.checklisten["ablauf-" + s.nr] || []);
@@ -3715,17 +3765,19 @@ function Ablauf() {
               <b style="font-size:19px;flex:1">${esc(s.titel)}</b>${s.punkte.length ? `<span class="small">${set.size}/${s.punkte.length}</span>` : ""}</div>
             ${(s.info || []).map(t => `<p class="small" style="margin:10px 0 0">ⓘ ${esc(t)}</p>`).join("")}
             ${s.punkte.map((p, i) => `<button class="step press check ${set.has(i) ? "on" : ""}" data-ab="${esc(s.nr)}" data-i="${i}" style="margin:10px 0 0;background:transparent;padding:6px 0">
-              <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">${esc(p.hinweis)}</span>` : ""}</span></button>`).join("")}
+              <span class="cbox">${svg("check", 3)}</span><span class="txt"><span class="strikeme">${esc(p.text)}</span>${p.hinweis ? `<span class="s">${esc(p.hinweis)}</span>` : ""}${entfaelltText(p)}</span></button>${dokZeile(p)}`).join("")}
             ${s.aktion === "pruefung" ? `<button class="btn" data-akt="pruefung" style="margin-bottom:0">${svg("shieldcheck")} Screening-Prüfung starten</button>` : ""}
             ${s.aktion === "fall" ? `<button class="btn" data-akt="fall" style="margin-bottom:0">${svg("pencil")} ${F ? "Angaben erfassen" : "Fall anlegen"}</button>` : ""}
             ${s.aktion === "vorlagen" ? `<button class="btn" data-akt="vorlagen" style="margin-bottom:0;${farbVars(2)}">${svg("docs")} Alle Unterlagen erstellen</button>` : ""}
-            ${s.mail ? `<a class="btn glassy" href="${esc(mailLink(s.mail))}" style="text-decoration:none;margin-bottom:0">${svg("share")} ${esc(s.mail.knopf)}</a>` : ""}
+            ${s.mail && (!s.mail_nur_screening || istScreening()) ? `<a class="btn glassy" href="${esc(mailLink(s.mail))}" style="text-decoration:none;margin-bottom:0">${svg("share")} ${esc(s.mail.knopf)}</a>` : ""}
+            ${s.bamf && C.bamf_meldung ? `<a class="btn glassy" href="${esc(mailLink(C.bamf_meldung.mail))}" style="text-decoration:none;margin-bottom:0">${svg("share")} ${esc(C.bamf_meldung.mail.knopf)}</a>` : ""}
           </div>`;
         }).join("")}
         ${istUma() ? "" : umaKarte(false)}
         <button class="btn glassy" id="abReset" style="margin-top:18px">${svg("rotate")} Haken zurücksetzen (neuer Einsatz)</button>
       </div>`,
     bind: () => {
+      dokBinden();
       app.querySelectorAll("[data-ab]").forEach(el => el.onclick = () => {
         vibrate();
         const k = "ablauf-" + el.dataset.ab, i = +el.dataset.i, set = new Set(S.checklisten[k] || []);

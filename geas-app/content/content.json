@@ -53,11 +53,11 @@
         },
         {
           "titel": "Inhalt des Screenings",
-          "text": "• **Identifizierung/Identitätsprüfung** – Dokumente, Datenbankabgleich\n• **Vorläufige Gesundheitskontrolle** – durch die nach Landesrecht zuständigen Gesundheitsbehörden\n• **Vorläufige Vulnerabilitätsprüfung** – z. B. Minderjährige, Schwangere, Opfer von Menschenhandel, Folter, Behinderung\n• **Sicherheitsprüfung** – Abgleich u. a. SIS, Europol-, Interpol- und nationale Datenbanken\n• **Erfassung biometrischer Daten** in Eurodac\n• Ausfüllen des **Überprüfungsformulars** (Screening-Formular)"
+          "text": "• **Identifizierung/Identitätsprüfung** – Dokumente, Datenbankabgleich\n• **Vorläufige Gesundheitskontrolle** – durch die nach Landesrecht zuständigen Gesundheitsbehörden\n• **Vorläufige Vulnerabilitätsprüfung** – z. B. Minderjährige, Schwangere, Opfer von Menschenhandel, Folter, Behinderung\n• **Sicherheitsprüfung** – Abgleich u. a. SIS, Europol- und nationale Datenbanken (Interpol derzeit keine Abfrage)\n• **Erfassung biometrischer Daten** in Eurodac\n• Ausfüllen des **Überprüfungsformulars** (Screening-Formular)"
         },
         {
           "titel": "Dauer und Rechtsgrundlagen (national)",
-          "text": "• Außengrenze: höchstens **7 Tage** – § 14a AufenthG (Zuständigkeit an Flug- und Seehäfen i. d. R. Bundespolizei)\n• Inland: höchstens **3 Tage** – § 15b AufenthG\n• Die Person ist zur Durchführung **festzuhalten** und an einen geeigneten Ort zu **verbringen**, wenn die Überprüfung sonst nicht oder nur unter erheblichen Schwierigkeiten möglich ist.\n• **Freilassen**, wenn nicht **bis zum Ende des Tages nach dem Ergreifen** eine **richterliche Entscheidung** über die Fortdauer vorliegt (Art. 104 GG).\n• Zuständigkeit: § 71 Abs. 4a AufenthG – Polizeien der Länder sowie weitere nach Landesrecht bestimmte Behörden (z. B. Ausländerbehörden, Aufnahmeeinrichtungen). **Die sächsische Aufgabenverteilung (Zuständigkeitsverordnung/Erlass SMI) beachten.**"
+          "text": "• Außengrenze: höchstens **7 Tage** (Art. 8 Screening-VO; national § 14a AufenthG – Zuständigkeit an Flug- und Seehäfen i. d. R. Bundespolizei)\n• Inland: höchstens **3 Tage** (Art. 8 Abs. 4 Screening-VO; national § 15b AufenthG)\n• Die Person ist zur Durchführung **festzuhalten** und an einen geeigneten Ort zu **verbringen**, wenn die Überprüfung sonst nicht oder nur unter erheblichen Schwierigkeiten möglich ist.\n• **Freilassen**, wenn nicht **bis zum Ende des Tages nach dem Ergreifen** eine **richterliche Entscheidung** über die Fortdauer vorliegt (Art. 104 GG).\n• Zuständigkeit: § 71 Abs. 4a AufenthG – Polizeien der Länder sowie weitere nach Landesrecht bestimmte Behörden (z. B. Ausländerbehörden, Aufnahmeeinrichtungen). **Die sächsische Aufgabenverteilung (Zuständigkeitsverordnung/Erlass SMI) beachten.**"
         },
         {
           "titel": "Information, Mitwirkung, Minderjährige",
@@ -73,12 +73,12 @@
         },
         {
           "titel": "Praxis PD Leipzig",
-          "text": "• Unerlaubt Aufhältige werden in Leipzig häufig bei Verkehrs-, Bahnhofs- oder Personenkontrollen angetroffen. Vor Einleitung eines Screenings **Eurodac-/INPOL-/AZR-Abfrage** – ist die Person bereits erfasst oder überprüft, entfällt das Screening regelmäßig.\n• **Minderjährige** und **Vulnerable** frühzeitig erkennen und dokumentieren (Jugendamt bei UMA).\n• **Sprachmittlung** sicherstellen; Belehrung in einer verständlichen Sprache.\n• Fristen strikt überwachen: **Richtervorbehalt** bei Festhalten über den Folgetag hinaus."
+          "text": "• Unerlaubt Aufhältige werden in Leipzig häufig bei Verkehrs-, Bahnhofs- oder Personenkontrollen angetroffen. Vor Einleitung eines Screenings **Eurodac-/INPOL-/AZR-Abfrage** – entbehrlich ist das Screening i. d. R. bei AZR mit Screening-Vermerk, INPOL mit ED-Behandlung und Asylantrag oder bekanntem unerlaubtem Aufenthalt in Deutschland, nicht schon bei jeder früheren Registrierung.\n• **Minderjährige** und **Vulnerable** frühzeitig erkennen und dokumentieren (Jugendamt bei UMA).\n• **Sprachmittlung** sicherstellen; Belehrung in einer verständlichen Sprache.\n• Fristen strikt überwachen: Bei Festhalten **unverzüglich** die richterliche Entscheidung herbeiführen; ohne Anordnung Freilassung spätestens mit Ende des Folgetages."
         }
       ],
       "merke": [
         "Inland: max. 3 Tage, Außengrenze: max. 7 Tage.",
-        "Festhalten über das Ende des Folgetages hinaus nur mit richterlicher Entscheidung.",
+        "Festhalten: richterliche Entscheidung unverzüglich herbeiführen – ohne Anordnung spätestens mit Ende des Folgetages freilassen.",
         "Screening ist kein Asylverfahren – Asylgesuche bleiben jederzeit möglich."
       ],
       "beispiele": [
@@ -104,21 +104,21 @@
         },
         {
           "titel": "Identitätsfeststellung im AufenthG/AsylG",
-          "text": "• **§ 49 AufenthG** – Überprüfung, Feststellung und Sicherung der Identität; erkennungsdienstliche Maßnahmen\n• **§ 16 AsylG** – Sicherung der Identität bei Asylsuchenden (ED-Behandlung)\n• **§ 48 AufenthG** – Ausweispflichten; bei fehlendem Pass Mitwirkungspflicht und **Durchsuchung nach Identitätsdokumenten** sowie Auswertung von **Datenträgern** unter den dort genannten Voraussetzungen\n• **§ 48a AufenthG** – Herausgabe von Zugangsdaten zu Datenträgern\n\nBei Kindern: altersgerecht, kindgerecht und in Anwesenheit einer Vertrauensperson/eines Vertreters vorgehen."
+          "text": "• **§ 49 AufenthG** – Überprüfung, Feststellung und Sicherung der Identität; erkennungsdienstliche Maßnahmen\n• **§ 16 AsylG** – Sicherung der Identität bei Asylsuchenden (ED-Behandlung)\n• **§ 48 AufenthG** – Ausweispflichten; bei fehlendem Pass Mitwirkungspflicht und **Durchsuchung nach Identitätsdokumenten** sowie Auswertung von **Datenträgern** unter den dort genannten Voraussetzungen\n• **§ 48 Abs. 3a Satz 2 AufenthG** – Pflicht, Zugangsdaten zur Verfügung zu stellen; **§ 48a AufenthG** – Auskunft über Zugangsdaten beim Telekommunikationsanbieter, wenn die Person sie nicht herausgibt\n\nBei Kindern: altersgerecht, kindgerecht und in Anwesenheit einer Vertrauensperson/eines Vertreters vorgehen."
         },
         {
           "titel": "Praxistipps",
-          "text": "• Vor jeder Maßnahme prüfen: **AZR, INPOL, SIS, Eurodac** (über die vorhandenen Fahndungs-/ED-Systeme)\n• Widersprüchliche Personalien immer als **Aliaspersonalien** dokumentieren\n• Mobiltelefone nicht ohne Rechtsgrundlage auswerten – § 48 Abs. 3a AufenthG (Datenträgerauswertung) setzt u. a. voraus, dass der Zweck nicht durch mildere Mittel erreicht werden kann\n• Dokumente sicherstellen und der Ausländerbehörde zuleiten (§ 48 AufenthG)"
+          "text": "• Vor jeder Maßnahme prüfen: **AZR, INPOL, SIS, Eurodac** (über die vorhandenen Fahndungs-/ED-Systeme)\n• Widersprüchliche Personalien immer als **Aliaspersonalien** dokumentieren\n• Mobiltelefone nicht ohne Rechtsgrundlage auslesen oder auswerten: Auslesen nur ohne gültigen Pass/Identitätsnachweis (§ 48 Abs. 3a AufenthG); Auswerten nur, wenn kein milderes Mittel reicht, und nur durch Bedienstete mit Befähigung zum Richteramt (§ 48 Abs. 3b AufenthG)\n• Dokumente in Verwahrung nehmen und Bescheinigung aushändigen – ohne Asylgesuch bei Ausreisepflichtigen § 50 Abs. 5 AufenthG (→ Ausländerbehörde), mit Asylgesuch § 21 Abs. 1 AsylG"
         }
       ],
       "merke": [
         "Eurodac ab 6 Jahren – Fingerabdrücke + Gesichtsbild.",
         "Aliaspersonalien vollständig dokumentieren.",
-        "Datenträgerauswertung nur unter den engen Voraussetzungen des § 48 Abs. 3a AufenthG."
+        "Datenträger: Auslesen nur nach § 48 Abs. 3a, Auswerten nur nach § 48 Abs. 3b AufenthG (Bedienstete mit Befähigung zum Richteramt)."
       ],
       "beispiele": [
         {
-          "text": "Die Fast-ID ergibt einen Eurodac-Treffer aus Österreich in der Kategorie Asyl: Die Person hat dort schon Asyl beantragt. Den Treffer dokumentieren – er ist für die Zuständigkeitsprüfung nach der AMM-VO wichtig. Fingerabdrücke werden ab 6 Jahren genommen: ein 7-jähriges Kind ja, ein 5-jähriges nicht."
+          "text": "Die Fast-ID ergibt einen Eurodac-Treffer aus Österreich in der Kategorie Asyl: Die Person hat dort schon Asyl beantragt. Den Treffer dokumentieren – er ist für die Zuständigkeitsprüfung nach der AMM-VO wichtig. Fingerabdrücke werden ab 6 Jahren genommen: ein 7-jähriges Kind ja, bei einem 5-jährigen nur ein Lichtbild."
         }
       ]
     },
@@ -176,7 +176,7 @@
         },
         {
           "titel": "Überstellungshaft",
-          "text": "Rechtsgrundlage ist nun **Art. 44 Abs. 2 AMM-VO** (bisher Art. 28 Dublin III). Voraussetzung ist insbesondere **erhebliche Fluchtgefahr** bzw. eine Gefahr für die öffentliche Sicherheit; Haft nur so kurz wie möglich, nach Einzelfallprüfung und durch richterliche Anordnung. Das Verfahren (Antrag, Anhörung) richtet sich weiterhin nach dem FamFG; ergänzend gelten die nationalen Vorschriften des AufenthG."
+          "text": "Rechtsgrundlage ist nun **Art. 44 Abs. 2 AMM-VO** (bisher Art. 28 Dublin III). Voraussetzung ist insbesondere **Fluchtgefahr** im Sinne von Art. 2 Nr. 18 AMM-VO (Vermutungen und Anhaltspunkte: § 2 Abs. 14 AufenthG i. V. m. § 62 Abs. 3a, 3b) bzw. eine Gefahr für die öffentliche Sicherheit; Haft nur so kurz wie möglich, nach Einzelfallprüfung und durch richterliche Anordnung. Das Verfahren (Antrag, Anhörung) richtet sich weiterhin nach dem FamFG; ergänzend gelten die nationalen Vorschriften des AufenthG."
         },
         {
           "titel": "Sekundärmigrationszentrum Sachsen",
@@ -214,7 +214,7 @@
         },
         {
           "titel": "Betreten und Durchsuchen (§ 58 Abs. 5–10 AufenthG)",
-          "text": "• **Betreten** der Wohnung zur Ergreifung, wenn Tatsachen vorliegen, dass sich die Person dort befindet (Abs. 5). In Gemeinschaftsunterkünften dürfen dabei auch **andere Räumlichkeiten** betreten werden.\n• **Durchsuchung** der Wohnung zur Ergreifung (Abs. 6) – nur auf **richterliche Anordnung**, bei **Gefahr im Verzug** auch durch die die Abschiebung durchführende Behörde (Abs. 8).\n• **Nachtzeit**: Betreten/Durchsuchen nur, wenn Tatsachen die Annahme rechtfertigen, dass die Ergreifung sonst **vereitelt** würde (Abs. 7). Die Organisation der Abschiebung allein ist **kein** solcher Grund.\n• Die richterliche Durchsuchungsanordnung ist **mitzuführen** bzw. zu **eröffnen**; Protokoll über Durchsuchung anfertigen."
+          "text": "• **Betreten** der Wohnung zur Ergreifung, wenn Tatsachen vorliegen, dass sich die Person dort befindet (Abs. 5). In Gemeinschaftsunterkünften dürfen dabei auch **andere Räumlichkeiten** betreten werden.\n• **Durchsuchung** der Wohnung zur Ergreifung (Abs. 6) – nur auf **richterliche Anordnung**, bei **Gefahr im Verzug** auch durch die die Abschiebung durchführende Behörde (Abs. 8).\n• **Nachtzeit**: Betreten/Durchsuchen nur, wenn Tatsachen die Annahme rechtfertigen, dass die Ergreifung sonst **vereitelt** würde (Abs. 7). Die Organisation der Abschiebung allein ist **kein** solcher Grund – es sei denn, es handelt sich um Bedingungen, die die durchführende Behörde nicht beeinflussen kann (§ 58 Abs. 7 Satz 2 AufenthG).\n• Die richterliche Durchsuchungsanordnung ist **mitzuführen** bzw. zu **eröffnen**; Protokoll über Durchsuchung anfertigen."
         },
         {
           "titel": "Ablauf einer Rückführung (vereinfacht, Sachsen)",
@@ -241,7 +241,7 @@
       "abschnitte": [
         {
           "titel": "Grundsätze",
-          "text": "• Freiheitsentziehung nur durch den **Richter** (Art. 104 GG) – bei Abschiebungshaft das **Amtsgericht** (FamFG)\n• Haft ist **unzulässig**, wenn der Zweck durch ein **milderes Mittel** erreicht werden kann (§ 62 Abs. 1 AufenthG)\n• **Minderjährige und Familien mit Minderjährigen** nur in besonderen Ausnahmefällen und nur so lange, wie es unter Berücksichtigung des Kindeswohls angemessen ist\n• Unverzügliche **Belehrung** und Benachrichtigung (Konsulat auf Wunsch, Angehörige, Rechtsbeistand)"
+          "text": "• Freiheitsentziehung nur durch den **Richter** (Art. 104 GG) – bei Abschiebungshaft das **Amtsgericht** (FamFG)\n• Haft ist **unzulässig**, wenn der Zweck durch ein **milderes Mittel** erreicht werden kann (§ 62 Abs. 1 AufenthG)\n• **Minderjährige und Familien mit Minderjährigen** werden grundsätzlich nicht in Abschiebungshaft genommen (§ 62 Abs. 1 Satz 3 AufenthG)\n• Unverzügliche **Belehrung** und Benachrichtigung (Konsulat auf Wunsch, Angehörige, Rechtsbeistand)"
         },
         {
           "titel": "Haftarten im AufenthG",
@@ -249,11 +249,11 @@
         },
         {
           "titel": "Vorläufige Ingewahrsamnahme (§ 62 Abs. 5 AufenthG)",
-          "text": "Die Polizei darf eine Person **ohne vorherige richterliche Anordnung** festhalten und vorläufig in Gewahrsam nehmen, wenn\n1. der **dringende Verdacht** für das Vorliegen der Voraussetzungen der Sicherungshaft besteht,\n2. die richterliche Entscheidung über die Anordnung der Sicherungshaft **nicht vorher eingeholt** werden kann und\n3. der **begründete Verdacht** vorliegt, dass sich die Person der Anordnung der Sicherungshaft **entziehen** will.\n\nDie Person ist **unverzüglich dem Richter** zur Entscheidung vorzuführen. Haftantrag in Abstimmung mit der zuständigen Ausländerbehörde."
+          "text": "Die für den Haftantrag zuständige Behörde – auch die Polizei (§ 71 Abs. 5 AufenthG) – darf eine Person **ohne vorherige richterliche Anordnung** festhalten und vorläufig in Gewahrsam nehmen, wenn\n1. der **dringende Verdacht** für das Vorliegen der Voraussetzungen der Sicherungshaft besteht,\n2. die richterliche Entscheidung über die Anordnung der Sicherungshaft **nicht vorher eingeholt** werden kann und\n3. der **begründete Verdacht** vorliegt, dass sich die Person der Anordnung der Sicherungshaft **entziehen** will.\n\nDie Person ist **unverzüglich dem Richter** zur Entscheidung vorzuführen. Haftantrag in Abstimmung mit der zuständigen Ausländerbehörde."
         },
         {
           "titel": "Neue Haftformen seit GEAS",
-          "text": "• **Überprüfungshaft** – Screening an der Außengrenze (§ 14a AufenthG) und im Inland (§ 15b AufenthG); Festhalten ohne Richter nur bis zum Ende des Folgetages\n• **Asylverfahrenshaft** – §§ 69–70a AsylG, nur auf richterliche Anordnung, Verhältnismäßigkeit/mildere Mittel\n• **Überstellungshaft** – Art. 44 Abs. 2 AMM-VO\n• **Haft im Rückkehr-Grenzverfahren** – Art. 5 VO 2024/1349\n\nDie genaue Ausgestaltung (Haftgründe, Höchstdauern) jeweils im Gesetzestext bzw. in der Erlasslage nachlesen."
+          "text": "• **Überprüfungshaft** – Screening an der Außengrenze (§ 14a AufenthG) und im Inland (§ 15b AufenthG); beim Festhalten unverzüglich die richterliche Entscheidung herbeiführen, ohne Anordnung Freilassung spätestens mit Ende des Folgetages\n• **Asylverfahrenshaft** – §§ 69–70a AsylG, nur auf richterliche Anordnung, Verhältnismäßigkeit/mildere Mittel\n• **Überstellungshaft** – Art. 44 Abs. 2 AMM-VO\n• **Haft im Rückkehr-Grenzverfahren** – Art. 5 VO 2024/1349\n\nDie genaue Ausgestaltung (Haftgründe, Höchstdauern) jeweils im Gesetzestext bzw. in der Erlasslage nachlesen."
         },
         {
           "titel": "Einrichtung in Sachsen",
@@ -292,7 +292,7 @@
         },
         {
           "titel": "Opfer von Menschenhandel / Traumatisierte",
-          "text": "• Anzeichen: fremdbestimmte Personen, einbehaltene Papiere, Angst, Schulden gegenüber Schleusern\n• Fachdienststelle (Menschenhandel) und Beratungsstellen einbinden; Bedenk- und Stabilisierungsfrist (§ 59 Abs. 7 AufenthG) beachten\n• Vulnerabilität im Screening-Formular dokumentieren"
+          "text": "• Anzeichen: fremdbestimmte Personen, einbehaltene Papiere, Angst, Schulden gegenüber Schleusern\n• Fachdienststelle (Menschenhandel) und Beratungsstellen einbinden; Bedenk- und Stabilisierungsfrist (§ 59 Abs. 7 AufenthG) beachten\n• Auffälligkeiten (z. B. Verletzung, Hinweise auf Menschenhandel) im Vorgang notieren und bei der Übergabe mitteilen – die Vulnerabilitätsprüfung macht die zuständige Behörde"
         },
         {
           "titel": "Kirchenasyl",
@@ -330,12 +330,12 @@
         },
         {
           "titel": "Praxis",
-          "text": "• Strafverfahren hindert die Abschiebung grundsätzlich nicht, aber: bei laufendem Ermittlungsverfahren ist das **Einvernehmen der Staatsanwaltschaft** erforderlich (§ 72 Abs. 4 AufenthG)\n• Beschuldigtenbelehrung **in verständlicher Sprache**, Dolmetscher (§ 187 GVG)\n• Aufenthaltsrechtlichen Status vor Einleitung eines Verfahrens nach § 95 prüfen (Duldung? Gestattung? Titel?)"
+          "text": "• Strafverfahren hindert die Abschiebung grundsätzlich nicht, aber: bei erhobener Klage oder laufendem Ermittlungsverfahren ist das **Einvernehmen der Staatsanwaltschaft** erforderlich (§ 72 Abs. 4 Satz 1 AufenthG) – nicht bei geringem Strafverfolgungsinteresse, u. a. bei Verfahren nur nach § 95 AufenthG oder § 9 FreizügG/EU (Satz 3–5)\n• Beschuldigtenbelehrung **in verständlicher Sprache**, Dolmetscher (§ 187 GVG)\n• Aufenthaltsrechtlichen Status vor Einleitung eines Verfahrens nach § 95 prüfen (Duldung? Gestattung? Titel?)"
         }
       ],
       "merke": [
         "Geduldete machen sich nicht nach § 95 Abs. 1 Nr. 2 strafbar.",
-        "Laufendes Ermittlungsverfahren → Einvernehmen der StA vor Abschiebung (§ 72 Abs. 4).",
+        "Laufendes Ermittlungsverfahren → Einvernehmen der StA vor Abschiebung (§ 72 Abs. 4) – entbehrlich bei geringem Strafverfolgungsinteresse, z. B. nur § 95 AufenthG.",
         "Art. 31 GFK beachten (§ 95 Abs. 5)."
       ],
       "beispiele": [
@@ -409,7 +409,7 @@
       ],
       "beispiele": [
         {
-          "text": "Kontrolle um 02:10 Uhr: Aufgriffszeit notieren. Wird die Person festgehalten, muss bis zum Ende des folgenden Tages (23:59 Uhr) eine richterliche Entscheidung vorliegen, sonst ist sie freizulassen. Das Screening muss spätestens drei Tage nach dem Aufgriff abgeschlossen sein."
+          "text": "Kontrolle um 02:10 Uhr: Aufgriffszeit notieren. Wird die Person festgehalten, ist unverzüglich eine richterliche Entscheidung herbeizuführen. Liegt bis zum Ende des folgenden Tages (23:59 Uhr) keine richterliche Anordnung vor, ist sie freizulassen. Das Screening muss spätestens drei Tage nach dem Aufgriff abgeschlossen sein."
         }
       ]
     }
@@ -437,7 +437,7 @@
         },
         {
           "text": "Festhalten erforderlich? Wenn ja: richterliche Entscheidung beantragt",
-          "hinweis": "Bis Ende des Folgetages"
+          "hinweis": "Unverzüglich – ohne Anordnung Freilassung spätestens mit Ende des Folgetages (§ 15b Abs. 1 AufenthG)"
         },
         {
           "text": "Identität geprüft, Dokumente gesichert"
@@ -503,7 +503,7 @@
           "hinweis": "Nicht, wenn bereits an Außengrenze überprüft"
         },
         {
-          "text": "Festhalten erforderlich? Richterliche Entscheidung bis Ende des Folgetages herbeiführen"
+          "text": "Festhalten erforderlich? Richterliche Entscheidung unverzüglich herbeiführen (ohne Anordnung Freilassung spätestens mit Ende des Folgetages)"
         },
         {
           "text": "Strafanzeige prüfen (§ 95 AufenthG / § 85 AsylG)",
@@ -546,7 +546,7 @@
           "text": "Bei laufender Abschiebung: sofort ZAB/LDS informieren und Weisung abwarten"
         },
         {
-          "text": "Vulnerabilität (Minderjährige, Kranke, Schwangere) vermerken"
+          "text": "Auffälligkeiten (Minderjährige, Kranke, Schwangere) im Vorgang notieren und bei der Übergabe mitteilen"
         }
       ]
     },
@@ -660,10 +660,10 @@
           "text": "Belehrung (Gründe, Rechte, Konsulat, Rechtsbeistand) in verständlicher Sprache"
         },
         {
-          "text": "Unverzügliche Vorführung beim Amtsgericht / Haftantrag über zuständige Behörde"
+          "text": "Unverzüglich dem Amtsgericht vorführen und Haftantrag stellen – die Polizei ist dafür selbst zuständig (§ 71 Abs. 5 AufenthG); mit der Ausländerbehörde/LDS abstimmen"
         },
         {
-          "text": "Minderjährige/Familien: nur in besonderen Ausnahmefällen"
+          "text": "Minderjährige/Familien mit Minderjährigen: grundsätzlich keine Abschiebungshaft (§ 62 Abs. 1 Satz 3 AufenthG)"
         },
         {
           "text": "Unterbringung: Einrichtung Dresden (nicht mit Strafgefangenen)"
@@ -701,7 +701,7 @@
     {
       "was": "Screening an der Außengrenze",
       "frist": "max. 7 Tage",
-      "grundlage": "Screening-VO, § 14a AufenthG"
+      "grundlage": "Art. 8 Screening-VO (national § 14a AufenthG)"
     },
     {
       "was": "Screening im Inland",
@@ -709,9 +709,9 @@
       "grundlage": "Art. 8 Abs. 4 Screening-VO, § 15b AufenthG; Art. 3 VO (EWG, Euratom) Nr. 1182/71"
     },
     {
-      "was": "Festhalten ohne Richter (Screening)",
-      "frist": "bis Ende des Tages nach dem Ergreifen",
-      "grundlage": "§§ 14a, 15b AufenthG, Art. 104 GG"
+      "was": "Festhalten zur Überprüfung – richterliche Entscheidung",
+      "frist": "unverzüglich; ohne richterliche Anordnung Freilassung spätestens mit Ende des Tages nach dem Ergreifen",
+      "grundlage": "§ 15b Abs. 1 Satz 2–4 AufenthG, Art. 104 Abs. 2 GG"
     },
     {
       "was": "Registrierung eines Asylantrags",
@@ -796,7 +796,7 @@
     {
       "was": "Sekundärmigrationszentrum Sachsen",
       "frist": "max. 24 Monate (Familien 12)",
-      "grundlage": "LDS"
+      "grundlage": "§ 47 Abs. 1b, 1c AsylG"
     }
   ],
   "normen": [
@@ -821,8 +821,8 @@
     {
       "norm": "§ 48 AufenthG",
       "titel": "Ausweisrechtliche Pflichten",
-      "inhalt": "Pass vorlegen und überlassen; Mitwirkung bei Passbeschaffung; Durchsuchung nach Dokumenten; Datenträgerauswertung (Abs. 3a).",
-      "praxis": "Pässe sicherstellen und Ausländerbehörde zuleiten."
+      "inhalt": "Pass vorlegen und überlassen; Mitwirkung bei Passbeschaffung; Durchsuchung nach Dokumenten (Abs. 3); Auslesen von Datenträgern (Abs. 3a), Auswertung (Abs. 3b).",
+      "praxis": "Dokumente: ohne Asylgesuch bei ausreisepflichtigen Personen nach § 50 Abs. 5 AufenthG in Verwahrung nehmen und der Ausländerbehörde zuleiten; mit Asylgesuch nach § 21 Abs. 1 AsylG verwahren und weiterleiten. Bescheinigung aushändigen."
     },
     {
       "norm": "§ 49 AufenthG",
@@ -887,7 +887,7 @@
     {
       "norm": "§ 72 Abs. 4 AufenthG",
       "titel": "Beteiligung der StA",
-      "inhalt": "Abschiebung bei laufendem Ermittlungsverfahren nur im Einvernehmen mit der Staatsanwaltschaft.",
+      "inhalt": "Abschiebung bei erhobener Klage oder laufendem Ermittlungsverfahren nur im Einvernehmen mit der Staatsanwaltschaft (Satz 1); nicht erforderlich bei geringem Strafverfolgungsinteresse, u. a. bei Verfahren nur nach § 95 AufenthG, § 9 FreizügG/EU oder Delikten nach Satz 5 (Satz 3–5).",
       "praxis": "Vor Rückführung Verfahrensstand prüfen."
     },
     {
@@ -912,7 +912,7 @@
       "norm": "§ 19 AsylG",
       "titel": "Aufgaben der Ausländerbehörde und der Polizei",
       "inhalt": "Weiterleitung von Asylsuchenden an die zuständige Aufnahmeeinrichtung; ED-Behandlung.",
-      "praxis": "Fassung nach GEAS-Anpassungsgesetz prüfen."
+      "praxis": "Ist ein Screening erforderlich, zuerst Screening, dann Weiterleitung (§ 19 Abs. 1 Satz 2 AsylG); ED-Behandlung vor der Weiterleitung (Abs. 2). Folgt die Person der Weiterleitung nicht, gilt der Asylantrag als nicht gestellt (§ 20 AsylG) – Belehrung nach § 20 aushändigen."
     },
     {
       "norm": "§ 55 AsylG",
@@ -923,13 +923,13 @@
     {
       "norm": "§ 56 AsylG",
       "titel": "Räumliche Beschränkung",
-      "inhalt": "Aufenthaltsgestattung ist räumlich beschränkt.",
+      "inhalt": "Räumlich beschränkt auf den Bezirk der Ausländerbehörde der zuständigen Aufnahmeeinrichtung (§ 56 Abs. 1 AsylG); erlischt nach drei Monaten gestatteten Aufenthalts, nicht aber solange die Wohnpflicht in der Aufnahmeeinrichtung besteht (§ 59a Abs. 1 AsylG).",
       "praxis": "Erstverstoß § 86 (OWi), wiederholt § 85 (Straftat)."
     },
     {
       "norm": "§§ 69–70a AsylG",
       "titel": "Asylverfahrenshaft",
-      "inhalt": "Neue Haftform seit GEAS; nur durch richterliche Anordnung; Verhältnismäßigkeit, mildere Mittel.",
+      "inhalt": "Neue Haftform seit GEAS; nur durch richterliche Anordnung; Verhältnismäßigkeit, mildere Mittel. Vorläufiges Festhalten durch die für den Haftantrag zuständige Behörde nur nach § 69 Abs. 4 AsylG (schriftlich anordnen, unverzüglich vorführen, Freilassung spätestens mit Ablauf des Folgetages).",
       "praxis": "Umsetzung von Art. 10 Aufnahme-RL."
     },
     {
@@ -1264,7 +1264,7 @@
         "Innerhalb von 48 Stunden"
       ],
       "richtig": 1,
-      "erklaerung": "Freilassung, wenn nicht bis zum Ende des Tages nach dem Ergreifen richterlich angeordnet."
+      "erklaerung": "Freilassung, wenn nicht bis zum Ende des Tages nach dem Ergreifen richterlich angeordnet. Die Entscheidung ist aber unverzüglich herbeizuführen – Dienstag 24:00 Uhr ist nur die äußerste Grenze (§ 15b Abs. 1 AufenthG, Art. 104 Abs. 2 GG)."
     },
     {
       "kapitel": "screening",
@@ -1288,7 +1288,7 @@
         "Die Person selbst per Fragebogen"
       ],
       "richtig": 1,
-      "erklaerung": "Die Polizei veranlasst die Kontrolle, führt sie aber nicht selbst durch."
+      "erklaerung": "Zuständig ist die nach Landesrecht bestimmte Stelle (§ 71 Abs. 4a AufenthG) – in Sachsen die LDS (Ausländerbehörde/Erstaufnahmeeinrichtung). Die Polizei führt sie nicht selbst durch."
     },
     {
       "kapitel": "screening",
@@ -1607,7 +1607,7 @@
       "frage": "Darf die Wohnung zur Nachtzeit zur Ergreifung betreten werden, weil der Flug um 6 Uhr geht?",
       "antworten": [
         "Ja, die Flugplanung genügt",
-        "Nein, die Organisation der Abschiebung allein ist kein Grund – es braucht Tatsachen für eine drohende Vereitelung",
+        "Nur wenn Tatsachen eine drohende Vereitelung belegen oder die Flugzeit eine von der Behörde nicht beeinflussbare Bedingung ist – die bloße Organisation reicht nicht",
         "Ja, wenn der Richter informiert ist",
         "Nur mit Zustimmung des Vermieters"
       ],
@@ -1792,7 +1792,7 @@
         "Zustimmung des BAMF"
       ],
       "richtig": 1,
-      "erklaerung": "Einvernehmen der StA."
+      "erklaerung": "Einvernehmen der StA (§ 72 Abs. 4 Satz 1 AufenthG) – außer bei geringem Strafverfolgungsinteresse, z. B. Verfahren nur nach § 95 AufenthG (Satz 3, 4)."
     },
     {
       "kapitel": "strafrecht",
@@ -1920,7 +1920,7 @@
     {
       "icon": "exclamationmark.triangle",
       "titel": "Drei goldene Regeln",
-      "text": "1. **Erst abfragen, dann entscheiden.** INPOL, AZR, SIS, Eurodac – immer vor der Entscheidung.\n2. **Uhrzeit des Aufgriffs sofort notieren.** Festhalten ohne Richter nur bis zum **Ende des folgenden Tages**, Screening höchstens **3 Tage**.\n3. **Asyl sticht nichts aus.** Wer um Schutz bittet, wird trotzdem überprüft – das Gesuch wird **wörtlich** notiert und weitergeleitet.\n\nIm Zweifel: **Rücksprache** mit Dienstgruppenleitung bzw. Fachdienststelle."
+      "text": "1. **Erst abfragen, dann entscheiden.** INPOL, AZR, SIS, Eurodac – immer vor der Entscheidung.\n2. **Uhrzeit des Aufgriffs sofort notieren.** Wird festgehalten: unverzüglich die richterliche Entscheidung herbeiführen – ohne Anordnung spätestens mit **Ende des folgenden Tages** freilassen. Screening höchstens **3 Tage**.\n3. **Asyl sticht nichts aus.** Wer um Schutz bittet, wird trotzdem überprüft – das Gesuch wird **wörtlich** notiert und weitergeleitet.\n\nIm Zweifel: **Rücksprache** mit Dienstgruppenleitung bzw. Fachdienststelle."
     },
     {
       "icon": "square.grid.2x2",
@@ -1941,15 +1941,15 @@
       "Abfragen: INPOL, AZR, SIS, Eurodac/Fast-ID.",
       "Screening-Prüfung in der App Schritt für Schritt beantworten.",
       "Ergebnis befolgen. Bei „Screening durchführen“: Fall im Unterlagen-Assistenten anlegen – die App erstellt alle Unterlagen.",
-      "Festhalten? Richterliche Entscheidung bis Ende des Folgetages – Fristenrechner nutzen."
+      "Festhalten? Richterliche Entscheidung unverzüglich herbeiführen – ohne Anordnung spätestens mit Ende des Folgetages freilassen (Fristenrechner)."
     ],
     "grundsaetze": [
       "Screening gilt nur für Drittstaatsangehörige – nie für EU-, EWR- oder Schweizer Staatsangehörige.",
-      "Screening im Inland nur, wenn es keinen Hinweis auf eine Kontrolle an einer EU-Außengrenze gibt und die Person noch nicht überprüft oder registriert wurde.",
+      "Screening im Inland nur, wenn es keinen Hinweis auf eine Kontrolle an einer EU-Außengrenze gibt und die Person noch nicht überprüft wurde (kein Screening-Vermerk, keine bekannte ED-Behandlung mit Asylantrag).",
       "Legal eingereist und zu lange geblieben (z. B. Visum abgelaufen, 90 Tage überschritten) → kein Screening, sondern Rückkehrverfahren.",
       "Nach Abschiebung/Ausreise ohne Kontrolle zurückgekehrt → erneutes Screening; eine Überstellung innerhalb der EU zählt nicht als Ausreise.",
       "Ein Asylgesuch verhindert das Screening nicht.",
-      "Höchstdauer im Inland: 3 Tage. Festhalten ohne Richter: bis Ende des Tages nach dem Ergreifen.",
+      "Höchstdauer im Inland: 3 Tage. Festhalten: richterliche Entscheidung unverzüglich; ohne Anordnung Freilassung spätestens mit Ende des Tages nach dem Ergreifen.",
       "Die Polizei prüft keine Asylgründe und stellt keine Gesundheit fest – das machen BAMF bzw. Gesundheitsbehörde."
     ],
     "knoten": {
@@ -1977,7 +1977,7 @@
         "typ": "frage",
         "schritt": "Freizügigkeit",
         "frage": "Ist die Person nachweislich Familienangehörige/r einer Unionsbürgerin oder eines Unionsbürgers mit Freizügigkeitsrecht?",
-        "hilfe": "Nachweis ist z. B. eine „Aufenthaltskarte für Familienangehörige eines Unionsbürgers“. Eine bloße Behauptung reicht nicht.",
+        "hilfe": "Nachweis ist z. B. eine „Aufenthaltskarte für Familienangehörige eines Unionsbürgers“. Eine bloße Behauptung reicht nicht. Plausible Angaben ohne Dokument: erst Gelegenheit zur Vorlage von Nachweisen geben und die Ausländerbehörde einbinden (Leitfaden EU-Freizügigkeit).",
         "beispiele": [
           "Ja: Aufenthaltskarte nach § 5 FreizügG/EU",
           "Nein: nur mündliche Angabe, kein Dokument"
@@ -2006,7 +2006,7 @@
         ],
         "antworten": [
           {
-            "text": "Ja – gültiges deutsches Dokument oder gültiges Visum",
+            "text": "Ja – gültiges deutsches Dokument, gültiges Visum oder Titel eines anderen Schengen-Staates (höchstens 90 Tage in Deutschland)",
             "ziel": "e_status"
           },
           {
@@ -2113,23 +2113,27 @@
             ]
           },
           {
-            "text": "Minderjährig oder besonders schutzbedürftig? → Jugendamt bzw. Fachstelle einbinden, kindgerecht vorgehen.",
+            "text": "Minderjährigkeit nicht auszuschließen? → sofort Jugendamt informieren, kindgerecht vorgehen. Hinweise auf besondere Schutzbedürftigkeit notieren und bei der Übergabe mitteilen.",
             "hinweis": "Im Zweifel als minderjährig behandeln"
           },
           {
-            "text": "Nur festhalten, wenn die Überprüfung sonst nicht möglich ist. Dann richterliche Entscheidung beantragen – spätestens bis Ende des Folgetages.",
+            "text": "Nur festhalten, wenn die Überprüfung sonst nicht oder nur unter erheblichen Schwierigkeiten möglich ist. Dann unverzüglich die richterliche Entscheidung herbeiführen. Ordnet das Gericht die Fortdauer nicht bis zum Ende des Tages nach dem Ergreifen an: freilassen. Festhalten beenden, sobald es nicht mehr nötig ist (§ 15b Abs. 3 AufenthG).",
             "hinweis": "§ 15b AufenthG, Art. 104 GG"
           },
           {
+            "text": "Wird die Person wegen Haftbefehl, Untersuchungs- oder Auslieferungshaft festgenommen? Dann kann auf das Screening verzichtet werden (Art. 18 Abs. 6 Screening-VO) – nicht bei Bagatelldelikten.",
+            "hinweis": "Schon begonnen: Überprüfungsformular mit dem Grund an die zuständige Stelle senden. Wird gescreent, gilt die 3-Tages-Frist voll."
+          },
+          {
             "text": "Identität prüfen: Dokumente sichten und sichern.",
-            "hinweis": "Datenträger nur nach § 48 Abs. 3a AufenthG"
+            "hinweis": "Datenträger nur nach § 48 Abs. 3a, 3b AufenthG"
           },
           {
             "text": "Sicherheitsabfragen vollständig durchführen (SIS, INPOL, weitere über die zuständige Stelle).",
             "hinweis": null
           },
           {
-            "text": "ED-Behandlung und Eurodac: Fingerabdrücke und Gesichtsbild (ab 6 Jahren).",
+            "text": "ED-Behandlung und Eurodac: ab 6 Jahren Fingerabdrücke und Lichtbild, unter 6 Jahren nur Lichtbild (§ 49 Abs. 8 AufenthG).",
             "hinweis": null
           },
           {
@@ -2141,7 +2145,7 @@
             "hinweis": null
           },
           {
-            "text": "Überprüfungsformular (Screening-Formular) vollständig ausfüllen.",
+            "text": "Überprüfungsformular ausfüllen – Punkt 3 und 6.4 bis 6.6 bleiben leer (macht die zuständige Behörde/LDS); Anlage „Sicherheitskontrolle“ nicht aushändigen.",
             "hinweis": null
           },
           {
@@ -2153,7 +2157,7 @@
             "hinweis": "Erlasslage SMI beachten"
           },
           {
-            "text": "Screening spätestens nach 3 Tagen abschließen und alles dokumentieren.",
+            "text": "Unterlagen noch am selben Tag weiterleiten – das Screening schließt die zuständige Behörde ab; die 3-Tages-Frist gilt für alles zusammen.",
             "hinweis": null
           }
         ],
@@ -2414,12 +2418,16 @@
             ]
           },
           {
-            "text": "Minderjährig oder besonders schutzbedürftig? → Jugendamt bzw. Fachstelle einbinden, kindgerecht vorgehen.",
+            "text": "Minderjährigkeit nicht auszuschließen? → sofort Jugendamt informieren, kindgerecht vorgehen. Hinweise auf besondere Schutzbedürftigkeit notieren und bei der Übergabe mitteilen.",
             "hinweis": "Im Zweifel als minderjährig behandeln"
           },
           {
-            "text": "Nur festhalten, wenn die Überprüfung sonst nicht möglich ist. Dann richterliche Entscheidung beantragen – spätestens bis Ende des Folgetages.",
+            "text": "Nur festhalten, wenn die Überprüfung sonst nicht oder nur unter erheblichen Schwierigkeiten möglich ist. Dann unverzüglich die richterliche Entscheidung herbeiführen. Ordnet das Gericht die Fortdauer nicht bis zum Ende des Tages nach dem Ergreifen an: freilassen. Festhalten beenden, sobald es nicht mehr nötig ist (§ 15b Abs. 3 AufenthG).",
             "hinweis": "§ 15b AufenthG, Art. 104 GG"
+          },
+          {
+            "text": "Wird die Person wegen Haftbefehl, Untersuchungs- oder Auslieferungshaft festgenommen? Dann kann auf das Screening verzichtet werden (Art. 18 Abs. 6 Screening-VO) – nicht bei Bagatelldelikten.",
+            "hinweis": "Schon begonnen: Überprüfungsformular mit dem Grund an die zuständige Stelle senden. Wird gescreent, gilt die 3-Tages-Frist voll."
           },
           {
             "text": "Einreise- und Aufenthaltsverbot prüfen (§ 11 AufenthG): Einreise trotz Verbots ist eine Straftat – Strafanzeige nach § 95 Abs. 2 Nr. 1 AufenthG.",
@@ -2430,23 +2438,23 @@
             "hinweis": null
           },
           {
-            "text": "Frühere Daten (Eurodac, AZR, ED-Bestand) für die Identifizierung nutzen – Abgleich statt Neuerfassung, soweit möglich.",
+            "text": "Frühere Daten (Eurodac, AZR, ED-Bestand) zum Abgleich der Identität nutzen – die ED-Behandlung wird trotzdem neu durchgeführt.",
             "hinweis": null
           },
           {
-            "text": "ZAB/LDS sofort informieren: Zurückschiebung (§ 57 AufenthG) und Haft (§ 62 AufenthG) prüfen lassen.",
+            "text": "ZAB/LDS sofort informieren: Abschiebung bzw. ggf. Zurückschiebung (§ 57 Abs. 2 AufenthG) und Haft (§ 62 Abs. 3 Satz 1 Nr. 4 AufenthG) prüfen lassen.",
             "hinweis": null
           },
           {
             "text": "Identität prüfen: Dokumente sichten und sichern.",
-            "hinweis": "Datenträger nur nach § 48 Abs. 3a AufenthG"
+            "hinweis": "Datenträger nur nach § 48 Abs. 3a, 3b AufenthG"
           },
           {
             "text": "Sicherheitsabfragen vollständig durchführen (SIS, INPOL, weitere über die zuständige Stelle).",
             "hinweis": null
           },
           {
-            "text": "ED-Behandlung und Eurodac: Fingerabdrücke und Gesichtsbild (ab 6 Jahren).",
+            "text": "ED-Behandlung und Eurodac: ab 6 Jahren Fingerabdrücke und Lichtbild, unter 6 Jahren nur Lichtbild (§ 49 Abs. 8 AufenthG).",
             "hinweis": null
           },
           {
@@ -2458,7 +2466,7 @@
             "hinweis": null
           },
           {
-            "text": "Überprüfungsformular (Screening-Formular) vollständig ausfüllen.",
+            "text": "Überprüfungsformular ausfüllen – Punkt 3 und 6.4 bis 6.6 bleiben leer (macht die zuständige Behörde/LDS); Anlage „Sicherheitskontrolle“ nicht aushändigen.",
             "hinweis": null
           },
           {
@@ -2470,7 +2478,7 @@
             "hinweis": "Erlasslage SMI beachten"
           },
           {
-            "text": "Screening spätestens nach 3 Tagen abschließen und alles dokumentieren.",
+            "text": "Unterlagen noch am selben Tag weiterleiten – das Screening schließt die zuständige Behörde ab; die 3-Tages-Frist gilt für alles zusammen.",
             "hinweis": null
           }
         ],
@@ -3062,7 +3070,7 @@
         "id": "festhalten",
         "titel": "Festhalten",
         "icon": "lock.shield",
-        "beschreibung": "Festhalten nur, wenn die Überprüfung sonst nicht oder nur unter erheblichen Schwierigkeiten möglich ist (§ 15b AufenthG).",
+        "beschreibung": "Festhalten nur, wenn die Überprüfung sonst nicht oder nur unter erheblichen Schwierigkeiten möglich ist (§ 15b AufenthG). Dann unverzüglich die richterliche Entscheidung herbeiführen. Festhalten beenden, sobald Identität, Fingerabdrücke und Sicherheitskontrolle erledigt sind und keine Rückführung oder Überstellung zu sichern ist (§ 15b Abs. 3). Minderjährige grundsätzlich nicht in Überprüfungshaft (§ 15b Abs. 2 Satz 4 AufenthG i. V. m. § 70a AsylG).",
         "felder": [
           {
             "id": "festgehalten",
@@ -3100,6 +3108,36 @@
             "label": "Geprüfte mildere Mittel und warum sie nicht ausreichen",
             "typ": "mehrzeilig",
             "pflicht": true,
+            "bedingung": {
+              "feld": "festgehalten",
+              "wert": "Ja"
+            }
+          },
+          {
+            "id": "fluchtgefahr",
+            "label": "Tatsachen für Fluchtgefahr vom Überprüfungsort (§ 15b Abs. 2 AufenthG)",
+            "typ": "mehrzeilig",
+            "pflicht": true,
+            "bedingung": {
+              "feld": "festgehalten",
+              "wert": "Ja"
+            },
+            "hinweis": "Nur mit konkreten Tatsachen kann das Gericht Überprüfungshaft anordnen (z. B. Person hat versucht wegzulaufen, erklärt, sich zu entziehen, keine Anschrift)."
+          },
+          {
+            "id": "richter_antrag",
+            "label": "Richterliche Entscheidung beantragt (Zeit, Gericht)",
+            "typ": "text",
+            "bedingung": {
+              "feld": "festgehalten",
+              "wert": "Ja"
+            },
+            "hinweis": "Unverzüglich nach Beginn des Festhaltens. Nicht nötig, wenn die Person vor einer Entscheidung des Gerichts ohnehin freigelassen wird (§ 15b Abs. 1 Satz 3)."
+          },
+          {
+            "id": "richter_ergebnis",
+            "label": "Ergebnis / Freilassung (Zeit)",
+            "typ": "text",
             "bedingung": {
               "feld": "festgehalten",
               "wert": "Ja"
@@ -3193,7 +3231,7 @@
           },
           {
             "id": "uebergabe_zeit",
-            "label": "Übergabe / Ende des Screenings",
+            "label": "Übergabe der Person (Zeit)",
             "typ": "datumzeit",
             "pflicht": true
           },
@@ -3333,11 +3371,11 @@
         },
         {
           "titel": "Deutsch",
-          "text": "**Zweck und Dauer.** Sie werden nach Art. 7 der Verordnung (EU) 2024/1356 und § 15b Aufenthaltsgesetz überprüft (Screening). Damit wird festgestellt, wer Sie sind und welches Verfahren für Sie gilt. Die Überprüfung dauert höchstens drei Tage.\n\n**Ablauf.** Ihre Identität wird festgestellt; Ihre Angaben und Dokumente werden mit Datenbanken abgeglichen (Sicherheitskontrolle). Ihre Fingerabdrücke und ein Gesichtsbild werden aufgenommen und in Eurodac gespeichert. Eine Gesundheitsbehörde führt eine vorläufige Gesundheitskontrolle durch. Es wird geprüft, ob Sie besonderen Schutz oder besondere Unterstützung benötigen.\n\n**Ihre Pflichten.** Sie müssen während der Überprüfung für die Behörden erreichbar bleiben, mitwirken, wahrheitsgemäße Angaben machen und die Aufnahme Ihrer biometrischen Daten dulden (Art. 9 Screening-VO).\n\n**Ihre Rechte.** Sie können **jederzeit einen Antrag auf internationalen Schutz (Asyl)** stellen. Wenn Sie festgehalten werden, entscheidet ein Gericht spätestens bis zum Ende des folgenden Tages. Sie können einen Rechtsbeistand und auf Wunsch Ihr Konsulat benachrichtigen. Sie können Angaben im Überprüfungsformular widersprechen.\n\n**Nach der Überprüfung.** Sie werden an die zuständige Stelle weitergeleitet: in ein Asylverfahren, wenn Sie Schutz beantragen, oder in ein Rückkehrverfahren, wenn Sie kein Recht auf Aufenthalt haben. Wer die Voraussetzungen für Einreise und Aufenthalt nicht erfüllt, ist zur Ausreise verpflichtet.\n\n**Datenschutz.** Ihre Daten werden für die Überprüfung und die anschließenden Verfahren verarbeitet. Sie haben das Recht auf Auskunft, Berichtigung und Löschung nach den geltenden Datenschutzvorschriften."
+          "text": "**Zweck und Dauer.** Sie werden nach Art. 7 der Verordnung (EU) 2024/1356 und § 15b Aufenthaltsgesetz überprüft (Screening). Damit wird festgestellt, wer Sie sind und welches Verfahren für Sie gilt. Die Überprüfung dauert höchstens drei Tage.\n\n**Ablauf.** Ihre Identität wird festgestellt; Ihre Angaben und Dokumente werden mit Datenbanken abgeglichen (Sicherheitskontrolle). Ihre Fingerabdrücke und ein Gesichtsbild werden aufgenommen und in Eurodac gespeichert. Eine Gesundheitsbehörde führt eine vorläufige Gesundheitskontrolle durch. Es wird geprüft, ob Sie besonderen Schutz oder besondere Unterstützung benötigen.\n\n**Ihre Pflichten.** Sie müssen während der Überprüfung für die Behörden erreichbar bleiben, mitwirken, wahrheitsgemäße Angaben machen und die Aufnahme Ihrer biometrischen Daten dulden (Art. 9 Screening-VO).\n\n**Ihre Rechte.** Sie können **jederzeit einen Antrag auf internationalen Schutz (Asyl)** stellen. Werden Sie festgehalten, wird unverzüglich eine richterliche Entscheidung herbeigeführt. Ordnet das Gericht die Fortdauer nicht bis zum Ende des folgenden Tages an, werden Sie freigelassen. Sie können einen Rechtsbeistand und auf Wunsch Ihr Konsulat benachrichtigen. Sie können Angaben im Überprüfungsformular widersprechen.\n\n**Nach der Überprüfung.** Sie werden an die zuständige Stelle weitergeleitet: in ein Asylverfahren, wenn Sie Schutz beantragen, oder in ein Rückkehrverfahren, wenn Sie kein Recht auf Aufenthalt haben. Wer die Voraussetzungen für Einreise und Aufenthalt nicht erfüllt, ist zur Ausreise verpflichtet.\n\n**Datenschutz.** Ihre Daten werden für die Überprüfung und die anschließenden Verfahren verarbeitet. Sie haben das Recht auf Auskunft, Berichtigung und Löschung nach den geltenden Datenschutzvorschriften."
         },
         {
           "titel": "English",
-          "text": "**Purpose and duration.** You are being screened under Article 7 of Regulation (EU) 2024/1356 and Section 15b of the German Residence Act. The screening establishes your identity and the procedure that applies to you. It lasts no longer than three days.\n\n**Steps.** Your identity is established; your data and documents are checked against databases (security check). Your fingerprints and a facial image are taken and stored in Eurodac. A health authority carries out a preliminary health check. It is checked whether you need special protection or support.\n\n**Your obligations.** During the screening you must remain available to the authorities, cooperate, provide truthful information and allow your biometric data to be taken (Article 9 of the Screening Regulation).\n\n**Your rights.** You may **apply for international protection (asylum) at any time**. If you are held, a court will decide by the end of the following day at the latest. You may contact a lawyer and, if you wish, your consulate. You may object to information in the screening form.\n\n**After the screening.** You will be referred to the competent authority: to an asylum procedure if you apply for protection, or to a return procedure if you have no right to stay. Anyone who does not fulfil the conditions for entry and stay is obliged to leave.\n\n**Data protection.** Your data are processed for the screening and the subsequent procedures. You have the right of access, rectification and erasure under the applicable data protection rules."
+          "text": "**Purpose and duration.** You are being screened under Article 7 of Regulation (EU) 2024/1356 and Section 15b of the German Residence Act. The screening establishes your identity and the procedure that applies to you. It lasts no longer than three days.\n\n**Steps.** Your identity is established; your data and documents are checked against databases (security check). Your fingerprints and a facial image are taken and stored in Eurodac. A health authority carries out a preliminary health check. It is checked whether you need special protection or support.\n\n**Your obligations.** During the screening you must remain available to the authorities, cooperate, provide truthful information and allow your biometric data to be taken (Article 9 of the Screening Regulation).\n\n**Your rights.** You may **apply for international protection (asylum) at any time**. If you are held, a court decision will be sought without delay. If the court has not ordered your continued detention by the end of the following day, you will be released. You may contact a lawyer and, if you wish, your consulate. You may object to information in the screening form.\n\n**After the screening.** You will be referred to the competent authority: to an asylum procedure if you apply for protection, or to a return procedure if you have no right to stay. Anyone who does not fulfil the conditions for entry and stay is obliged to leave.\n\n**Data protection.** Your data are processed for the screening and the subsequent procedures. You have the right of access, rectification and erasure under the applicable data protection rules."
         },
         {
           "titel": "Bestätigung / Confirmation",
@@ -3347,10 +3385,10 @@
     },
     {
       "id": "festhalten",
-      "titel": "Festhalten & Antrag an das Gericht",
-      "untertitel": "§ 15b AufenthG, Art. 104 GG",
+      "titel": "Festhalten & Antrag auf Überprüfungshaft",
+      "untertitel": "§ 15b Abs. 1, 2 AufenthG, Art. 104 GG",
       "icon": "building.columns.fill",
-      "beschreibung": "Vermerk über das Festhalten und Antrag auf richterliche Entscheidung.",
+      "beschreibung": "Vermerk über das Festhalten und Antrag auf richterliche Anordnung der Überprüfungshaft.",
       "bedingung": {
         "feld": "festgehalten",
         "wert": "Ja"
@@ -3367,6 +3405,7 @@
         "festhalten_beginn",
         "festhalten_grund",
         "milderes_mittel",
+        "fluchtgefahr",
         "unterbringung",
         "gericht"
       ],
@@ -3376,8 +3415,8 @@
           "text": "An das {{gericht}}\n– Bereitschaftsdienst –\n\n| Vorgangsnummer | {{vorgang}}\n| Dienststelle | {{dienststelle}}\n| Sachbearbeitung | {{sachbearbeiter}} ({{erreichbarkeit}})"
         },
         {
-          "titel": "Antrag auf Anordnung der Fortdauer des Festhaltens zur Durchführung der Überprüfung",
-          "text": "Es wird beantragt, die Fortdauer des Festhaltens der nachstehend bezeichneten Person zur Durchführung der Überprüfung nach Art. 7 VO (EU) 2024/1356 i. V. m. § 15b AufenthG anzuordnen.\n\n| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}"
+          "titel": "Antrag auf Anordnung der Überprüfungshaft (§ 15b Abs. 1 Satz 2, Abs. 2 AufenthG)",
+          "text": "Es wird beantragt, gegen die nachstehend bezeichnete Person zur Sicherstellung der Überprüfung nach Art. 7 Abs. 1 VO (EU) 2024/1356 Überprüfungshaft nach § 15b Abs. 2 Satz 1 AufenthG bis längstens {{frist_screening}} anzuordnen.\n\n| Familienname | {{name}}\n| Vorname(n) | {{vorname}}\n| Geburtsdatum | {{geburtsdatum}}\n| Geschlecht | {{geschlecht}}\n| Staatsangehörigkeit | {{staatsangehoerigkeit}}"
         },
         {
           "titel": "Sachverhalt",
@@ -3385,7 +3424,7 @@
         },
         {
           "titel": "Begründung",
-          "text": "Die Überprüfung kann ohne Festhalten nicht oder nur unter erheblichen Schwierigkeiten durchgeführt werden:\n\n{{festhalten_grund}}\n\n**Mildere Mittel:** {{milderes_mittel}}\n\n| Beginn des Festhaltens | {{festhalten_beginn}}\n| Ort des Festhaltens | {{unterbringung}}\n| Richterliche Entscheidung spätestens | {{frist_richter}}\n| Höchstdauer der Überprüfung bis | {{frist_screening}}\n| Schutzersuchen | {{asyl}}\n| Hinweise Schutzbedürftigkeit | {{vulnerabilitaet}}\n| Benachrichtigungen | {{benachrichtigung}}\n| Sprachmittlung | {{dolmetscher}}\n\nWird die Fortdauer nicht bis zum Ende des Tages nach dem Ergreifen richterlich angeordnet, wird die Person freigelassen.\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
+          "text": "Die Überprüfung kann ohne Festhalten nicht oder nur unter erheblichen Schwierigkeiten durchgeführt werden:\n\n{{festhalten_grund}}\n\nDie Überprüfungshaft ist zur ordnungsgemäßen Durchführung der Überprüfung erforderlich. Es besteht die Gefahr, dass die Person vom Ort der Überprüfung flieht (§ 15b Abs. 2 Satz 1 AufenthG):\n\n{{fluchtgefahr}}\n\n**Mildere Mittel:** {{milderes_mittel}}\n\n| Beginn des Festhaltens | {{festhalten_beginn}}\n| Ort des Festhaltens | {{unterbringung}}\n| Ohne richterliche Anordnung Freilassung spätestens | {{frist_richter}}\n| Höchstdauer der Überprüfung bis | {{frist_screening}}\n| Schutzersuchen | {{asyl}}\n| Hinweise Schutzbedürftigkeit | {{vulnerabilitaet}}\n| Benachrichtigungen | {{benachrichtigung}}\n| Sprachmittlung | {{dolmetscher}}\n\nWird die Fortdauer nicht bis zum Ende des Tages nach dem Ergreifen richterlich angeordnet, wird die Person freigelassen.\n\nLeipzig, {{heute}}\n\n\n______________________________\n{{sachbearbeiter}}"
         }
       ]
     },

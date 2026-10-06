@@ -72,18 +72,23 @@ def mische_intern(c, i):
     c["_daten"] = {}
     if (sp / "index.json").exists():
         idx = json.loads((sp / "index.json").read_text(encoding="utf-8"))
-        c["sprachen_formulare"] = idx["formulare"]
+        # Unterschiedliche Schreibweisen der LDS-Dateinamen auf einen Sprachnamen vereinheitlichen
+        alias = {"franzoesisch": "französisch", "tuerkisch": "türkisch", "paschto": "paschtu", "nepali": "nepalesisch", "bengali": "bengalisch",
+                 "aserbaidschan": "aserbaidschanisch", "tigrinia": "tigrinya", "portugisisch": "portugiesisch",
+                 "kurdisch-badini": "kurd-badini", "kurdisch-kurmanci": "kurd-kurmanci", "kurdisch-sorani": "kurd-sorani"}
+        norm = lambda x: alias.get(x, x)
+        c["sprachen_formulare"] = {art: sorted({norm(spr) for spr in liste}) for art, liste in idx["formulare"].items()}
         for art, liste in idx["formulare"].items():
             for spr in liste:
-                c["_daten"][f"sp/{art}/{spr}"] = sp / art / f"{spr}.docx"
+                c["_daten"][f"sp/{art}/{norm(spr)}"] = sp / art / f"{spr}.docx"
         c["beilagen_liste"] = []
         for b in idx["beilagen"]:
             regel = next((r for r in i.get("beilagen_regeln", []) if r["typ"] == b["typ"]), None)
             if not regel:
                 continue
-            c["beilagen_liste"].append(dict(regel, sprache=b["sprache"], name=b["datei"]))
+            c["beilagen_liste"].append(dict(regel, sprache=norm(b["sprache"]), name=b["datei"]))
             c["_daten"]["bl/" + b["datei"]] = ordner / "beilagen" / b["datei"]
-        sprachen = sorted({s for l in idx["formulare"].values() for s in l} | {"deutsch"}, key=lambda x: (x != "deutsch", x))
+        sprachen = sorted({s for l in c["sprachen_formulare"].values() for s in l} | {"deutsch"}, key=lambda x: (x != "deutsch", x))
         for st in c["fall"]["schritte"]:
             for f in st["felder"]:
                 if f["id"] == "formularsprache":
