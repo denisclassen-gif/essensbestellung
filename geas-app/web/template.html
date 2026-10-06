@@ -1142,6 +1142,7 @@ function erfuellt(b) {
   if (!b) return true;
   const l = auswahl(b.feld);
   if (b.wert.startsWith("!")) return l.length > 0 && !l.includes(b.wert.slice(1));
+  if (b.wert.startsWith("~")) return !l.includes(b.wert.slice(1));   // sichtbar, solange nicht dieser Wert gewählt ist
   return l.includes(b.wert);
 }
 const sichtbar = f => erfuellt(f.bedingung);
@@ -1150,6 +1151,10 @@ const offenIn = s => s.felder.filter(f => f.pflicht && sichtbar(f) && leer(f.id)
 const offenDok = d => d.pflichtfelder.map(id => FELDER[id]).filter(f => f && sichtbar(f) && leer(f.id));
 const relevant = d => erfuellt(d.bedingung);
 const istUma = () => wert("uma") === "Ja" || auswahl("vulnerabilitaet").includes("Unbegleitete:r Minderjährige:r");
+// Screening-Fall? Angabe im Fall, sonst Ergebnis der Prüfung im geführten Einsatz – ohne Angabe gilt: Screening
+const istScreening = () => { const w = wert("screening_fall"); if (w) return !w.startsWith("Nein"); return !(S.einsatz && S.einsatz.pruefung === "nein"); };
+// Betreff der Aufgriffsmeldung an das BAMF (Checkliste Meldeverfahren)
+const bamfBetreff = () => `${wert("haft") === "Ja" ? "HAFT – " : ""}${istUma() ? "Aufgriff uM" : wert("asyl") === "Ja" ? "Asyl" : "Aufgriff"} – ${wert("azr_nummer").trim() || "[AZR-Nummer]"}`;
 const aufgriff = () => { const w = wert("aufgriff_zeit"); return w ? new Date(w) : null; };
 
 function FallUebersicht() {
@@ -1305,6 +1310,8 @@ function platzhalter(id) {
   const a = aufgriff();
   if (id === "frist_richter") { if (wert("festgehalten") === "Nein") return "entfällt – kein Festhalten"; return a ? fmtDatum(richterFrist(a)) : "—"; }
   if (id === "frist_screening") return a ? fmtDatum(screeningFrist(a)) : "—";
+  if (id === "bamf_betreff") return bamfBetreff();
+  if (id === "bamf_anlagen") return ((C.bamf_meldung || {}).anlagen || []).map((x, k) => `${k + 1}. ${x}`).join("\n");
   const v = wert(id).trim();
   if (!v) return "—";
   if (FELDER[id] && FELDER[id].typ === "datumzeit") { const d = new Date(v); if (!isNaN(d)) return fmtDatum(d); }
@@ -2145,6 +2152,7 @@ const NACH_STRIKE = ["dstrike", "outline", "shadow", "emboss", "imprint", "noPro
 // Absätze durchstreichen, die die Streife nicht erledigt (z. B. Aushändigung des Überprüfungsformulars)
 function durchstreichen(doc, regeln, bericht) {
   for (const r of regeln || []) {
+    if (r.wenn) { dokumenteImFall(); if (!dokumenteImFall.passt(r.wenn)) continue; }
     for (const p of Array.from(doc.getElementsByTagNameNS(W_NS, "p")).filter(p => wText(p).includes(r.enthaelt))) {
       for (const run of Array.from(p.getElementsByTagNameNS(W_NS, "r"))) {
         let rPr = wKinder(run, "rPr")[0];
@@ -2427,7 +2435,8 @@ function dokumenteImFall() {
   const asyl = wert("asyl") === "Ja", uma = istUma();
   const hatDokumente = auswahl("dokumente").some(d => !d.startsWith("Kein"));
   const passt1 = w => w === "immer" || (w === "asyl" && asyl) || (w === "ohne_asyl" && !asyl) || (w === "uma" && uma) || (w === "erwachsen" && !uma) || (w === "dokumente" && hatDokumente) || (w === "ohne_asyl_oder_uma" && (!asyl || uma))
-    || (w === "kein_rueckkehr" && !wert("weiterleitung").startsWith("Rückkehrverfahren"));
+    || (w === "kein_rueckkehr" && !wert("weiterleitung").startsWith("Rückkehrverfahren"))
+    || (w === "screening" && istScreening()) || (w === "ohne_screening" && !istScreening());
   const passt = w => w.split("+").every(passt1);   // z. B. "asyl+dokumente"
   dokumenteImFall.passt = passt;
   return (C.dokumentauswahl || []).filter(d => passt(d.wann));
@@ -2483,14 +2492,18 @@ function Originalformulare() {
         ${fertig.length ? `<button class="btn" id="vAlle">${svg("share")} Alle Unterlagen als ZIP herunterladen</button>
         <button class="btn" id="vDruckAlle" style="margin-top:8px">${svg("print")} Alle drucken</button>` : ""}
       </div>
-      ${C.sidas && fertig.length ? `<div class="glass" style="padding:16px;margin-bottom:12px">
+      ${(C.sidas || C.bamf_meldung) && fertig.length ? `<div class="glass" style="padding:16px;margin-bottom:12px">
+        <div class="note" style="margin:0 0 10px;border:1.5px solid ${istScreening() ? "#e75113" : "#008444"}"><span><b>${istScreening() ? "Screening-Fall" : "Aufgriff ohne Screening"}</b> – ${istScreening() ? "Unterlagen an die LDS über SiDaS und Aufgriffsmeldung an das BAMF." : "kein Überprüfungsformular, kein SiDaS-Upload; Aufgriffsmeldung an das BAMF."} Ändern im Fall unter „Screening-Fall?“.</span></div>
         <b>In der ZIP-Datei:</b>
         <ul style="margin:6px 0 0;padding-left:20px">
-          <li><b>${esc(dateiBasis())}.pdf</b> – alle Unterlagen für SIDAS in einer PDF → per E-Mail an Referat 2</li>
+          ${C.sidas && istScreening() ? `<li><b>${esc(dateiBasis())}.pdf</b> – Unterlagen für die LDS (SiDaS) → per E-Mail an Referat 2</li>` : ""}
+          ${C.bamf_meldung ? `<li><b>${esc(dateiBasis())}_BAMF.pdf</b> – Aufgriffsmeldung an das BAMF (farblich markierte Unterlagen)</li>` : ""}
           <li>die Word-Dateien zum Ausdrucken${beilagen.length ? " und das Merkblatt" : ""}</li>
         </ul>
-        <p class="small" style="margin:8px 0 0">${esc(C.sidas.hinweis)}</p>
-        ${C.sidas.mail ? `<a class="btn glassy" href="${esc(mailLink(C.sidas.mail))}" style="text-decoration:none;margin-bottom:0">${svg("share")} ${esc(C.sidas.mail.knopf)} (PDF anhängen)</a>` : ""}
+        ${C.sidas && istScreening() ? `<p class="small" style="margin:8px 0 0">${esc(C.sidas.hinweis)}</p>
+        ${C.sidas.mail ? `<a class="btn glassy" href="${esc(mailLink(C.sidas.mail))}" style="text-decoration:none;margin-bottom:0">${svg("share")} ${esc(C.sidas.mail.knopf)} (PDF anhängen)</a>` : ""}` : C.sidas && C.sidas.ohne_screening ? `<p class="small" style="margin:8px 0 0"><b>Kein SiDaS:</b> ${esc(C.sidas.ohne_screening)}</p>` : ""}
+        ${C.bamf_meldung ? `<p class="small" style="margin:12px 0 0">${esc(C.bamf_meldung.hinweis)}</p>
+        <a class="btn glassy" href="${esc(mailLink(C.bamf_meldung.mail))}" style="text-decoration:none;margin-bottom:0">${svg("share")} ${esc(C.bamf_meldung.mail.knopf)} (PDF anhängen)</a>` : ""}
       </div>` : ""}
       ${!auto && !VORLAGEN_ERGEBNIS.length ? `<div class="glass" style="padding:16px;margin-bottom:12px"><b>Word-Vorlagen auswählen</b> (aktuelles LDS-Paket) – alle auf einmal markieren. Die App erkennt jede Vorlage selbst.</div>` : ""}
       ${VORLAGEN_ERGEBNIS.length && fehlen.length ? `<div class="note glass" style="border:1.5px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span><b>Es fehlt noch ${fehlen.length === 1 ? "eine Vorlage" : fehlen.length + " Vorlagen"}:</b> ${fehlen.map(d => esc(d.name)).join(" · ")}</span></div>` : ""}
@@ -2525,6 +2538,10 @@ function Originalformulare() {
           const pdf = await sidasPdf(fertig, t => { alle.textContent = t; });
           if (pdf) inhalt.unshift({ name: `${dateiBasis()}.pdf`, daten: new Uint8Array(await pdf.arrayBuffer()) });
         } catch (err) { alert("Die PDF-Datei für SIDAS konnte nicht erstellt werden (" + err.message + "). Die Word-Dateien werden trotzdem gespeichert."); }
+        try {
+          const bp = await bamfPdf(fertig, t => { alle.textContent = t; });
+          if (bp) inhalt.unshift({ name: `${dateiBasis()}_BAMF.pdf`, daten: new Uint8Array(await bp.arrayBuffer()) });
+        } catch (err) { alert("Die PDF-Datei für die BAMF-Meldung konnte nicht erstellt werden (" + err.message + ")."); }
         speichern(await zipSchreiben(inhalt, "application/zip"), `${dateiBasis()}_Unterlagen.zip`);
         alle.disabled = false;
         alle.innerHTML = svg("check") + " Gespeichert – ZIP entpacken";
@@ -2939,8 +2956,17 @@ function pdfAusBildern(seiten, titel) {
   return new Blob(teile, { type: "application/pdf" });
 }
 
+// PDF der Aufgriffsmeldung an das BAMF: nur die farblich markierten Unterlagen (Überprüfungsformular nur bei Screening)
+async function bamfPdf(ergebnisse, fortschritt) {
+  if (typeof html2canvas === "undefined" || typeof docx === "undefined" || !C.bamf_meldung) return null;
+  const arten = C.bamf_meldung.arten.filter(a => a !== "screening" || istScreening());
+  const liste = ergebnisse.filter(e => arten.includes(e.art) && !e.sprache).sort((a, b) => arten.indexOf(a.art) - arten.indexOf(b.art));
+  if (!liste.length) return null;
+  return pdfAusBildern(await seitenBilder(liste, fortschritt), dateiBasis() + "_BAMF");
+}
 async function sidasPdf(ergebnisse, fortschritt) {
-  if (typeof html2canvas === "undefined" || typeof docx === "undefined" || !C.sidas) return null;
+  // Über SiDaS erhält die LDS ausschließlich Unterlagen zu Screening-Fällen der Landespolizei
+  if (typeof html2canvas === "undefined" || typeof docx === "undefined" || !C.sidas || !istScreening()) return null;
   const arten = C.sidas.arten;
   const liste = ergebnisse.filter(e => arten.includes(e.art) && !e.sprache).sort((a, b) => arten.indexOf(a.art) - arten.indexOf(b.art));
   if (!liste.length) return null;
@@ -3446,6 +3472,7 @@ function einsatzErgebnis(antwort, titel, nurMerken) {
   const e = ES();
   if (e.pruefung === antwort && e.ergebnis === titel && nurMerken) return;
   e.pruefung = antwort; e.ergebnis = titel; save();
+  if (F && C.intern) { F.werte.screening_fall = antwort === "nein" ? "Nein – Aufgriff ohne Screening" : "Ja – Screening durch die Landespolizei"; fallSpeichern(); }
   if (nurMerken) return;
   const i = einsatzSchritte().findIndex(x => x.id === "pruefung");
   e.i = i + 1; save();
@@ -3468,7 +3495,7 @@ function Einsatz(nr) {
     title: `Schritt ${nr + 1} von ${liste.length}`,
     html: `${bar((nr + 1) / liste.length)}
       <div class="stepper">${phasen.map(ph => `<button class="${ph === st.phase ? "cur" : ""}" data-ph="${esc(ph)}">${esc(ph)}</button>`).join("")}</div>
-      ${nachPruefung && e.pruefung === "nein" ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span>Die Prüfung ergab <b>kein Screening</b> („${esc(e.ergebnis)}“). Diese Schritte gelten nur bei einem Screening.</span></div>` : ""}
+      ${nachPruefung && e.pruefung === "nein" ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span>Die Prüfung ergab <b>kein Screening</b> („${esc(e.ergebnis)}“). Ohne Screening entfallen Überprüfungsformular, Information Art. 11, die Sicherheitskontrolle nach Art. 15 und der SiDaS-Upload. Die übrigen Unterlagen (Belehrung, Anlaufbescheinigung, Inverwahrung, Fragebogen, Abschlusserklärung) erstellt die App weiterhin; gemeldet wird per E-Mail an das BAMF.</span></div>` : ""}
       ${nachPruefung && !e.pruefung ? `<div class="note glass" style="border:2px solid #e08600">${svg("alert").replace("<svg", '<svg style="color:#e08600"')}<span>Die Prüfung „Screening ja oder nein?“ wurde noch nicht gemacht.</span></div>` : ""}
       <div class="small" style="margin:10px 2px 0;font-weight:700;color:var(--green)">${esc(st.phase)}</div>
       <h2 class="rounded" style="font-size:30px;margin:2px 0 8px;line-height:1.15">${esc(st.titel)}</h2>
@@ -3485,7 +3512,8 @@ function Einsatz(nr) {
       ${st.erfassen ? `<button class="btn" id="eF" style="font-size:18px;padding:18px">${svg("pencil")} ${F ? "Angaben erfassen" : "Fall anlegen und erfassen"}${F ? ` <span style="font-weight:600;opacity:.85">(${offenSchritt ? offenSchritt + " offen" : "vollständig ✓"})</span>` : ""}</button>` : ""}
       ${mailAblauf && mailAblauf.mail ? `<a class="btn glassy" href="${esc(mailLink(mailAblauf.mail))}" style="text-decoration:none">${svg("share")} ${esc(mailAblauf.mail.knopf)}</a>` : ""}
       ${st.aktion === "unterlagen" ? `<button class="btn" id="eU" style="font-size:19px;padding:20px">${svg("docs")} Alle Unterlagen erstellen</button>` : ""}
-      ${st.aktion === "meldung" && C.sidas && C.sidas.mail ? `<a class="btn" href="${esc(mailLink(C.sidas.mail))}" style="text-decoration:none">${svg("share")} ${esc(C.sidas.mail.knopf)} (PDF anhängen)</a>
+      ${st.aktion === "meldung" ? `${C.sidas && C.sidas.mail && istScreening() ? `<a class="btn" href="${esc(mailLink(C.sidas.mail))}" style="text-decoration:none">${svg("share")} ${esc(C.sidas.mail.knopf)} (PDF anhängen)</a>` : C.sidas ? `<div class="note glass" style="border:2px solid #008444"><span><b>Aufgriff ohne Screening:</b> ${esc(C.sidas.ohne_screening || "")}</span></div>` : ""}
+        ${C.bamf_meldung ? `<a class="btn ${C.sidas && istScreening() ? "glassy" : ""}" href="${esc(mailLink(C.bamf_meldung.mail))}" style="text-decoration:none">${svg("share")} ${esc(C.bamf_meldung.mail.knopf)} (PDF anhängen)</a>` : ""}
         <button class="btn glassy" id="eU">${svg("docs")} Unterlagen / ZIP noch einmal öffnen</button>` : ""}
       ${st.aktion === "ende" ? `<button class="btn glassy danger" id="eL">${svg("trash")} Fall löschen und Einsatz beenden</button>` : ""}
       ${st.uma ? umaKarte(istUma()) : ""}
