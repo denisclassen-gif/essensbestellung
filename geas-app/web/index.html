@@ -473,7 +473,7 @@
   .hrg-ico svg { width: 100%; height: 100%; }
   .hrg-nr { position: absolute; top: -.6em; left: -.5em; width: 1.4em; height: 1.4em; border-radius: 50%; background: #002664; color: #fff; font-weight: 800; font-size: .85em; display: grid; place-items: center; }
   .hrg-pfeil { align-self: center; color: #002664; font-size: 1.1em; flex: none; }
-  .hrg-vergleich { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; }
+  .hrg-vergleich { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow: column; gap: .7em; }
   .hrg-spalte { border: 2px solid var(--f); border-radius: 10px; overflow: hidden; font-size: .85em; line-height: 1.3; text-align: center; }
   .hrg-kopf { background: var(--f); color: #fff; padding: .45em; display: flex; gap: .4em; align-items: center; justify-content: center; }
   .hrg-kopf svg { width: 1.3em; height: 1.3em; flex: none; }
@@ -485,8 +485,20 @@
   .hrg-karte .hrg-ico { display: block; width: 1.8em; height: 1.8em; margin: 0 auto .2em; color: var(--f); }
   .hrg-karte b { display: block; color: var(--f); }
   .hr-bildschirm .hrg-schritt, .hr-bildschirm .hrg-karte { background: var(--glass, #fff); color: var(--text); }
-  @media (max-width: 560px) { .hr-bildschirm .hrg-ablauf { flex-direction: column; } .hr-bildschirm .hrg-pfeil { transform: rotate(90deg); } .hr-bildschirm .hrg-vergleich { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .hr-bildschirm .hrg-ablauf { flex-direction: column; } .hr-bildschirm .hrg-pfeil { transform: rotate(90deg); } .hr-bildschirm .hrg-vergleich { grid-template-columns: 1fr; grid-auto-flow: row; } }
   @media print { #druck .hrg, #druck .hr-ico, #druck .hrg * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } #druck .hr-abschnitt h2 { display: flex; align-items: center; } #druck li.hr-wichtig { display: flex; } }
+  li.hr-polizei, li.hr-polizei-u { display: flex; gap: .5em; align-items: flex-start; list-style: none; }
+  li.hr-polizei .hr-wico, li.hr-polizei-u .hr-wico { color: #002664; width: 1.25em; height: 1.25em; }
+  .hr-bildschirm li.hr-polizei { background: rgba(0, 38, 100, .08); border-left: 4px solid #002664; border-radius: 6px; padding: 6px 10px; margin-left: -16px; }
+  li.hr-polizei-u { color: #002664; margin: .25em 0 .25em -1.1em !important; background: #eef3fb; border-radius: 4px; padding: .15em .45em; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .hr-bildschirm li.hr-polizei-u { background: rgba(0, 38, 100, .08); }
+  .hr-bildschirm li.hr-polizei-u { color: inherit; }
+  li.hr-polizei-u b, li.hr-polizei > span > b:first-child { color: #002664; }
+  li.hr-variante { list-style: none; border: 1.5px solid var(--f); border-left-width: 5px; border-radius: 8px; padding: .35em .6em .4em; margin: .35em 0 .45em -16px; break-inside: avoid; }
+  li.hr-variante > b:first-child { color: var(--f); }
+  .hr-unterliste { margin: .25em 0 0; padding-left: 1.1em; }
+  .hr-unterliste li { margin: .12em 0; }
+  @media (prefers-color-scheme: dark) { .hr-bildschirm li.hr-polizei-u b, .hr-bildschirm li.hr-polizei > span > b:first-child { color: #8fb4ff; } }
   .hr-bildschirm li.hr-wichtig { background: rgba(224, 134, 0, .12); border-left: 4px solid #e08600; border-radius: 6px; padding: 6px 10px; list-style: none; margin-left: -16px; font-weight: 600; }
   .step.wichtig { box-shadow: inset 0 0 0 2px #e08600; }
   .wbadge { display: flex; width: max-content; gap: 4px; align-items: center; font-size: 12px; font-weight: 800; color: #b36b00; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 2px; }
@@ -503,6 +515,11 @@
     #druck:not(.docxdruck) ul, #druck:not(.docxdruck) ol { margin: 0; padding-left: 16pt; }
     #druck:not(.docxdruck) li { margin-bottom: 3pt; break-inside: avoid; }
     #druck li.hr-wichtig { list-style: none; margin-left: -16pt; border-left: 3pt solid #e08600; background: #fff3dc; padding: 3pt 6pt; font-weight: 600; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #druck li.hr-polizei { margin-left: -16pt; border-left: 3pt solid #002664; background: #e8eef8; padding: 3pt 6pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #druck li.hr-variante { margin-left: -16pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #druck .hr-unterliste { padding-left: 12pt; margin-top: 2pt; }
+    #druck .hr-unterliste li { margin-bottom: 1.5pt; }
+    #druck li.hr-polizei-u .hr-wico, #druck li.hr-polizei .hr-wico { width: 11pt; height: 11pt; flex: none; color: #002664; }
     #druck .hr-quellen { font-size: 8.5pt; color: #333; border-top: 1px solid #999; margin-top: 10pt; padding-top: 4pt; }
     #druck .hr-fuss { font-size: 8pt; color: #555; margin-top: 8pt; }
   }
@@ -3111,15 +3128,28 @@ function hrGrafik(g) {
 // Punkte, die mit einer Frage beginnen („Ausländerbehörde informieren? Immer …“): Frage hervorgehoben und fett
 const hrFrage = t => { const m = String(t).match(/^([^?]{3,100}\?)(\s[\s\S]*)$/); return m ? `<b class="hr-frage">${esc(m[1])}</b>${esc(m[2])}` : esc(t); };
 
+// **fett** im Text erlauben (nach dem Maskieren)
+const hrText = t => hrFrage(t).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+// Unterpunkte; „Für die Streife: …“ wird als Handlungsanweisung für die Polizei hervorgehoben
+const hrUnter = liste => liste && liste.length ? `<ul class="hr-unterliste">${liste.map(u => /^Für die Streife:/.test(u)
+  ? `<li class="hr-polizei-u"><span class="hr-wico">${svg("shieldcheck", 2)}</span><span><b>Für die Streife:</b>${hrText(u.replace(/^Für die Streife:/, ""))}</span></li>`
+  : `<li>${hrText(u)}</li>`).join("")}</ul>` : "";
+// Ein Punkt: [Text, Quelle, Art, Unterpunkte] – Art: „wichtig[:Symbol]“, „polizei“ oder „variante:Farbe“
+function hrPunkt([t, , w, unter]) {
+  const art = String(w || "").split(":")[0], zusatz = String(w || "").split(":")[1];
+  if (art === "polizei") return `<li class="hr-polizei"><span class="hr-wico">${svg("shieldcheck", 2)}</span><span><b>Für die Streife:</b> ${hrText(t)}${hrUnter(unter)}</span></li>`;
+  if (art === "variante") return `<li class="hr-variante" style="--f:${zusatz || "#002664"}">${hrText(t)}${hrUnter(unter)}</li>`;
+  if (w) return `<li class="hr-wichtig"><span class="hr-wico">${svg(zusatz || "alert", 2)}</span><span><b>Besonders wichtig:</b> ${hrText(t)}${hrUnter(unter)}</span></li>`;
+  return `<li>${hrText(t)}${hrUnter(unter)}</li>`;
+}
+
 // Handreichung: Bildschirmansicht + Druck (DIN A4, mit Logo, Quellen und Stand)
 function handreichungHTML(id, druck) {
   const H = C.handreichungen[id], Q = C.quellen_leitfaden || {};
   const benutzt = [...new Set(H.abschnitte.flatMap(a => a.punkte.map(p => p[1]).filter(Boolean)))];
   return `${druck ? `<div class="hr-kopf">${C.logo ? `<img src="${C.logo}" alt="">` : ""}<div><b>Nur für den Dienstgebrauch</b><br>Stand: ${esc(C.meta.stand)}</div></div>` : ""}
     <h1 class="hr-titel">${esc(H.titel)}</h1><p class="hr-unter">${esc(H.untertitel)}</p>
-    ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${a.icon ? `<span class="hr-ico">${svg(a.icon, 2)}</span>` : ""}${esc(a.titel)}</h2><ul>${a.punkte.map(([t, , w]) => w
-      ? `<li class="hr-wichtig"><span class="hr-wico">${svg(String(w).split(":")[1] || "alert", 2)}</span><span><b>Besonders wichtig:</b> ${hrFrage(t)}</span></li>`
-      : `<li>${hrFrage(t)}</li>`).join("")}</ul>${hrGrafik(a.grafik)}</section>`).join("")}
+    ${H.abschnitte.map(a => `<section class="hr-abschnitt"><h2>${a.icon ? `<span class="hr-ico">${svg(a.icon, 2)}</span>` : ""}${esc(a.titel)}</h2><ul>${a.punkte.map(hrPunkt).join("")}</ul>${hrGrafik(a.grafik)}</section>`).join("")}
     <section class="hr-quellen"><h2>Quellen</h2><ul>${benutzt.map(q => `<li>${esc((Q[q] || {}).titel || q)}${q === "pruefen" ? "" : ` <i>(${esc((Q[q] || {}).art || "")})</i>`}</li>`).join("")}</ul>
       <p>Diese Handreichung ist eine Arbeitshilfe. Maßgeblich sind die jeweils aktuellen Gesetze, Erlasse und die Entscheidung der zuständigen Ausländerbehörde.</p></section>
     ${C.meta.copyright ? `<p class="hr-fuss">${esc(C.meta.copyright)}</p>` : ""}`;
